@@ -2,6 +2,9 @@ package io.github.bedwarsrel.shop;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
+import io.github.bedwarsrel.game.Team;
+import io.github.bedwarsrel.shop.Specials.SpecialItem;
+import io.github.bedwarsrel.shop.Specials.VirtualItem;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.SoundMachine;
 import io.github.bedwarsrel.utils.Utils;
@@ -71,10 +74,26 @@ public class NewItemShop {
 
   }
 
+  // Caller must ensure that the player has enough resources to pay for the item.
   @SuppressWarnings("unchecked")
   private boolean buyItem(VillagerTrade trade, ItemStack item, Player player) {
     PlayerInventory inventory = player.getInventory();
     boolean success = true;
+    boolean isVirtualItem = SpecialItem.isVirtualRepresentation(item);
+
+    if (isVirtualItem) {
+      Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
+      Team team = game.getPlayerTeam(player);
+      VirtualItem virtualItem = SpecialItem.newVirtualInstance(game, team, item);
+      // Check if item was successfully added to the game
+      if (!virtualItem.init()) {
+        player.sendMessage(ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
+                          ._l(player, "errors.alreadypurchased")));
+        return false;
+      }
+      player.sendMessage(ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
+              ._l(player, "success.basealarmpurchased")));
+    }
 
     int item1ToPay = trade.getItem1().getAmount();
     Iterator<?> stackIterator = inventory.all(trade.getItem1().getType()).entrySet().iterator();
@@ -132,6 +151,12 @@ public class NewItemShop {
           }
         }
       }
+    }
+
+    // If the item is virtual at this point it was added to the game and paid for.
+    // Then prevent adding an item to the inventory.
+    if (isVirtualItem) {
+      return true;
     }
 
     ItemStack addingItem = item.clone();
@@ -321,8 +346,6 @@ public class NewItemShop {
             cancel = ((bought + item.getAmount()) > 64);
           }
         }
-
-        bought = 0;
       } else {
         this.buyItem(trade, ice.getCurrentItem(), player);
       }
@@ -332,8 +355,6 @@ public class NewItemShop {
       } else {
         ice.setCancelled(false);
       }
-
-      return;
     }
   }
 

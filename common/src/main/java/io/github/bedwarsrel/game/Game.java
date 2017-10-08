@@ -307,6 +307,10 @@ public class Game {
         }
       }
 
+      if (t.getBaseLoc1() == null || t.getBaseLoc2() == null) {
+        return GameCheckCode.LOC_BASE_NOT_SET_ERROR;
+      }
+
     }
 
     return GameCheckCode.OK;
