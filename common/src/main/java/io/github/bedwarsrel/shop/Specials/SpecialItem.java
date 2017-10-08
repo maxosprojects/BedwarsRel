@@ -36,6 +36,8 @@ public abstract class SpecialItem {
         BedwarsRel.getInstance());
     BedwarsRel.getInstance().getServer().getPluginManager().registerEvents(new TrapBaseListener(),
             BedwarsRel.getInstance());
+    BedwarsRel.getInstance().getServer().getPluginManager().registerEvents(new TntListener(),
+            BedwarsRel.getInstance());
     BedwarsRel.getInstance().getServer().getPluginManager().registerEvents(new MagnetShoeListener(),
         BedwarsRel.getInstance());
     BedwarsRel.getInstance().getServer().getPluginManager()
