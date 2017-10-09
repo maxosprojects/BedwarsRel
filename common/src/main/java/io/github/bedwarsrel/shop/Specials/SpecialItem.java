@@ -65,6 +65,8 @@ public abstract class SpecialItem {
     SpecialItem.virtualItems.add(new ArmorUpgrade(ArmorUpgradeEnum.PROTECTION4));
     SpecialItem.virtualItems.add(new SwordUpgrade(SwordUpgradeEnum.SHARPNESS0));
     SpecialItem.virtualItems.add(new SwordUpgrade(SwordUpgradeEnum.SHARPNESS1));
+    SpecialItem.virtualItems.add(new PermanentItem(PermanentItemEnum.WOOD_SWORD));
+    SpecialItem.virtualItems.add(new PermanentItem(PermanentItemEnum.SHEARS));
   }
 
   public abstract Material getActivatedMaterial();

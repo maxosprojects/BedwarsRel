@@ -87,6 +87,7 @@ success:
   armorpurchased: "&aPermanent $type$ Armor applied!"
   armorupgraded: "&aArmor upgraded to $upgrade$!"
   swordsupgraded: "&aSwords upgraded to $upgrade$!"
+  permanentitempurchased: "&aPermanent $type$ applied!"
 gamecheck:
   LOC_NOT_SET_ERROR: "Locations for the region were not set properly!"
   LOC_BASE_NOT_SET_ERROR: "Locations for the base regions were not set properly!"
@@ -178,6 +179,9 @@ ingame:
     protection4: "Protection IV"
   swordupgrade:
     sharpness1: "Sharpness I"
+  permanentitems:
+    wood-sword: "Wood Sword"
+    shears: "Shears"
 lobby:
   countdown: "Game will start in $sec$ second(s)!"
   countdowncancel: "More players needed. Countdown was cancelled!"

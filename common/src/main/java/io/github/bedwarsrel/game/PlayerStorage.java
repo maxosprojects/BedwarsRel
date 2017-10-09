@@ -3,12 +3,11 @@ package io.github.bedwarsrel.game;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsOpenTeamSelectionEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+
+import java.util.*;
 
 import io.github.bedwarsrel.shop.Specials.ArmorPurchaseEnum;
+import io.github.bedwarsrel.shop.Specials.PermanentItemEnum;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -26,6 +25,7 @@ public class PlayerStorage {
 
   private ItemStack[] armor = null;
   private ArmorPurchaseEnum inGameArmor = ArmorPurchaseEnum.LEATHER;
+  private Set<PermanentItemEnum> permanentItems = new HashSet<>();
   private String displayName = null;
   private Collection<PotionEffect> effects = null;
   private int foodLevel = 0;
@@ -66,6 +66,8 @@ public class PlayerStorage {
     inv.setContents(new ItemStack[]{});
 
     this.inGameArmor = ArmorPurchaseEnum.LEATHER;
+    this.permanentItems.clear();
+    this.permanentItems.add(PermanentItemEnum.WOOD_SWORD);
 
     this.player.setAllowFlight(false);
     this.player.setFlying(false);
@@ -139,9 +141,18 @@ public class PlayerStorage {
     this.inGameArmor = armor;
   }
 
+  public Set<PermanentItemEnum> getPermanentItems() {
+    return Collections.unmodifiableSet(this.permanentItems);
+  }
+
+  public void addPermanentItem(PermanentItemEnum item) {
+    this.permanentItems.add(item);
+  }
+
   public void prepareForBattle() {
-    ItemStack sword = new ItemStack(Material.WOOD_SWORD, 1);
-    this.player.getInventory().setItem(0, sword);
+    for (PermanentItemEnum item : this.permanentItems) {
+      item.equipPlayer(this.player);
+    }
     this.player.getInventory().setHeldItemSlot(0);
 
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
