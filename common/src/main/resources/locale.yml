@@ -2,6 +2,7 @@ default:
   pages: "Page $current$ of $max$"
   currently: Currently
 errors:
+  notstandingonchest: "You must stand on a chest!"
   argumentslength: "Number of arguments does not match the correct amount!"
   holodependencynotfound: "Couldn't find $dependency$ for Hologram-Statistic"
   packagenotfound: "Couldn't fetch $package$ package!"
@@ -59,6 +60,7 @@ success:
   bedset: "You sucessfully set the respawn block of team $team$!"
   regionset: "Game region location $location$ for Game $game$ was set successfully!"
   baseregionset: "Base region location $location$ for Team $team$ in Game $game$ was set successfully!"
+  teamchestset: "Team $team$ chest location in Game $game$ was set successfully!"
   spawnset: "Spawn location for Team $team$ was set successfully!"
   spawnerset: "Resource spawn location for $name$ was set successfully!"
   stopped: "Game successfully stopped!"
@@ -85,6 +87,7 @@ success:
 gamecheck:
   LOC_NOT_SET_ERROR: "Locations for the region were not set properly!"
   LOC_BASE_NOT_SET_ERROR: "Locations for the base regions were not set properly!"
+  LOC_TEAM_CHEST_NOT_SET_ERROR: "Location of the team chest was not set!"
   TEAM_SIZE_LOW_ERROR: "You have to set more teams!"
   NO_RES_SPAWNER_ERROR: "You haven't set any resource spawner!"
   NO_LOBBY_SET: "You haven't set a lobby!"
@@ -232,6 +235,9 @@ commands:
   setbaseregion:
     name: "Sets a base region point"
     desc: "Sets a base region point for the team"
+  setteamchest:
+    name: "Sets team chest location"
+    desc: "Sets team chest location"
   setspawn:
     name: "Sets a team spawn"
     desc: "Sets the spawn of the given team"

@@ -805,6 +805,7 @@ public class BedwarsRel extends JavaPlugin {
     this.commands.add(new StopGameCommand(this));
     this.commands.add(new SetRegionCommand(this));
     this.commands.add(new SetBaseRegionCommand(this));
+    this.commands.add(new SetTeamChestCommand(this));
     this.commands.add(new AddTeamCommand(this));
     this.commands.add(new SaveGameCommand(this));
     this.commands.add(new JoinGameCommand(this));

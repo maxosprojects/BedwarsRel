@@ -38,6 +38,7 @@ public class Team implements ConfigurationSerializable {
     private Location targetHeadBlock = null;
     private Location baseLoc1;
     private Location baseLoc2;
+    private Location chestLoc;
 
     public Team(Map<String, Object> deserialize) {
         this.setName(deserialize.get("name").toString());
@@ -45,6 +46,9 @@ public class Team implements ConfigurationSerializable {
         this.setColor(TeamColor.valueOf(deserialize.get("color").toString().toUpperCase()));
         this.setSpawnLocation(Utils.locationDeserialize(deserialize.get("spawn")));
         this.setChests(new ArrayList<Block>());
+        this.setBaseLoc1(Utils.locationDeserialize(deserialize.get("baseloc1")));
+        this.setBaseLoc2(Utils.locationDeserialize(deserialize.get("baseloc2")));
+        this.setChestLoc(Utils.locationDeserialize(deserialize.get("chestloc")));
 
         if (deserialize.containsKey("bedhead")) {
             this.setTargetHeadBlock(Utils.locationDeserialize(deserialize.get("bedhead")));
@@ -54,9 +58,6 @@ public class Team implements ConfigurationSerializable {
                 this.setTargetFeetBlock(Utils.locationDeserialize(deserialize.get("bedfeed")));
             }
         }
-
-        this.setBaseLoc1(Utils.locationDeserialize(deserialize.get("baseloc1")));
-        this.setBaseLoc2(Utils.locationDeserialize(deserialize.get("baseloc2")));
     }
 
     public Team(String name, TeamColor color, int maxPlayers,
@@ -240,13 +241,13 @@ public class Team implements ConfigurationSerializable {
         team.put("maxplayers", this.getMaxPlayers());
         team.put("spawn", Utils.locationSerialize(this.getSpawnLocation()));
         team.put("bedhead", Utils.locationSerialize(this.getTargetHeadBlock()));
+        team.put("baseloc1", Utils.locationSerialize(this.baseLoc1));
+        team.put("baseloc2", Utils.locationSerialize(this.baseLoc2));
+        team.put("chestloc", Utils.locationSerialize(this.chestLoc));
 
         if (this.targetFeetBlock != null) {
             team.put("bedfeed", Utils.locationSerialize(this.targetFeetBlock));
         }
-
-        team.put("baseloc1", Utils.locationSerialize(this.baseLoc1));
-        team.put("baseloc2", Utils.locationSerialize(this.baseLoc2));
 
         return team;
     }

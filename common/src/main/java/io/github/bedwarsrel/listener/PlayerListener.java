@@ -945,8 +945,10 @@ public class PlayerListener extends BaseListener {
         }
       }
 
-      if (clickedBlock != null && clickedBlock.getType() == Material.ENDER_CHEST
-          && !g.isSpectator(player)) {
+      if (clickedBlock != null
+              && (clickedBlock.getType() == Material.ENDER_CHEST
+                  || clickedBlock.getType() == Material.CHEST)
+              && !g.isSpectator(player)) {
         pie.setCancelled(true);
 
         Block chest = pie.getClickedBlock();

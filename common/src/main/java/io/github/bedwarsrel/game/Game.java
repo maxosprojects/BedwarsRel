@@ -312,6 +312,10 @@ public class Game {
         return GameCheckCode.LOC_BASE_NOT_SET_ERROR;
       }
 
+      if (t.getChestLoc() == null) {
+        return GameCheckCode.LOC_TEAM_CHEST_NOT_SET_ERROR;
+      }
+
     }
 
     return GameCheckCode.OK;
@@ -1002,6 +1006,10 @@ public class Game {
       } else {
         this.playingTeams.add(team);
       }
+      if (team.getInventory() == null) {
+        team.createTeamInventory();
+      }
+      team.addChest(team.getChestLoc().getBlock());
     }
 
     this.updateScoreboard();
