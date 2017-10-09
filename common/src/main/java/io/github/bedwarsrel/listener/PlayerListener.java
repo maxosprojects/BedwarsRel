@@ -578,6 +578,9 @@ public class PlayerListener extends BaseListener {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private void onIngameInventoryClick(InventoryClickEvent ice, Player player, Game game) {
+    if (ice.getSlotType() == InventoryType.SlotType.ARMOR) {
+      ice.setCancelled(true);
+    }
     if (!ice.getInventory().getName().equals(BedwarsRel._l(player, "ingame.shop.name"))) {
       if (game.isSpectator(player)
           || (game.getCycle() instanceof BungeeGameCycle && game.getCycle().isEndGameRunning()

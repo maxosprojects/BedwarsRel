@@ -10,7 +10,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -106,7 +105,7 @@ public class TrapBase extends SpecialItem implements VirtualItem {
     }
 
     @Override
-    public VirtualItem create(Game game, Team team) {
+    public VirtualItem create(Game game, Team team, Player player) {
         TrapBase item = new TrapBase();
 
         item.game = game;
@@ -135,6 +134,10 @@ public class TrapBase extends SpecialItem implements VirtualItem {
             }
         }
         this.game.addSpecialItem(this);
+        for (Player player : this.team.getPlayers()) {
+            player.sendMessage(ChatWriter.pluginMessage(
+                    BedwarsRel._l(player, "success.basealarmpurchased")));
+        }
         return true;
     }
 

@@ -2,6 +2,7 @@ package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.Team;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public interface VirtualItem {
@@ -10,9 +11,10 @@ public interface VirtualItem {
      *
      * @param game
      * @param team
+     * @param player
      * @return
      */
-    VirtualItem create(Game game, Team team);
+    VirtualItem create(Game game, Team team, Player player);
 
     /**
      * Initializes the item and adds it to the game.

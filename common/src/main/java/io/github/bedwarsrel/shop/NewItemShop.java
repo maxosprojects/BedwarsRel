@@ -2,7 +2,6 @@ package io.github.bedwarsrel.shop;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
 import io.github.bedwarsrel.shop.Specials.VirtualItem;
 import io.github.bedwarsrel.utils.ChatWriter;
@@ -82,17 +81,13 @@ public class NewItemShop {
     boolean isVirtualItem = SpecialItem.isVirtualRepresentation(item);
 
     if (isVirtualItem) {
-      Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
-      Team team = game.getPlayerTeam(player);
-      VirtualItem virtualItem = SpecialItem.newVirtualInstance(game, team, item);
+      VirtualItem virtualItem = SpecialItem.newVirtualInstance(player, item);
       // Check if item was successfully added to the game
       if (!virtualItem.init()) {
         player.sendMessage(ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
                           ._l(player, "errors.alreadypurchased")));
         return false;
       }
-      player.sendMessage(ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
-              ._l(player, "success.basealarmpurchased")));
     }
 
     int item1ToPay = trade.getItem1().getAmount();

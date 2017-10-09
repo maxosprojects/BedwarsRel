@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+
+import io.github.bedwarsrel.shop.Specials.ArmorPurchaseEnum;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -17,13 +19,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.Wool;
 import org.bukkit.potion.PotionEffect;
 
 public class PlayerStorage {
 
   private ItemStack[] armor = null;
+  private ArmorPurchaseEnum inGameArmor = ArmorPurchaseEnum.LEATHER;
   private String displayName = null;
   private Collection<PotionEffect> effects = null;
   private int foodLevel = 0;
@@ -62,6 +64,8 @@ public class PlayerStorage {
     PlayerInventory inv = this.player.getInventory();
     inv.setArmorContents(new ItemStack[4]);
     inv.setContents(new ItemStack[]{});
+
+    this.inGameArmor = ArmorPurchaseEnum.LEATHER;
 
     this.player.setAllowFlight(false);
     this.player.setFlying(false);
@@ -127,47 +131,23 @@ public class PlayerStorage {
     this.player.updateInventory();
   }
 
-  private void equipPlayerWithLeather(TeamColor color) {
-    // helmet
-    ItemStack helmet = new ItemStack(Material.LEATHER_HELMET, 1);
-    LeatherArmorMeta meta = (LeatherArmorMeta) helmet.getItemMeta();
-    meta.setColor(color.getColor());
-    helmet.setItemMeta(meta);
+  public ArmorPurchaseEnum getInGameArmor() {
+    return this.inGameArmor;
+  }
 
-    // chestplate
-    ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
-    meta = (LeatherArmorMeta) chestplate.getItemMeta();
-    meta.setColor(color.getColor());
-    chestplate.setItemMeta(meta);
-
-    // leggings
-    ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS, 1);
-    meta = (LeatherArmorMeta) leggings.getItemMeta();
-    meta.setColor(color.getColor());
-    leggings.setItemMeta(meta);
-
-    // boots
-    ItemStack boots = new ItemStack(Material.LEATHER_BOOTS, 1);
-    meta = (LeatherArmorMeta) boots.getItemMeta();
-    meta.setColor(color.getColor());
-    boots.setItemMeta(meta);
-
-    player.getInventory().setHelmet(helmet);
-    player.getInventory().setChestplate(chestplate);
-    player.getInventory().setLeggings(leggings);
-    player.getInventory().setBoots(boots);
-    player.updateInventory();
+  public void setIngameArmor(ArmorPurchaseEnum armor) {
+    this.inGameArmor = armor;
   }
 
   public void prepareForBattle() {
     ItemStack sword = new ItemStack(Material.WOOD_SWORD, 1);
-    player.getInventory().setItem(0, sword);
-    player.getInventory().setHeldItemSlot(0);
+    this.player.getInventory().setItem(0, sword);
+    this.player.getInventory().setHeldItemSlot(0);
 
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
     Team team = game.getPlayerTeam(this.player);
     if (team != null) {
-      this.equipPlayerWithLeather(team.getColor());
+      this.inGameArmor.equipPlayer(this.player, team.getColor());
     }
 
     this.player.updateInventory();

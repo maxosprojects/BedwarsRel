@@ -83,7 +83,8 @@ success:
   selectteamjoinentity: "Now do a right click on the entity you want to use as team join!"
   teamjoinadded: "Entity was successfully marked as team selection for team $team$"
   holoremoved: "Hologram-Statistic successfully removed!"
-  basealarmpurchased: "&aYou have successfully installed base alarm!"
+  basealarmpurchased: "&aBase alarm installed!"
+  armorpurchased: "&aPermanent $type$ Armor applied!"
 gamecheck:
   LOC_NOT_SET_ERROR: "Locations for the region were not set properly!"
   LOC_BASE_NOT_SET_ERROR: "Locations for the base regions were not set properly!"
@@ -163,6 +164,11 @@ ingame:
     tracker:
       no-target-found: "No target player was found!"
       target-found: "$player$ is $blocks$ block(s) away from you."
+  armor:
+    leather: "Leather"
+    chainmail: "Chainmail"
+    iron: "Iron"
+    diamond: "Diamond"
 lobby:
   countdown: "Game will start in $sec$ second(s)!"
   countdowncancel: "More players needed. Countdown was cancelled!"

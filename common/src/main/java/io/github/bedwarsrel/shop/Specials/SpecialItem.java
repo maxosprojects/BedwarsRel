@@ -7,6 +7,7 @@ import java.util.List;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.Team;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public abstract class SpecialItem {
@@ -54,6 +55,10 @@ public abstract class SpecialItem {
             BedwarsRel.getInstance());
 
     SpecialItem.virtualItems.add(new TrapBase());
+    SpecialItem.virtualItems.add(new ArmorPurchase(ArmorPurchaseEnum.LEATHER));
+    SpecialItem.virtualItems.add(new ArmorPurchase(ArmorPurchaseEnum.CHAINMAIL));
+    SpecialItem.virtualItems.add(new ArmorPurchase(ArmorPurchaseEnum.IRON));
+    SpecialItem.virtualItems.add(new ArmorPurchase(ArmorPurchaseEnum.DIAMOND));
   }
 
   public abstract Material getActivatedMaterial();
@@ -77,12 +82,14 @@ public abstract class SpecialItem {
     return true;
   }
 
-  public static VirtualItem newVirtualInstance(Game game, Team team, ItemStack item) {
+  public static VirtualItem newVirtualInstance(Player player, ItemStack item) {
     VirtualItem builder = getVirtualItemBuilder(item);
     if (builder == null) {
       return null;
     }
-    return builder.create(game, team);
+    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
+    Team team = game.getPlayerTeam(player);
+    return builder.create(game, team, player);
   }
 
 }
