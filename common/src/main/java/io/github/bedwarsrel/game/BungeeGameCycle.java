@@ -6,6 +6,7 @@ import com.google.common.io.ByteStreams;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsGameEndEvent;
 import io.github.bedwarsrel.shop.Specials.ArmorUpgradeEnum;
+import io.github.bedwarsrel.shop.Specials.SwordUpgradeEnum;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.Utils;
 import java.io.ByteArrayOutputStream;
@@ -106,6 +107,7 @@ public class BungeeGameCycle extends GameCycle {
         team.setInventory(null);
         team.getChests().clear();
         team.setArmorUpgrade(ArmorUpgradeEnum.PROTECTION0);
+        team.setSwordUpgrade(SwordUpgradeEnum.SHARPNESS0);
       }
 
       // clear protections

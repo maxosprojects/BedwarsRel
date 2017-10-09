@@ -184,6 +184,9 @@ public class NewItemShop {
       success = false;
     }
 
+    BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player)
+            .getPlayerTeam(player).getSwordUpgrade().equipPlayer(player);
+
     player.updateInventory();
     return success;
   }

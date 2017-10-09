@@ -86,6 +86,7 @@ success:
   basealarmpurchased: "&aBase alarm installed!"
   armorpurchased: "&aPermanent $type$ Armor applied!"
   armorupgraded: "&aArmor upgraded to $upgrade$!"
+  swordsupgraded: "&aSwords upgraded to $upgrade$!"
 gamecheck:
   LOC_NOT_SET_ERROR: "Locations for the region were not set properly!"
   LOC_BASE_NOT_SET_ERROR: "Locations for the base regions were not set properly!"
@@ -175,6 +176,8 @@ ingame:
     protection2: "Protection II"
     protection3: "Protection III"
     protection4: "Protection IV"
+  swordupgrade:
+    sharpness1: "Sharpness I"
 lobby:
   countdown: "Game will start in $sec$ second(s)!"
   countdowncancel: "More players needed. Countdown was cancelled!"

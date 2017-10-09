@@ -149,6 +149,7 @@ public class PlayerStorage {
     if (team != null) {
       this.inGameArmor.equipPlayer(this.player, team);
       team.getArmorUpgrade().equipPlayer(this.player);
+      team.getSwordUpgrade().equipPlayer(this.player);
     }
 
     this.player.updateInventory();

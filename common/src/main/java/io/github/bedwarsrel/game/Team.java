@@ -4,6 +4,7 @@ import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsPlayerJoinTeamEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 import io.github.bedwarsrel.shop.Specials.ArmorUpgradeEnum;
+import io.github.bedwarsrel.shop.Specials.SwordUpgradeEnum;
 import io.github.bedwarsrel.utils.Utils;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class Team implements ConfigurationSerializable {
     private Location baseLoc2;
     private Location chestLoc;
     private ArmorUpgradeEnum armorUpgrade = ArmorUpgradeEnum.PROTECTION0;
+    private SwordUpgradeEnum swordUpgrade = SwordUpgradeEnum.SHARPNESS0;
 
     public Team(Map<String, Object> deserialize) {
         this.setName(deserialize.get("name").toString());
