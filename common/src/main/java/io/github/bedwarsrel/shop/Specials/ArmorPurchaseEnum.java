@@ -1,5 +1,6 @@
 package io.github.bedwarsrel.shop.Specials;
 
+import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.game.TeamColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -7,19 +8,19 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public enum ArmorPurchaseEnum {
-    LEATHER(Material.LEATHER_CHESTPLATE,
+    LEATHER(Material.LEATHER_LEGGINGS,
             Material.LEATHER_LEGGINGS,
             Material.LEATHER_BOOTS,
             "leather"),
-    CHAINMAIL(Material.CHAINMAIL_CHESTPLATE,
+    CHAINMAIL(Material.CHAINMAIL_LEGGINGS,
             Material.CHAINMAIL_LEGGINGS,
             Material.CHAINMAIL_BOOTS,
             "chainmail"),
-    IRON(Material.IRON_CHESTPLATE,
+    IRON(Material.IRON_LEGGINGS,
             Material.IRON_LEGGINGS,
             Material.IRON_BOOTS,
             "iron"),
-    DIAMOND(Material.DIAMOND_CHESTPLATE,
+    DIAMOND(Material.DIAMOND_LEGGINGS,
             Material.DIAMOND_LEGGINGS,
             Material.DIAMOND_BOOTS,
             "diamond");
@@ -48,7 +49,9 @@ public enum ArmorPurchaseEnum {
         return this.translationKey;
     }
 
-    public void equipPlayer(Player player, TeamColor color) {
+    public void equipPlayer(Player player, Team team) {
+        TeamColor color = team.getColor();
+
         ItemStack leggings = new ItemStack(this.leggings, 1);
         ItemStack boots = new ItemStack(this.boots, 1);
         ItemStack helmet = new ItemStack(Material.LEATHER_HELMET, 1);
@@ -61,7 +64,7 @@ public enum ArmorPurchaseEnum {
         meta.setColor(color.getColor());
         chestplate.setItemMeta(meta);
 
-        if (this.representation == Material.LEATHER_CHESTPLATE) {
+        if (this.representation == Material.LEATHER_LEGGINGS) {
             meta = (LeatherArmorMeta) leggings.getItemMeta();
             meta.setColor(color.getColor());
             leggings.setItemMeta(meta);
@@ -77,5 +80,7 @@ public enum ArmorPurchaseEnum {
         player.getInventory().setChestplate(chestplate);
 
         player.updateInventory();
+
+        team.getArmorUpgrade().equipPlayer(player);
     }
 }

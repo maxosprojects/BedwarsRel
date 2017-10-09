@@ -59,6 +59,10 @@ public abstract class SpecialItem {
     SpecialItem.virtualItems.add(new ArmorPurchase(ArmorPurchaseEnum.CHAINMAIL));
     SpecialItem.virtualItems.add(new ArmorPurchase(ArmorPurchaseEnum.IRON));
     SpecialItem.virtualItems.add(new ArmorPurchase(ArmorPurchaseEnum.DIAMOND));
+    SpecialItem.virtualItems.add(new ArmorUpgrade(ArmorUpgradeEnum.PROTECTION1));
+    SpecialItem.virtualItems.add(new ArmorUpgrade(ArmorUpgradeEnum.PROTECTION2));
+    SpecialItem.virtualItems.add(new ArmorUpgrade(ArmorUpgradeEnum.PROTECTION3));
+    SpecialItem.virtualItems.add(new ArmorUpgrade(ArmorUpgradeEnum.PROTECTION4));
   }
 
   public abstract Material getActivatedMaterial();

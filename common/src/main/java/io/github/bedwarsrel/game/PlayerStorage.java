@@ -147,7 +147,8 @@ public class PlayerStorage {
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
     Team team = game.getPlayerTeam(this.player);
     if (team != null) {
-      this.inGameArmor.equipPlayer(this.player, team.getColor());
+      this.inGameArmor.equipPlayer(this.player, team);
+      team.getArmorUpgrade().equipPlayer(this.player);
     }
 
     this.player.updateInventory();

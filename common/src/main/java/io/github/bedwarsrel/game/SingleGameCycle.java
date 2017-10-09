@@ -3,6 +3,7 @@ package io.github.bedwarsrel.game;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsGameEndEvent;
+import io.github.bedwarsrel.shop.Specials.ArmorUpgradeEnum;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.Utils;
@@ -84,6 +85,7 @@ public class SingleGameCycle extends GameCycle {
     for (Team team : this.getGame().getTeams().values()) {
       team.setInventory(null);
       team.getChests().clear();
+      team.setArmorUpgrade(ArmorUpgradeEnum.PROTECTION0);
     }
 
     // clear protections

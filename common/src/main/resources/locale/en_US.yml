@@ -85,6 +85,7 @@ success:
   holoremoved: "Hologram-Statistic successfully removed!"
   basealarmpurchased: "&aBase alarm installed!"
   armorpurchased: "&aPermanent $type$ Armor applied!"
+  armorupgraded: "&aArmor upgraded to $upgrade$!"
 gamecheck:
   LOC_NOT_SET_ERROR: "Locations for the region were not set properly!"
   LOC_BASE_NOT_SET_ERROR: "Locations for the base regions were not set properly!"
@@ -169,6 +170,11 @@ ingame:
     chainmail: "Chainmail"
     iron: "Iron"
     diamond: "Diamond"
+  armorupgrade:
+    protection1: "Protection I"
+    protection2: "Protection II"
+    protection3: "Protection III"
+    protection4: "Protection IV"
 lobby:
   countdown: "Game will start in $sec$ second(s)!"
   countdowncancel: "More players needed. Countdown was cancelled!"
