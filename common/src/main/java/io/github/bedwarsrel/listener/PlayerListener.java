@@ -564,8 +564,7 @@ public class PlayerListener extends BaseListener {
     }
 
     if (game.getState() == GameState.RUNNING) {
-      if (game.isSpectator(player) || game.getCycle().isEndGameRunning()
-              || !game.getConfig().getBoolean("hunger", true)) {
+      if (game.isSpectator(player) || game.getCycle().isEndGameRunning() || !game.isHungerEnabled()) {
         flce.setCancelled(true);
         return;
       }

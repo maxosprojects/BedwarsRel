@@ -63,6 +63,7 @@ public class Game {
   private static final int MAX_SCORE_LENGTH = 40;
 
   private boolean autobalance = false;
+  private boolean hungerEnabled = true;
   private String builder = null;
   private YamlConfiguration config = null;
   private GameCycle cycle = null;
@@ -383,6 +384,8 @@ public class Game {
     }
 
     yml.set("autobalance", this.autobalance);
+
+    yml.set("hunger-enabled", this.hungerEnabled);
 
     yml.set("spawner", this.resourceSpawners);
     yml.createSection("teams", this.teams);
