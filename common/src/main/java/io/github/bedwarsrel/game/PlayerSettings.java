@@ -14,7 +14,7 @@ public class PlayerSettings {
   public PlayerSettings(Player player) {
     this.player = player;
     this.oneStackPerShift = BedwarsRel.getInstance()
-        .getBooleanConfig("player-settings.one-stack-on-shift", false);
+        .getBooleanConfig("player-settings.one-stack-on-shift", true);
     this.useOldShop = BedwarsRel.getInstance()
         .getBooleanConfig("player-settings.old-shop-as-default", false);
   }

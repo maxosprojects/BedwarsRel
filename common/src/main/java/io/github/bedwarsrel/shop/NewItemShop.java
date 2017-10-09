@@ -527,9 +527,9 @@ public class NewItemShop {
     }
 
     if (stack == null) {
-      inventory.setItem(size - 5, slime);
+//      inventory.setItem(size - 5, slime);
     } else {
-      inventory.setItem(size - 6, slime);
+//      inventory.setItem(size - 6, slime);
     }
 
     player.openInventory(inventory);

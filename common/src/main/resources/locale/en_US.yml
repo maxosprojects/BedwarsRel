@@ -127,7 +127,7 @@ ingame:
     name: "Itemshop"
     newshop: "Use new shop"
     oldshop: "Use old shop"
-    fullstackpershift: "Multiply stacks per shift click"
+    fullstackpershift: "Multiple stacks per shift click"
     onestackpershift: "One stack per shift click"
   player:
     left: "Player $player$ has left the game!"
