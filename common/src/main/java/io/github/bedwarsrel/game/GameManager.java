@@ -237,7 +237,7 @@ public class GameManager {
         game.setAutobalance(cfg.getBoolean("autobalance"));
       }
 
-      if (cfg.contains("hunger")) {
+      if (cfg.contains("hunger-enabled")) {
         game.setHungerEnabled(cfg.getBoolean("hunger-enabled"));
       }
 
