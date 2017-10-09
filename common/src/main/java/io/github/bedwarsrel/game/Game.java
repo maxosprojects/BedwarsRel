@@ -13,6 +13,7 @@ import io.github.bedwarsrel.shop.NewItemShop;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrel.utils.TitleWriter;
 import io.github.bedwarsrel.utils.Utils;
 import io.github.bedwarsrel.villager.MerchantCategory;
 import io.github.bedwarsrel.villager.MerchantCategoryComparator;
@@ -855,13 +856,22 @@ public class Game {
 
     for (Player aPlayer : this.getPlayers()) {
       if (aPlayer.isOnline()) {
-        aPlayer.sendMessage(
-            ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
-                ._l(aPlayer, "ingame.blocks.beddestroyed",
-                    ImmutableMap.of("team",
-                        bedDestroyTeam.getChatColor() + bedDestroyTeam.getName() + ChatColor.RED,
-                        "player",
-                        Game.getPlayerWithTeamString(p, team, ChatColor.RED)))));
+        ChatColor chatColor = ChatColor.GOLD;
+        if (bedDestroyTeam.isInTeam(aPlayer)) {
+          String titleMsg = TitleWriter.pluginMessage(ChatColor.RED
+                  + BedwarsRel._l(aPlayer, "ingame.blocks.beddestroyedtitle"));
+          aPlayer.sendTitle(titleMsg, null, 10, 70, 20);
+          chatColor = ChatColor.RED;
+        }
+        String chatMsg = ChatWriter.pluginMessage(chatColor.toString() + ChatColor.BOLD
+                + BedwarsRel._l(aPlayer, "ingame.blocks.beddestroyed",
+                        ImmutableMap.of("team",
+                                bedDestroyTeam.getChatColor() + ChatColor.BOLD.toString()
+                                        + bedDestroyTeam.getName() + chatColor.toString(),
+                                "player",
+                                ChatColor.BOLD.toString()
+                                        + Game.getPlayerWithTeamString(p, team, bedDestroyTeam.getChatColor()))));
+        aPlayer.sendMessage(chatMsg);
       }
     }
 

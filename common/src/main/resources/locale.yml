@@ -113,7 +113,7 @@ ingame:
   noturteamchest: "This chest isn't a chest of your team!"
   protectionleft: "Invulnerable for &c$length$&f second(s)!"
   protectionend: "You're now &cvulnerable&f again!"
-  team-dead: "Team $team$ was destroyed!"
+  team-dead: "&6&lTeam &l$team$&6&l was eliminated!"
   no-friendlybreak: "&cCan't break block under team-member!"
   teamchestdestroy: "&cOne of your teamchest(s) has been destroyed!"
   title:
@@ -134,7 +134,8 @@ ingame:
     waskicked: "You were kicked from the game!"
   blocks:
     ownbeddestroy: "You can't destroy your own bed!"
-    beddestroyed: "$player$ destroyed bed of team $team$!"
+    beddestroyed: "Team $team$ bed was destroyed by $player$!"
+    beddestroyedtitle: "Bed destroyed!"
   specials:
     rescue-platform:
       left: "There are &c$time$&f second(s) left until you can use the next rescue platform!"

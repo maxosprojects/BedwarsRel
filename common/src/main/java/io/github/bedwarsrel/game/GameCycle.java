@@ -419,8 +419,8 @@ public abstract class GameCycle {
         if (aPlayer.isOnline()) {
           aPlayer.sendMessage(
               ChatWriter.pluginMessage(
-                  ChatColor.RED + BedwarsRel._l(aPlayer, "ingame.team-dead", ImmutableMap.of("team",
-                      deathTeam.getChatColor() + deathTeam.getDisplayName() + ChatColor.RED))));
+                  BedwarsRel._l(aPlayer, "ingame.team-dead", ImmutableMap.of("team",
+                      deathTeam.getChatColor() + deathTeam.getDisplayName()))));
         }
       }
     }
