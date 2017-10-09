@@ -19,17 +19,15 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
@@ -662,6 +660,34 @@ public class PlayerListener extends BaseListener {
       }
     } else {
       game.getNewItemShop(player).handleInventoryClick(ice, game, player);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onBowShot(EntityShootBowEvent evt) {
+    if (!(evt.getEntity() instanceof Player)) {
+      return;
+    }
+
+    Player player = (Player) evt.getEntity();
+    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
+
+    if (game == null || game.getState() != GameState.RUNNING) {
+      return;
+    }
+
+    Team team = game.getPlayerTeam(player);
+    if (team == null) {
+      return;
+    }
+
+    ItemStack bow = evt.getBow();
+    // Take away one arrow from player if shot from a bow with "infinity" enchantment
+    if (bow.hasItemMeta() && bow.getItemMeta().hasEnchant(Enchantment.ARROW_INFINITE)) {
+      Inventory inv = player.getInventory();
+      int slot = inv.first(Material.ARROW);
+      ItemStack stack = inv.getItem(slot);
+      stack.setAmount(stack.getAmount() - 1);
     }
   }
 
