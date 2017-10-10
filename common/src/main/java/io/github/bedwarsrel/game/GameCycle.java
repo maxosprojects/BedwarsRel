@@ -313,6 +313,15 @@ public abstract class GameCycle {
     int delay = BedwarsRel.getInstance().getConfig().getInt("gameoverdelay"); // configurable
     // delay
 
+    processStatsAndRewards(winner, madeRecord);
+
+    this.getGame().getPlayingTeams().clear();
+
+    GameOverTask gameOver = new GameOverTask(this, delay, winner);
+    gameOver.runTaskTimer(BedwarsRel.getInstance(), 0L, 20L);
+  }
+
+  private void processStatsAndRewards(Team winner, boolean madeRecord) {
     if (BedwarsRel.getInstance().statisticsEnabled()
         || BedwarsRel.getInstance().getBooleanConfig("rewards.enabled", false)
         || (BedwarsRel.getInstance().getBooleanConfig("titles.win.enabled", true))) {
@@ -406,11 +415,6 @@ public abstract class GameCycle {
         }
       }
     }
-
-    this.getGame().getPlayingTeams().clear();
-
-    GameOverTask gameOver = new GameOverTask(this, delay, winner);
-    gameOver.runTaskTimer(BedwarsRel.getInstance(), 0L, 20L);
   }
 
   private void sendTeamDeadMessage(Team deathTeam) {
