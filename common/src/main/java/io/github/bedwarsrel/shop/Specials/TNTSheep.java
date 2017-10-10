@@ -71,7 +71,7 @@ public class TNTSheep extends SpecialItem {
 
   @Override
   public Material getItemMaterial() {
-    return Material.MONSTER_EGG;
+    return Material.MELON_BLOCK;
   }
 
   public Player getPlayer() {
