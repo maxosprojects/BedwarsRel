@@ -35,6 +35,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.Wool;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -316,8 +317,15 @@ public class PlayerListener extends BaseListener {
     ItemStack item = event.getItem();
     if (item.getType() == Material.POTION) {
       PotionMeta meta = (PotionMeta) item.getItemMeta();
-      PlayerListener.this.makePlayerInvisible(player, true);
       if (meta.hasCustomEffect(PotionEffectType.INVISIBILITY)) {
+        // Default 30 sec
+        int duration = 600;
+        for (PotionEffect effect : meta.getCustomEffects()) {
+          if (PotionEffectType.INVISIBILITY.equals(effect.getType())) {
+            duration = effect.getDuration();
+          }
+        }
+        this.makePlayerInvisible(player, true);
         if (invisibilityTasks.containsKey(player)) {
           invisibilityTasks.get(player).cancel();
         }
@@ -327,7 +335,7 @@ public class PlayerListener extends BaseListener {
             invisibilityTasks.remove(player);
             PlayerListener.this.makePlayerInvisible(player, false);
           }
-        }.runTaskLater(BedwarsRel.getInstance(), 600L));
+        }.runTaskLater(BedwarsRel.getInstance(), duration));
       }
       new BukkitRunnable() {
         public void run() {

@@ -560,6 +560,19 @@ public class NewItemShop {
       lores = new ArrayList<String>();
     }
 
+    // Support for color
+    List<String> temp = new ArrayList<>(lores.size());
+    for (String line : lores) {
+      temp.add(ChatColor.translateAlternateColorCodes('&', line));
+    }
+    lores = temp;
+    if (meta.getDisplayName() != null) {
+      meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', meta.getDisplayName()));
+    }
+    if (meta.getLocalizedName() != null) {
+      meta.setLocalizedName(ChatColor.translateAlternateColorCodes('&', meta.getLocalizedName()));
+    }
+
     lores.add(ChatColor.WHITE + String.valueOf(item1.getAmount()) + " "
         + item1.getItemMeta().getDisplayName());
     if (item2 != null) {
