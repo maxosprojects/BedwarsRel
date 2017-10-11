@@ -25,9 +25,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Data;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -68,6 +70,7 @@ public class Game {
   private YamlConfiguration config = null;
   private GameCycle cycle = null;
   private List<Player> freePlayers = null;
+  private Map<Player, PlayerFlags> playersFlags = new HashMap<>();
   private GameLobbyCountdown gameLobbyCountdown = null;
   private Location hologramLocation = null;
   private boolean isOver = false;
@@ -83,7 +86,8 @@ public class Game {
   // Itemshops
   private HashMap<Player, NewItemShop> newItemShops = null;
   private List<MerchantCategory> orderedShopCategories = null;
-  private Map<Player, Player> playerDamages = null;
+  private Map<Player, DamageHolder> playerDamages = null;
+  private Map<Player, BukkitTask> waitingRespawn = new HashMap<>();
   private Map<Player, PlayerSettings> playerSettings = null;
   private HashMap<Player, PlayerStorage> playerStorages = null;
   private List<Team> playingTeams = null;
@@ -124,7 +128,7 @@ public class Game {
     this.isOver = false;
     this.newItemShops = new HashMap<Player, NewItemShop>();
     this.respawnProtections = new HashMap<Player, RespawnProtectionRunnable>();
-    this.playerDamages = new HashMap<Player, Player>();
+    this.playerDamages = new HashMap<>();
     this.specialItems = new ArrayList<SpecialItem>();
 
     this.record = BedwarsRel.getInstance().getMaxLength();
@@ -663,7 +667,7 @@ public class Game {
     return this.getPlayers().size();
   }
 
-  public Player getPlayerDamager(Player p) {
+  public DamageHolder getPlayerDamager(Player p) {
     return this.playerDamages.get(p);
   }
 
@@ -774,8 +778,8 @@ public class Game {
     return null;
   }
 
-  public ArrayList<Player> getTeamPlayers() {
-    ArrayList<Player> players = new ArrayList<>();
+  public List<Player> getTeamPlayers() {
+    List<Player> players = new ArrayList<>();
 
     for (Team team : this.teams.values()) {
       players.addAll(team.getPlayers());
@@ -938,8 +942,8 @@ public class Game {
       return null;
     }
 
-    ArrayList<Player> players = this.getTeamPlayers();
-    ArrayList<Team> teams = new ArrayList<>();
+    List<Player> players = this.getTeamPlayers();
+    Set<Team> teams = new HashSet<>();
 
     if (players.size() == 0 || players.isEmpty()) {
       return null;
@@ -951,15 +955,15 @@ public class Game {
         continue;
       }
 
-      if (!player.isDead()) {
+      if (this.isPlayerVirtuallyAlive(player)) {
         teams.add(playerTeam);
-      } else if (!playerTeam.isDead(this)) {
+      } else if (!playerTeam.isBedDestroyed(this)) {
         teams.add(playerTeam);
       }
     }
 
     if (teams.size() == 1) {
-      return teams.get(0);
+      return teams.iterator().next();
     } else {
       return null;
     }
@@ -1284,25 +1288,26 @@ public class Game {
           p.showPlayer(player);
         }
       }
-    } else {
-      if (this.state == GameState.RUNNING && !this.getCycle().isEndGameRunning()) {
-        if (!team.isDead(this) && !p.isDead() && BedwarsRel.getInstance().statisticsEnabled()
-            && BedwarsRel.getInstance().getBooleanConfig("statistics.player-leave-kills", false)) {
-          statistic.setCurrentDeaths(statistic.getCurrentDeaths() + 1);
-          statistic.setCurrentScore(statistic.getCurrentScore() + BedwarsRel.getInstance()
-              .getIntConfig("statistics.scores.die", 0));
-          if (this.getPlayerDamager(p) != null) {
-            PlayerStatistic killerPlayer = BedwarsRel.getInstance().getPlayerStatisticManager()
-                .getStatistic(this.getPlayerDamager(p));
-            killerPlayer.setCurrentKills(killerPlayer.getCurrentKills() + 1);
-            killerPlayer.setCurrentScore(killerPlayer.getCurrentScore() + BedwarsRel.getInstance()
-                .getIntConfig("statistics.scores.kill", 10));
-          }
-          statistic.setCurrentLoses(statistic.getCurrentLoses() + 1);
-          statistic.setCurrentScore(statistic.getCurrentScore() + BedwarsRel.getInstance()
-              .getIntConfig("statistics.scores.lose", 0));
-        }
+    } else if (this.state == GameState.RUNNING
+          && !this.getCycle().isEndGameRunning()
+          && !team.isBedDestroyed(this)
+          && this.isPlayerVirtuallyAlive(p)
+          && BedwarsRel.getInstance().statisticsEnabled()
+          && BedwarsRel.getInstance().getBooleanConfig("statistics.player-leave-kills",
+              false)) {
+      statistic.setCurrentDeaths(statistic.getCurrentDeaths() + 1);
+      statistic.setCurrentScore(statistic.getCurrentScore() + BedwarsRel.getInstance()
+          .getIntConfig("statistics.scores.die", 0));
+      if (this.getPlayerDamager(p) != null && this.getPlayerDamager(p).wasCausedRecently()) {
+        PlayerStatistic killerPlayer = BedwarsRel.getInstance().getPlayerStatisticManager()
+            .getStatistic(this.getPlayerDamager(p).getDamager());
+        killerPlayer.setCurrentKills(killerPlayer.getCurrentKills() + 1);
+        killerPlayer.setCurrentScore(killerPlayer.getCurrentScore() + BedwarsRel.getInstance()
+            .getIntConfig("statistics.scores.kill", 10));
       }
+      statistic.setCurrentLoses(statistic.getCurrentLoses() + 1);
+      statistic.setCurrentScore(statistic.getCurrentScore() + BedwarsRel.getInstance()
+          .getIntConfig("statistics.scores.lose", 0));
     }
 
     if (this.isProtected(p)) {
@@ -1609,8 +1614,7 @@ public class Game {
   }
 
   public void setPlayerDamager(Player p, Player damager) {
-    this.playerDamages.remove(p);
-    this.playerDamages.put(p, damager);
+    this.playerDamages.put(p, new DamageHolder(damager, System.currentTimeMillis()));
   }
 
   public void setPlayerGameMode(Player player) {
@@ -2022,7 +2026,7 @@ public class Game {
       this.scoreboard.resetScores(this.formatScoreboardTeam(t, false));
       this.scoreboard.resetScores(this.formatScoreboardTeam(t, true));
 
-      boolean teamDead = (t.isDead(this) && this.getState() == GameState.RUNNING) ? true : false;
+      boolean teamDead = (t.isBedDestroyed(this) && this.getState() == GameState.RUNNING) ? true : false;
       Score score = obj.getScore(this.formatScoreboardTeam(t, teamDead));
       score.setScore(t.getPlayers().size());
     }
@@ -2102,4 +2106,107 @@ public class Game {
       Game.this.updateSignConfig();
     }
   }
+
+  public void addWaitingRespawn(final Player player) {
+    // Task with countdown till respawn
+    BukkitTask task = new BukkitRunnable() {
+      private int respawnIn = 5;
+      @Override
+      public void run() {
+        if (Game.this.getState() == GameState.RUNNING && !Game.this.isStopping()) {
+          String title = ChatColor.translateAlternateColorCodes('&',
+                  BedwarsRel._l(player, "ingame.title.youdied"));
+          String subtitle = ChatColor.translateAlternateColorCodes('&',
+                  BedwarsRel._l(player, "ingame.title.respawninseconds",
+                    ImmutableMap.of("time", Integer.toString(this.respawnIn))));
+          player.sendTitle(title, subtitle, 0, 20, 10);
+        }
+        this.respawnIn--;
+      }
+    }.runTaskTimer(BedwarsRel.getInstance(), 0, 20);
+    this.addRunningTask(task);
+    this.waitingRespawn.put(player, task);
+
+    task = new BukkitRunnable() {
+      @Override
+      public void run() {
+        if (Game.this.getState() == GameState.RUNNING) {
+          player.teleport(Game.this.getPlayerTeam(player).getSpawnLocation());
+          player.setGameMode(GameMode.SURVIVAL);
+          Game.this.setPlayerVirtuallyAlive(player, true);
+        }
+        Game.this.stopWaitingRespawn(player);
+      }
+    }.runTaskLater(BedwarsRel.getInstance(), 100);
+    this.addRunningTask(task);
+  }
+
+  public void stopWaitingRespawn(Player player) {
+    BukkitTask task = this.waitingRespawn.get(player);
+    if (task != null) {
+      try {
+        task.cancel();
+      } catch (Exception ex) {
+        // already cancelled
+      }
+      this.waitingRespawn.remove(player);
+    }
+  }
+
+  public boolean isWaitingRespawn(Player player) {
+    return this.waitingRespawn.get(player) != null;
+  }
+
+  public Location getTopMiddle() {
+    return this.region.getTopMiddle();
+  }
+
+  public void onPlayerVirtuallyDies(Player player) {
+    if (!this.isPlayerVirtuallyAlive(player)) {
+      return;
+    }
+
+    PlayerStorage storage = this.getPlayerStorage(player);
+    storage.clean();
+    storage.prepareForBattle();
+
+    this.setPlayerVirtuallyAlive(player, false);
+
+    this.getCycle().checkGameOver();
+
+    if (this.getState() == GameState.RUNNING && this.isStopping()) {
+      String title = ChatColor.translateAlternateColorCodes('&',
+          BedwarsRel._l(player, "ingame.title.youdied"));
+      player.sendTitle(title, "", 0, 40, 10);
+    }
+
+    player.setGameMode(GameMode.SPECTATOR);
+    player.teleport(this.getTopMiddle());
+
+    if (this.getState() == GameState.RUNNING
+        && !this.getCycle().isEndGameRunning()
+        && !this.isStopping()) {
+      this.addWaitingRespawn(player);
+    }
+  }
+
+  private void setPlayerVirtuallyAlive(Player player, boolean alive) {
+    PlayerFlags flags = this.getOrCreatePlayerFlags(player);
+    flags.setVirtuallyAlive(alive);
+  }
+
+  private PlayerFlags getOrCreatePlayerFlags(Player player) {
+    PlayerFlags flags = this.playersFlags.get(player);
+    if (flags == null) {
+      flags = new PlayerFlags();
+      this.playersFlags.put(player, flags);
+    }
+    return flags;
+  }
+
+  public boolean isPlayerVirtuallyAlive(Player player) {
+    PlayerFlags flags = this.playersFlags.get(player);
+    return (flags == null || flags.isVirtuallyAlive());
+  }
+
 }

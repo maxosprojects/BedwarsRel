@@ -4,15 +4,21 @@ import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsOpenShopEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 import io.github.bedwarsrel.game.BungeeGameCycle;
+import io.github.bedwarsrel.game.DamageHolder;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.PlayerStorage;
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.shop.NewItemShop;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.villager.MerchantCategory;
 import java.lang.reflect.Method;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -23,13 +29,31 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.inventory.*;
-import org.bukkit.event.player.*;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -474,46 +498,52 @@ public class PlayerListener extends BaseListener {
       if (BedwarsRel.getInstance().getBooleanConfig("die-on-void", false)
           && ede.getCause() == DamageCause.VOID) {
         ede.setCancelled(true);
-        p.setHealth(0);
+//        p.setHealth(0);
+        this.handleDeath(p, g);
         return;
       }
 
+      Player damager = null;
       if (ede instanceof EntityDamageByEntityEvent) {
         EntityDamageByEntityEvent edbee = (EntityDamageByEntityEvent) ede;
 
         if (edbee.getDamager() instanceof Player) {
-          Player damager = (Player) edbee.getDamager();
-          if (g.isSpectator(damager)) {
-            ede.setCancelled(true);
-            return;
-          }
-
-          g.setPlayerDamager(p, damager);
+          damager = (Player) edbee.getDamager();
         } else if (edbee.getDamager().getType().equals(EntityType.ARROW)) {
           Arrow arrow = (Arrow) edbee.getDamager();
           if (arrow.getShooter() instanceof Player) {
-            Player shooter = (Player) arrow.getShooter();
-            if (g.isSpectator(shooter)) {
-              ede.setCancelled(true);
-              return;
-            }
-
-            g.setPlayerDamager(p, (Player) arrow.getShooter());
+            damager = (Player) arrow.getShooter();
           }
+        } else if (edbee.getDamager().getType().equals(EntityType.PRIMED_TNT)) {
+          TNTPrimed tnt = (TNTPrimed) edbee.getDamager();
+          damager = (Player) tnt.getSource();
         }
       }
 
-      if (!g.getCycle().isEndGameRunning()) {
-        return;
-      } else if (ede.getCause() == DamageCause.VOID) {
-        p.teleport(g.getPlayerTeam(p).getSpawnLocation());
+      if (damager != null) {
+        if (g.isSpectator(damager)) {
+          ede.setCancelled(true);
+          return;
+        } else {
+          g.setPlayerDamager(p, damager);
+        }
       }
+
+      if (g.isWaitingRespawn(p) || g.getCycle().isEndGameRunning()) {
+        ede.setCancelled(true);
+        return;
+      }
+
+      if (ede.getDamage() >= p.getHealth()) {
+        ede.setCancelled(true);
+        this.handleDeath(p, g);
+        return;
+      }
+
     } else if (g.getState() == GameState.WAITING
         && ede.getCause() == EntityDamageEvent.DamageCause.VOID) {
       p.teleport(g.getLobby());
     }
-
-    ede.setCancelled(true);
   }
 
   @EventHandler
@@ -815,64 +845,19 @@ public class PlayerListener extends BaseListener {
     player.closeInventory();
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
-  public void onPlayerDie(PlayerDeathEvent pde) {
-    final Player player = pde.getEntity();
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
+  private void handleDeath(Player player, Game game) {
 
-    if (game == null) {
-      return;
-    }
+//    if (!BedwarsRel.getInstance().getBooleanConfig("player-drops", false)) {
+//      pde.getDrops().clear();
+//    }
 
-    if (game.getState() == GameState.RUNNING) {
-      pde.setDroppedExp(0);
-      pde.setDeathMessage(null);
+//    pde.setKeepInventory(
+//            BedwarsRel.getInstance().getBooleanConfig("keep-inventory-on-death", false));
 
-      if (!BedwarsRel.getInstance().getBooleanConfig("player-drops", false)) {
-        pde.getDrops().clear();
-      }
+    DamageHolder damager = game.getPlayerDamager(player);
+    game.getCycle().onPlayerDies(player, (damager != null && damager.wasCausedRecently()) ? damager.getDamager() : null);
 
-      try {
-        if (!BedwarsRel.getInstance().isSpigot()) {
-          Class<?> clazz = null;
-          try {
-            clazz = Class.forName("io.github.bedwarsrel.com."
-                + BedwarsRel.getInstance().getCurrentVersion().toLowerCase()
-                + ".PerformRespawnRunnable");
-          } catch (ClassNotFoundException ex) {
-            BedwarsRel.getInstance().getBugsnag().notify(ex);
-            clazz = Class
-                .forName("io.github.bedwarsrel.com.fallback.PerformRespawnRunnable");
-          }
-
-          BukkitRunnable respawnRunnable =
-              (BukkitRunnable) clazz.getDeclaredConstructor(Player.class).newInstance(player);
-          respawnRunnable.runTaskLater(BedwarsRel.getInstance(), 20L);
-        } else {
-          new BukkitRunnable() {
-
-            @Override
-            public void run() {
-              player.spigot().respawn();
-            }
-          }.runTaskLater(BedwarsRel.getInstance(), 20L);
-        }
-
-      } catch (Exception e) {
-        BedwarsRel.getInstance().getBugsnag().notify(e);
-        e.printStackTrace();
-      }
-
-      pde.setKeepInventory(
-          BedwarsRel.getInstance().getBooleanConfig("keep-inventory-on-death", false));
-
-      Player killer = player.getKiller();
-      if (killer == null) {
-        killer = game.getPlayerDamager(player);
-      }
-
-      game.getCycle().onPlayerDies(player, killer);
-    }
+    game.onPlayerVirtuallyDies(player);
   }
 
   /*

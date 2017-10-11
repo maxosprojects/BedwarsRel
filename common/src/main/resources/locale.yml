@@ -127,6 +127,8 @@ ingame:
     map-builder: "Built by $builder$"
     win-title: "&6Congratulations!"
     win-subtitle: "$team$&6 won in &e$time$"
+    youdied: "&cYou died!"
+    respawninseconds: "&9Respawn in &6$time$&9 sec"
   shop:
     name: "Itemshop"
     newshop: "Use new shop"

@@ -189,7 +189,7 @@ public class Team implements ConfigurationSerializable {
         return players;
     }
 
-    public boolean isDead(Game game) {
+    public boolean isBedDestroyed(Game game) {
         Material targetMaterial = game.getTargetMaterial();
 
         this.getTargetHeadBlock().getBlock().getChunk().load(true);

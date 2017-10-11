@@ -114,16 +114,16 @@ public abstract class GameCycle {
 
       boolean onlyOnBedDestroy =
           BedwarsRel.getInstance().getBooleanConfig("statistics.bed-destroyed-kills", false);
-      boolean teamIsDead = deathTeam.isDead(this.getGame());
+      boolean teamBedDestroyed = deathTeam.isBedDestroyed(this.getGame());
 
-      if ((onlyOnBedDestroy && teamIsDead) || !onlyOnBedDestroy) {
+      if ((onlyOnBedDestroy && teamBedDestroyed) || !onlyOnBedDestroy) {
         diePlayer.setCurrentDeaths(diePlayer.getCurrentDeaths() + 1);
         diePlayer.setCurrentScore(diePlayer.getCurrentScore() + BedwarsRel
             .getInstance().getIntConfig("statistics.scores.die", 0));
       }
 
       if (killer != null) {
-        if ((onlyOnBedDestroy && teamIsDead) || !onlyOnBedDestroy) {
+        if ((onlyOnBedDestroy && teamBedDestroyed) || !onlyOnBedDestroy) {
           killerPlayer = BedwarsRel.getInstance().getPlayerStatisticManager().getStatistic(killer);
           if (killerPlayer != null) {
             killerPlayer.setCurrentKills(killerPlayer.getCurrentKills() + 1);
@@ -135,7 +135,7 @@ public abstract class GameCycle {
 
       // dispatch reward commands directly
       if (BedwarsRel.getInstance().getBooleanConfig("rewards.enabled", false) && killer != null
-          && ((onlyOnBedDestroy && teamIsDead) || !onlyOnBedDestroy)) {
+          && ((onlyOnBedDestroy && teamBedDestroyed) || !onlyOnBedDestroy)) {
         List<String> commands = BedwarsRel.getInstance().getConfig()
             .getStringList("rewards.player-kill");
         BedwarsRel.getInstance().dispatchRewardCommands(commands,
@@ -201,7 +201,7 @@ public abstract class GameCycle {
       }
     }
 
-    if (deathTeam.isDead(this.getGame())) {
+    if (deathTeam.isBedDestroyed(this.getGame())) {
       killer.playSound(killer.getLocation(), SoundMachine.get("LEVEL_UP", "ENTITY_PLAYER_LEVELUP"),
           Float.valueOf("1.0"), Float.valueOf("1.0"));
     }
@@ -228,7 +228,7 @@ public abstract class GameCycle {
 
     PlayerStorage storage = this.getGame().getPlayerStorage(player);
 
-    if (team.isDead(this.getGame())) {
+    if (team.isBedDestroyed(this.getGame())) {
 
       if (BedwarsRel.getInstance().statisticsEnabled()) {
         PlayerStatistic statistic =
@@ -418,7 +418,7 @@ public abstract class GameCycle {
   }
 
   private void sendTeamDeadMessage(Team deathTeam) {
-    if (deathTeam.getPlayers().size() == 1 && deathTeam.isDead(this.getGame())) {
+    if (deathTeam.getPlayers().size() == 1 && deathTeam.isBedDestroyed(this.getGame())) {
       for (Player aPlayer : this.getGame().getPlayers()) {
         if (aPlayer.isOnline()) {
           aPlayer.sendMessage(
@@ -438,7 +438,7 @@ public abstract class GameCycle {
 
       // check for winning through bed destroy
       for (Team team : this.getGame().getPlayingTeams()) {
-        if (team.isDead(this.getGame())) {
+        if (team.isBedDestroyed(this.getGame())) {
           throughBed = true;
           break;
         }

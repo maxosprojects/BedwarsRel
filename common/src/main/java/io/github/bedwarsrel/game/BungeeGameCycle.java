@@ -297,7 +297,7 @@ public class BungeeGameCycle extends GameCycle {
 
   @Override
   public void onPlayerLeave(Player player) {
-    if (player.isOnline() || player.isDead()) {
+    if (player.isOnline() || !this.getGame().isPlayerVirtuallyAlive(player)) {
       this.bungeeSendToServer(BedwarsRel.getInstance().getBungeeHub(), player, true);
     }
 

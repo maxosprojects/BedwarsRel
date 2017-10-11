@@ -385,4 +385,11 @@ public class Region {
       }
     }
   }
+
+    public Location getTopMiddle() {
+      double x = (maxCorner.getX() + minCorner.getX()) / 2;
+      double y = maxCorner.getY();
+      double z = (maxCorner.getZ() + minCorner.getZ()) / 2;
+      return new Location(this.world, x, y, z);
+    }
 }
