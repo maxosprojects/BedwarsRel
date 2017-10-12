@@ -16,14 +16,12 @@ import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.TitleWriter;
 import io.github.bedwarsrel.utils.Utils;
 import io.github.bedwarsrel.villager.MerchantCategory;
-import io.github.bedwarsrel.villager.MerchantCategoryComparator;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -85,7 +83,7 @@ public class Game {
   private String name = null;
   // Itemshops
   private HashMap<Player, NewItemShop> newItemShops = null;
-  private List<MerchantCategory> orderedShopCategories = null;
+  private List<MerchantCategory> shopCatsList = null;
   private Map<Player, DamageHolder> playerDamages = null;
   private Map<Player, BukkitTask> waitingRespawn = new HashMap<>();
   private Map<Player, PlayerSettings> playerSettings = null;
@@ -99,7 +97,7 @@ public class Game {
   private Map<Player, RespawnProtectionRunnable> respawnProtections = null;
   private List<BukkitTask> runningTasks = null;
   private Scoreboard scoreboard = null;
-  private HashMap<Material, MerchantCategory> shopCategories = null;
+  private HashMap<String, MerchantCategory> shopCatsMap;
   private List<SpecialItem> specialItems = null;
   private GameState state = null;
   private Material targetMaterial = null;
@@ -599,12 +597,8 @@ public class Game {
     return players;
   }
 
-  public HashMap<Material, MerchantCategory> getItemShopCategories() {
-    return this.shopCategories;
-  }
-
-  public void setItemShopCategories(HashMap<Material, MerchantCategory> cats) {
-    this.shopCategories = cats;
+  public HashMap<String, MerchantCategory> getShopCategories() {
+    return this.shopCatsMap;
   }
 
   public GameLobbyCountdown getLobbyCountdown() {
@@ -659,8 +653,8 @@ public class Game {
     return players;
   }
 
-  public List<MerchantCategory> getOrderedItemShopCategories() {
-    return this.orderedShopCategories;
+  public List<MerchantCategory> getShopCatList() {
+    return this.shopCatsList;
   }
 
   public int getPlayerAmount() {
@@ -992,14 +986,11 @@ public class Game {
   }
 
   public void loadItemShopCategories() {
-    this.shopCategories = MerchantCategory.loadCategories(BedwarsRel.getInstance().getShopConfig());
-    this.orderedShopCategories = this.loadOrderedItemShopCategories();
-  }
-
-  private List<MerchantCategory> loadOrderedItemShopCategories() {
-    List<MerchantCategory> list = new ArrayList<MerchantCategory>(this.shopCategories.values());
-    Collections.sort(list, new MerchantCategoryComparator());
-    return list;
+    this.shopCatsList = MerchantCategory.loadCategories(BedwarsRel.getInstance().getShopConfig());
+    this.shopCatsMap = new HashMap<>();
+    for (MerchantCategory cat : this.shopCatsList) {
+      this.shopCatsMap.put(cat.getName(), cat);
+    }
   }
 
   private void makeTeamsReady() {
@@ -1039,7 +1030,7 @@ public class Game {
   }
 
   public NewItemShop openNewItemShop(Player player) {
-    NewItemShop newShop = new NewItemShop(this.orderedShopCategories);
+    NewItemShop newShop = new NewItemShop(this.shopCatsList);
     this.newItemShops.put(player, newShop);
 
     return newShop;

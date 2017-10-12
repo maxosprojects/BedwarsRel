@@ -81,6 +81,6 @@ public enum ArmorPurchaseEnum {
 
         player.updateInventory();
 
-        team.getArmorUpgrade().equipPlayer(player);
+        team.getUpgrade(ArmorUpgradeEnum.class).equipPlayer(player);
     }
 }

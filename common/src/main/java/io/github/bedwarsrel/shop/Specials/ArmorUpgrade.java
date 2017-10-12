@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.Team;
+import io.github.bedwarsrel.shop.Reward;
 import io.github.bedwarsrel.utils.ChatWriter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
-public class ArmorUpgrade extends SpecialItem implements VirtualItem {
+public class ArmorUpgrade extends SpecialItem implements VirtualItem, Upgrade {
     private Game game;
     private Team team;
     private final ArmorUpgradeEnum upgrade;
@@ -30,13 +30,13 @@ public class ArmorUpgrade extends SpecialItem implements VirtualItem {
 
     @Override
     public boolean init() {
-        ArmorUpgradeEnum existingUpgrade = this.team.getArmorUpgrade();
+        ArmorUpgradeEnum existingUpgrade = this.team.getUpgrade(ArmorUpgradeEnum.class);
 
         if (!this.upgrade.isHigherThan(existingUpgrade)) {
             return false;
         }
 
-        team.setArmorUpgrade(this.upgrade);
+        team.setUpgrade(this.upgrade);
 
         this.upgrade.equipTeam(this.team);
 
@@ -68,7 +68,18 @@ public class ArmorUpgrade extends SpecialItem implements VirtualItem {
     }
 
     @Override
-    public boolean isRepresentation(ItemStack item) {
-        return item.getType() == upgrade.getRepresentation();
+    public boolean isRepresentation(Reward holder) {
+        return holder.isUpgrade() && holder.getUpgrade().getScope() == this.getScope();
     }
+
+    @Override
+    public UpgradeType getScope() {
+        return UpgradeType.TEAM;
+    }
+
+    @Override
+    public boolean matches(String type, int level) {
+        return type != null && type.equals("ARMOR") && level == this.upgrade.getLevel();
+    }
+
 }

@@ -5,10 +5,12 @@ import io.github.bedwarsrel.events.BedwarsPlayerJoinTeamEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 import io.github.bedwarsrel.shop.Specials.ArmorUpgradeEnum;
 import io.github.bedwarsrel.shop.Specials.SwordUpgradeEnum;
+import io.github.bedwarsrel.shop.Specials.UpgradeEnum;
 import io.github.bedwarsrel.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -41,10 +43,10 @@ public class Team implements ConfigurationSerializable {
     private Location baseLoc1;
     private Location baseLoc2;
     private Location chestLoc;
-    private ArmorUpgradeEnum armorUpgrade = ArmorUpgradeEnum.PROTECTION0;
-    private SwordUpgradeEnum swordUpgrade = SwordUpgradeEnum.SHARPNESS0;
+    private List<UpgradeEnum> upgrades = new ArrayList<>();
 
     public Team(Map<String, Object> deserialize) {
+        this.reset();
         this.setName(deserialize.get("name").toString());
         this.setMaxPlayers(Integer.parseInt(deserialize.get("maxplayers").toString()));
         this.setColor(TeamColor.valueOf(deserialize.get("color").toString().toUpperCase()));
@@ -66,11 +68,20 @@ public class Team implements ConfigurationSerializable {
 
     public Team(String name, TeamColor color, int maxPlayers,
                 org.bukkit.scoreboard.Team scoreboardTeam) {
+        this.reset();
         this.setName(name);
         this.setColor(color);
         this.setMaxPlayers(maxPlayers);
         this.setScoreboardTeam(scoreboardTeam);
         this.setChests(new ArrayList<Block>());
+    }
+
+    public void reset() {
+        this.inventory = null;
+        this.chests = new ArrayList<>();
+        this.upgrades = new ArrayList<>();
+        this.upgrades.add(ArmorUpgradeEnum.PROTECTION0);
+        this.upgrades.add(SwordUpgradeEnum.SHARPNESS0);
     }
 
     public void addChest(Block chestBlock) {
@@ -277,4 +288,26 @@ public class Team implements ConfigurationSerializable {
             this.baseLoc2 = loc;
         }
     }
+
+    public <T> T getUpgrade(Class<T> upgradeEnumClass) {
+        for (UpgradeEnum upgrade : this.upgrades) {
+            if (upgrade.getClass() == upgradeEnumClass) {
+                return (T)upgrade;
+            }
+        }
+        return null;
+    }
+
+    public void setUpgrade(UpgradeEnum upgrade) {
+        // First remove existing upgrade of the same enum
+        Iterator<UpgradeEnum> iter = this.upgrades.iterator();
+        while (iter.hasNext()) {
+            UpgradeEnum temp = iter.next();
+            if (temp.getClass() == upgrade.getClass()) {
+                iter.remove();
+            }
+        }
+        this.upgrades.add(upgrade);
+    }
+
 }

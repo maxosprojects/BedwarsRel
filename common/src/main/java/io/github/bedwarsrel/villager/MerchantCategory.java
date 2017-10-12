@@ -2,10 +2,11 @@ package io.github.bedwarsrel.villager;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrel.shop.Reward;
+import io.github.bedwarsrel.shop.Specials.SpecialItem;
+import io.github.bedwarsrel.shop.Specials.Upgrade;
 import io.github.bedwarsrel.utils.Utils;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,177 +17,188 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class MerchantCategory {
 
-  private Material item = null;
-  private List<String> lores = null;
+  private ItemStack button = null;
   private String name = null;
   private ArrayList<VillagerTrade> offers = null;
-  private int order = 0;
   private String permission = null;
 
-  public MerchantCategory(String name, Material item) {
-    this(name, item, new ArrayList<VillagerTrade>(), new ArrayList<String>(), 0, "bw.base");
+  public MerchantCategory(String name, ItemStack button) {
+    this(name, button, new ArrayList<VillagerTrade>(), "bw.base");
   }
 
-  public MerchantCategory(String name, Material item, ArrayList<VillagerTrade> offers,
-      List<String> lores, int order, String permission) {
+  public MerchantCategory(String name, ItemStack button, ArrayList<VillagerTrade> offers, String permission) {
     this.name = name;
-    this.item = item;
+    this.button = button;
     this.offers = offers;
-    this.lores = lores;
-    this.order = order;
     this.permission = permission;
   }
 
+  private static String color(String in) {
+    return ChatColor.translateAlternateColorCodes('&', in);
+  }
+
+  private static List<String> color(List<String> in) {
+    List<String> out = new ArrayList<>();
+    for (String line : in) {
+      out.add(color(line));
+    }
+    return out;
+  }
+
+  private static ItemStack color(ItemStack item) {
+    if (item.hasItemMeta()) {
+      ItemMeta meta = item.getItemMeta();
+      if (meta.hasDisplayName()) {
+        meta.setDisplayName(color(meta.getDisplayName()));
+      }
+      if (meta.hasLore()) {
+        meta.setLore(color(meta.getLore()));
+      }
+    }
+    return item;
+  }
+
+  private static void logParseError(String catName) {
+    logError("Couldn't parse shop category" + catName);
+  }
+
+  private static void logError(String text) {
+    BedwarsRel.getInstance().getServer().getConsoleSender().sendMessage(ChatColor.RED + text);
+  }
+
   @SuppressWarnings({"unchecked", "deprecation"})
-  public static HashMap<Material, MerchantCategory> loadCategories(FileConfiguration cfg) {
+  public static List<MerchantCategory> loadCategories(FileConfiguration cfg) {
     if (cfg.getConfigurationSection("shop") == null) {
-      return new HashMap<Material, MerchantCategory>();
+      return new ArrayList<>();
     }
 
-    HashMap<Material, MerchantCategory> mc = new HashMap<Material, MerchantCategory>();
+    List<MerchantCategory> res = new ArrayList<>();
 
-    ConfigurationSection section = cfg.getConfigurationSection("shop");
+    for (Map<?, ?> elem : cfg.getMapList("shop")) {
+      if (!elem.containsKey("name")
+          || !elem.containsKey("button")
+          || !elem.containsKey("offers")) {
+        logError("Shop category misses required field");
+        continue;
+      }
+      Map<String, Object> cat = (Map<String, Object>) elem;
 
-    for (String cat : section.getKeys(false)) {
-      String catName =
-          ChatColor.translateAlternateColorCodes('&', section.getString(cat + ".name"));
-      Material catItem = null;
-      List<String> lores = new ArrayList<String>();
-      String item = section.get(cat + ".item").toString();
+      String catName = color((String) cat.get("name"));
+      ItemStack catButton = color(ItemStack.deserialize((Map<String, Object>) cat.get("button")));
+      ItemMeta catMeta = catButton.getItemMeta();
+      catMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES,
+          ItemFlag.HIDE_POTION_EFFECTS,
+          ItemFlag.HIDE_ENCHANTS);
       String permission = "bw.base";
-      int order = 0;
 
-      if (!Utils.isNumber(item)) {
-        catItem = Material.getMaterial(section.getString(cat + ".item"));
-      } else {
-        catItem = Material.getMaterial(section.getInt(cat + ".item"));
-      }
-
-      if (section.contains(cat + ".lore")) {
-        for (Object lore : section.getList(cat + ".lore")) {
-          lores.add(ChatColor.translateAlternateColorCodes('&', lore.toString()));
-        }
-      }
-
-      if (section.contains(cat + ".order") && section.isInt(cat + ".order")) {
-        order = section.getInt(cat + ".order");
-      }
-
-      if (section.contains(cat + ".permission")) {
-        permission = section.getString(cat + ".permission", "bw.base");
+      if (cat.containsKey("permission")) {
+        permission = (String) cat.get("permission");
       }
 
       ArrayList<VillagerTrade> offers = new ArrayList<VillagerTrade>();
 
-      for (Object offer : section.getList(cat + ".offers")) {
+      for (Object offer : (List<Object>)cat.get("offers")) {
         if (offer instanceof String) {
           if (offer.toString().equalsIgnoreCase("empty")
               || offer.toString().equalsIgnoreCase("null")
               || offer.toString().equalsIgnoreCase("e")) {
-            VillagerTrade trade =
-                new VillagerTrade(new ItemStack(Material.AIR, 1), new ItemStack(Material.AIR, 1));
+            VillagerTrade trade = new VillagerTrade(new ItemStack(Material.AIR, 1),
+                    new Reward(new ItemStack(Material.AIR, 1), null));
             offers.add(trade);
           }
-
           continue;
         }
 
-        HashMap<String, List<Map<String, Object>>> offerSection =
-            (HashMap<String, List<Map<String, Object>>>) offer;
-
+        Map<String, Object> offerSection = (Map<String, Object>) offer;
         if (!offerSection.containsKey("price") || !offerSection.containsKey("reward")) {
           continue;
         }
 
         ItemStack item1 = null;
-
-        try {
-          item1 = setResourceName(ItemStack.deserialize(offerSection.get("price").get(0)));
-        } catch (Exception e) {
-          // CATCH EXCEPTION
-        }
-
         ItemStack item2 = null;
-        if (offerSection.get("price").size() == 2) {
+
+        List<Map<String, Object>> price = (List<Map<String, Object>>) offerSection.get("price");
+        try {
+          item1 = color(setResourceName(ItemStack.deserialize(price.get(0))));
+        } catch (Exception e) {
+          logParseError(catName);
+        }
+        if (price.size() == 2) {
           try {
-            item2 = setResourceName(ItemStack.deserialize(offerSection.get("price").get(1)));
+            item2 = color(setResourceName(ItemStack.deserialize(price.get(1))));
           } catch (Exception e) {
-            // CATCH EXCEPTION
+            logParseError(catName);
           }
         }
-        ItemStack reward = null;
 
+        ItemStack rewardButton = null;
+        Upgrade upgrade = null;
         try {
-          reward = ItemStack.deserialize(offerSection.get("reward").get(0));
+          Map<String, Object> rewardElem = (Map<String, Object>) offerSection.get("reward");
+          if (rewardElem.containsKey("button")) {
+            rewardButton = color(ItemStack.deserialize(
+                (Map<String, Object>) rewardElem.get("button")));
+            Map<String, Object> upgradeElem = (Map<String, Object>) rewardElem.get("upgrade");
+            upgrade = SpecialItem.getUpgrade(
+                (String)upgradeElem.get("type"), (int)upgradeElem.get("level"));
+          } else {
+            rewardButton = color(setResourceName(ItemStack.deserialize(
+                (Map<String, Object>) rewardElem.get("reward"))));
+          }
         } catch (Exception e) {
-          // CATCH EXCEPTION
+          logParseError(catName);
         }
+        Reward reward = new Reward(rewardButton, upgrade);
 
-        if (item1 == null || reward == null) {
-          BedwarsRel.getInstance().getServer().getConsoleSender().sendMessage(
-              ChatWriter.pluginMessage(ChatColor.RED + "Couldn't parse item in category \""
-                  + section.getString(cat + ".name") + "\": " + offerSection.toString()));
+        if (item1 == null || rewardButton == null) {
+          logParseError(catName);
           continue;
         }
 
-        VillagerTrade tradeObj = null;
-
-        if (item2 != null) {
-          tradeObj = new VillagerTrade(item1, item2, reward);
-        } else {
-          tradeObj = new VillagerTrade(item1, reward);
-        }
-
-        offers.add(tradeObj);
+        offers.add(new VillagerTrade(item1, item2, reward));
       }
 
-      mc.put(catItem, new MerchantCategory(catName, catItem, offers, lores, order, permission));
+      res.add(new MerchantCategory(catName, catButton, offers, permission));
     }
 
-    return mc;
+    return res;
   }
 
   @SuppressWarnings("deprecation")
-  public static void openCategorySelection(Player p, Game g) {
-    List<MerchantCategory> cats = g.getOrderedItemShopCategories();
+  public static void openCategorySelection(Player player, Game game) {
+    if (player == null) {
+      return;
+    }
+    List<MerchantCategory> cats = game.getShopCatList();
 
-    int nom = (cats.size() % 9 == 0) ? 9 : (cats.size() % 9);
-    int size = (cats.size() + (9 - nom)) + 9;
+    int part = cats.size() % 9;
+    // Complete lines
+    int size = cats.size() / 9 * 9;
+    if (part > 0) {
+      size += 9;
+    }
 
-    Inventory inv = Bukkit.createInventory(p, size, BedwarsRel._l(p, "ingame.shop.name"));
+    Inventory inv = Bukkit.createInventory(player, size, BedwarsRel._l(player, "ingame.shop.name"));
     for (MerchantCategory cat : cats) {
-      if (p != null && !p.hasPermission(cat.getPermission())) {
+      if (!player.hasPermission(cat.getPermission())) {
         continue;
       }
-
-      ItemStack is = new ItemStack(cat.getMaterial(), 1);
+      ItemStack is = cat.getButton().clone();
       ItemMeta im = is.getItemMeta();
-
       if (Utils.isColorable(is)) {
-        is.setDurability(g.getPlayerTeam(p).getColor().getDyeColor().getWoolData());
+        is.setDurability(game.getPlayerTeam(player).getColor().getDyeColor().getWoolData());
       }
-
-      im.setDisplayName(cat.getName());
-      im.setLore(cat.getLores());
       is.setItemMeta(im);
-
       inv.addItem(is);
     }
 
-    ItemStack snow = new ItemStack(Material.SNOW_BALL, 1);
-    ItemMeta snowMeta = snow.getItemMeta();
-
-    snowMeta.setDisplayName(BedwarsRel._l(p, "ingame.shop.newshop"));
-    snowMeta.setLore(new ArrayList<String>());
-    snow.setItemMeta(snowMeta);
-
-    inv.setItem(size - 5, snow);
-    p.openInventory(inv);
+    player.openInventory(inv);
   }
 
   @SuppressWarnings("deprecation")
@@ -195,21 +207,19 @@ public class MerchantCategory {
     ItemMeta im = item.getItemMeta();
     String name = im.getDisplayName();
 
-    // check if is ressource
+    // check if is resource
     ConfigurationSection resourceSection =
         BedwarsRel.getInstance().getConfig().getConfigurationSection("resource");
     for (String key : resourceSection.getKeys(false)) {
-
-      List<Object> resourceList = (List<Object>) BedwarsRel.getInstance().getConfig()
-          .getList("resource." + key + ".item");
+      List<Object> resourceList =
+          (List<Object>) BedwarsRel.getInstance().getConfig().getList("resource." + key + ".item");
 
       for (Object resource : resourceList) {
         ItemStack itemStack = ItemStack.deserialize((Map<String, Object>) resource);
         if (itemStack != null && itemStack.getType().equals(item.getType())
             && itemStack.getItemMeta() != null
             && itemStack.getItemMeta().getDisplayName() != null) {
-          name =
-              ChatColor.translateAlternateColorCodes('&', itemStack.getItemMeta().getDisplayName());
+          name = itemStack.getItemMeta().getDisplayName();
         }
       }
     }
@@ -228,20 +238,12 @@ public class MerchantCategory {
     while (iterator.hasNext()) {
       VillagerTrade trade = iterator.next();
       if (trade.getItem1().getType() == Material.AIR
-          && trade.getRewardItem().getType() == Material.AIR) {
+          && trade.getReward().getItem().getType() == Material.AIR) {
         iterator.remove();
       }
     }
 
     return trades;
-  }
-
-  public List<String> getLores() {
-    return this.lores;
-  }
-
-  public Material getMaterial() {
-    return this.item;
   }
 
   public String getName() {
@@ -252,12 +254,11 @@ public class MerchantCategory {
     return this.offers;
   }
 
-  public int getOrder() {
-    return this.order;
-  }
-
   public String getPermission() {
     return this.permission;
   }
 
+  public ItemStack getButton() {
+    return button;
+  }
 }

@@ -3,6 +3,7 @@ package io.github.bedwarsrel.shop.Specials;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.Team;
+import io.github.bedwarsrel.shop.Reward;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.SoundMachine;
 import io.github.bedwarsrel.utils.TitleWriter;
@@ -23,7 +24,7 @@ import java.util.List;
  * This is superior to the @{@link Trap} because it can't be jumped over nor anything
  * can be placed on top of the trap.
  */
-public class TrapBase extends SpecialItem implements VirtualItem {
+public class BaseAlarm extends SpecialItem implements VirtualItem {
 
     private List<PotionEffect> effects = null;
     private Game game = null;
@@ -35,7 +36,7 @@ public class TrapBase extends SpecialItem implements VirtualItem {
     private int x2;
     private int z2;
 
-    public TrapBase() {
+    public BaseAlarm() {
         this.effects = new ArrayList<>();
     }
 
@@ -62,8 +63,8 @@ public class TrapBase extends SpecialItem implements VirtualItem {
 
                 @Override
                 public void run() {
-                    if (this.counter >= TrapBase.this.maxDuration) {
-                        TrapBase.this.game.removeRunningTask(this);
+                    if (this.counter >= BaseAlarm.this.maxDuration) {
+                        BaseAlarm.this.game.removeRunningTask(this);
                         this.cancel();
                         return;
                     }
@@ -106,7 +107,7 @@ public class TrapBase extends SpecialItem implements VirtualItem {
 
     @Override
     public VirtualItem create(Game game, Team team, Player player) {
-        TrapBase item = new TrapBase();
+        BaseAlarm item = new BaseAlarm();
 
         item.game = game;
         item.team = team;
@@ -125,10 +126,10 @@ public class TrapBase extends SpecialItem implements VirtualItem {
     public boolean init() {
         // Check if another instance already exists in the game for the team
         for (SpecialItem item : this.game.getSpecialItems()) {
-            if (!(item instanceof TrapBase)) {
+            if (!(item instanceof BaseAlarm)) {
                 continue;
             }
-            TrapBase trap = (TrapBase) item;
+            BaseAlarm trap = (BaseAlarm) item;
             if (trap.game == this.game && trap.team == this.team) {
                 return false;
             }
@@ -166,7 +167,8 @@ public class TrapBase extends SpecialItem implements VirtualItem {
     }
 
     @Override
-    public boolean isRepresentation(ItemStack item) {
-        return item.getType() == Material.TRIPWIRE_HOOK;
+    public boolean isRepresentation(Reward holder) {
+        ItemStack item = holder.getItem();
+        return item != null && item.getType() == Material.TRIPWIRE_HOOK;
     }
 }

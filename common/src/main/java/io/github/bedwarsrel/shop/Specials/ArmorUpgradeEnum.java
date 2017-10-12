@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public enum ArmorUpgradeEnum {
+public enum ArmorUpgradeEnum implements UpgradeEnum {
     PROTECTION0(null, 0, ""),
     PROTECTION1(Material.CHAINMAIL_CHESTPLATE, 1, "protection1"),
     PROTECTION2(Material.IRON_CHESTPLATE, 2, "protection2"),
@@ -54,5 +54,9 @@ public enum ArmorUpgradeEnum {
             item.setItemMeta(meta);
         }
         player.updateInventory();
+    }
+
+    public int getLevel() {
+        return level;
     }
 }

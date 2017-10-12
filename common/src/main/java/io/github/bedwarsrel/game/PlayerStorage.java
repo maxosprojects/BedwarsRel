@@ -4,6 +4,8 @@ import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsOpenTeamSelectionEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 
+import io.github.bedwarsrel.shop.Specials.ArmorUpgradeEnum;
+import io.github.bedwarsrel.shop.Specials.SwordUpgradeEnum;
 import java.util.*;
 
 import io.github.bedwarsrel.shop.Specials.ArmorPurchaseEnum;
@@ -159,8 +161,10 @@ public class PlayerStorage {
     Team team = game.getPlayerTeam(this.player);
     if (team != null) {
       this.inGameArmor.equipPlayer(this.player, team);
-      team.getArmorUpgrade().equipPlayer(this.player);
-      team.getSwordUpgrade().equipPlayer(this.player);
+      ArmorUpgradeEnum armor = team.getUpgrade(ArmorUpgradeEnum.class);
+      armor.equipPlayer(this.player);
+      SwordUpgradeEnum sword = team.getUpgrade(SwordUpgradeEnum.class);
+      sword.equipPlayer(this.player);
     }
 
     this.player.updateInventory();

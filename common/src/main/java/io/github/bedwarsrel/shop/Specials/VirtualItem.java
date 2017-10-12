@@ -2,8 +2,8 @@ package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.Team;
+import io.github.bedwarsrel.shop.Reward;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 public interface VirtualItem {
     /**
@@ -23,5 +23,5 @@ public interface VirtualItem {
      */
     boolean init();
 
-    boolean isRepresentation(ItemStack item);
+    boolean isRepresentation(Reward holder);
 }

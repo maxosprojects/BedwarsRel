@@ -7,7 +7,6 @@ import io.github.bedwarsrel.game.BungeeGameCycle;
 import io.github.bedwarsrel.game.DamageHolder;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.GameState;
-import io.github.bedwarsrel.game.PlayerStorage;
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.shop.NewItemShop;
 import io.github.bedwarsrel.utils.ChatWriter;
@@ -138,7 +137,7 @@ public class PlayerListener extends BaseListener {
     iee.setCancelled(true);
 
     BedwarsOpenShopEvent openShopEvent =
-        new BedwarsOpenShopEvent(game, player, game.getItemShopCategories(), iee.getRightClicked());
+        new BedwarsOpenShopEvent(game, player, game.getShopCategories(), iee.getRightClicked());
     BedwarsRel.getInstance().getServer().getPluginManager().callEvent(openShopEvent);
 
     if (openShopEvent.isCancelled()) {
@@ -679,7 +678,7 @@ public class PlayerListener extends BaseListener {
           return;
         }
 
-        MerchantCategory cat = game.getItemShopCategories().get(clickedStack.getType());
+        MerchantCategory cat = game.getShopCategories().get(clickedStack.getType());
         if (cat == null) {
           return;
         }

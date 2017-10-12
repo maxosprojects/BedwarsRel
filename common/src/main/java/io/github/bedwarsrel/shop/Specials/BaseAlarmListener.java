@@ -4,19 +4,13 @@ import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.game.Team;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-public class TrapBaseListener implements Listener {
+public class BaseAlarmListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
@@ -61,11 +55,11 @@ public class TrapBaseListener implements Listener {
         }
 
         for (SpecialItem item : game.getSpecialItems()) {
-            if (!(item instanceof TrapBase)) {
+            if (!(item instanceof BaseAlarm)) {
                 continue;
             }
 
-            TrapBase trap = (TrapBase) item;
+            BaseAlarm trap = (BaseAlarm) item;
             if (trap.getPlacedTeam() == team || trap.getPlacedTeam() == null) {
                 continue;
             }

@@ -3,6 +3,7 @@ package io.github.bedwarsrel.shop;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
+import io.github.bedwarsrel.shop.Specials.SwordUpgradeEnum;
 import io.github.bedwarsrel.shop.Specials.VirtualItem;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.SoundMachine;
@@ -22,7 +23,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -39,49 +39,33 @@ public class NewItemShop {
 
   @SuppressWarnings("deprecation")
   private void addCategoriesToInventory(Inventory inventory, Player player, Game game) {
-    for (MerchantCategory category : this.categories) {
-
-      if (category.getMaterial() == null) {
-        BedwarsRel.getInstance().getServer().getConsoleSender()
-            .sendMessage(ChatWriter.pluginMessage(ChatColor.RED
-                + "Careful: Not supported material in shop category '" + category.getName() + "'"));
+    for (MerchantCategory cat : this.categories) {
+      if (player != null && !player.hasPermission(cat.getPermission())) {
         continue;
       }
-
-      if (player != null && !player.hasPermission(category.getPermission())) {
-        continue;
+      ItemStack button = cat.getButton().clone();
+      ItemMeta meta = button.getItemMeta();
+      if (Utils.isColorable(button)) {
+        button.setDurability(game.getPlayerTeam(player).getColor().getDyeColor().getWoolData());
       }
-
-      ItemStack is = new ItemStack(category.getMaterial(), 1);
-      ItemMeta im = is.getItemMeta();
-
-      if (Utils.isColorable(is)) {
-        is.setDurability(game.getPlayerTeam(player).getColor().getDyeColor().getWoolData());
+      if (this.currentCategory != null && this.currentCategory == cat) {
+        meta.addEnchant(Enchantment.DAMAGE_ALL, 1, true);
       }
-      if (this.currentCategory != null && this.currentCategory.equals(category)) {
-        im.addEnchant(Enchantment.DAMAGE_ALL, 1, true);
-        im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-      }
-
-      im.setDisplayName(category.getName());
-      im.setLore(category.getLores());
-      im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_POTION_EFFECTS);
-      is.setItemMeta(im);
-
-      inventory.addItem(is);
+      button.setItemMeta(meta);
+      inventory.addItem(button);
     }
-
   }
 
   // Caller must ensure that the player has enough resources to pay for the item.
   @SuppressWarnings("unchecked")
-  private boolean buyItem(VillagerTrade trade, ItemStack item, Player player) {
+  private boolean buyItem(VillagerTrade trade, int slot, Player player) {
     PlayerInventory inventory = player.getInventory();
     boolean success = true;
-    boolean isVirtualItem = SpecialItem.isVirtualRepresentation(item);
+    Reward holder = this.currentCategory.getItemHolder(slot);
+    boolean isVirtualItem = SpecialItem.isVirtualRepresentation(holder);
 
     if (isVirtualItem) {
-      VirtualItem virtualItem = SpecialItem.newVirtualInstance(player, item);
+      VirtualItem virtualItem = SpecialItem.newVirtualInstance(player, holder);
       // Check if item was successfully added to the game
       if (!virtualItem.init()) {
         player.sendMessage(ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
@@ -154,7 +138,7 @@ public class NewItemShop {
       return true;
     }
 
-    ItemStack addingItem = item.clone();
+    ItemStack addingItem = slot.clone();
     ItemMeta meta = addingItem.getItemMeta();
     List<String> lore = meta.getLore();
 
@@ -185,7 +169,7 @@ public class NewItemShop {
     }
 
     BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player)
-            .getPlayerTeam(player).getSwordUpgrade().equipPlayer(player);
+            .getPlayerTeam(player).getUpgrade(SwordUpgradeEnum.class).equipPlayer(player);
 
     player.updateInventory();
     return success;
@@ -241,11 +225,11 @@ public class NewItemShop {
     return itemAmount + (9 - nom);
   }
 
-  private VillagerTrade getTradingItem(MerchantCategory category, ItemStack stack, Game game,
+  private VillagerTrade getTradingItemDELEEEEETE(MerchantCategory category, ItemStack stack, Game game,
       Player player) {
     for (VillagerTrade trade : category.getOffers()) {
       if (trade.getItem1().getType() == Material.AIR
-          && trade.getRewardItem().getType() == Material.AIR) {
+          && trade.getReward().getItem().getType() == Material.AIR) {
         continue;
       }
       ItemStack iStack = this.toItemStack(trade, player, game);
@@ -276,14 +260,14 @@ public class NewItemShop {
     return null;
   }
 
-  private void handleBuyInventoryClick(InventoryClickEvent ice, Game game, Player player) {
+  private void handleBuyInventoryClick(InventoryClickEvent event, Game game, Player player) {
 
     int sizeCategories = this.getCategoriesSize(player);
     List<VillagerTrade> offers = this.currentCategory.getOffers();
     int sizeItems = offers.size();
     int totalSize = this.getBuyInventorySize(sizeCategories, sizeItems);
 
-    ItemStack item = ice.getCurrentItem();
+    ItemStack item = event.getCurrentItem();
     boolean cancel = false;
     int bought = 0;
     boolean oneStackPerShift = game.getPlayerSettings(player).oneStackPerShift();
@@ -293,9 +277,9 @@ public class NewItemShop {
       return;
     }
 
-    if (ice.getRawSlot() < sizeCategories) {
+    if (event.getRawSlot() < sizeCategories) {
       // is category click
-      ice.setCancelled(true);
+      event.setCancelled(true);
 
       if (item == null) {
         return;
@@ -307,11 +291,11 @@ public class NewItemShop {
         this.openCategoryInventory(player);
       } else {
         // open the clicked buy inventory
-        this.handleCategoryInventoryClick(ice, game, player);
+        this.handleCategoryInventoryClick(event, game, player);
       }
-    } else if (ice.getRawSlot() < totalSize) {
+    } else if (event.getRawSlot() < totalSize) {
       // its a buying item
-      ice.setCancelled(true);
+      event.setCancelled(true);
 
       if (item == null || item.getType() == Material.AIR) {
         return;
@@ -336,22 +320,22 @@ public class NewItemShop {
         return;
       }
 
-      if (ice.isShiftClick()) {
+      if (event.isShiftClick()) {
         while (this.hasEnoughRessource(player, trade) && !cancel) {
-          cancel = !this.buyItem(trade, ice.getCurrentItem(), player);
+          cancel = !this.buyItem(trade, event.getCurrentItem(), player);
           if (!cancel && oneStackPerShift) {
             bought = bought + item.getAmount();
             cancel = ((bought + item.getAmount()) > 64);
           }
         }
       } else {
-        this.buyItem(trade, ice.getCurrentItem(), player);
+        this.buyItem(trade, event.getSlot(), player);
       }
     } else {
-      if (ice.isShiftClick()) {
-        ice.setCancelled(true);
+      if (event.isShiftClick()) {
+        event.setCancelled(true);
       } else {
-        ice.setCancelled(false);
+        event.setCancelled(false);
       }
     }
   }
@@ -465,7 +449,7 @@ public class NewItemShop {
     for (int i = 0; i < offers.size(); i++) {
       VillagerTrade trade = offers.get(i);
       if (trade.getItem1().getType() == Material.AIR
-          && trade.getRewardItem().getType() == Material.AIR) {
+          && trade.getReward().getItem().getType() == Material.AIR) {
         continue;
       }
 
@@ -539,7 +523,7 @@ public class NewItemShop {
 
   @SuppressWarnings("deprecation")
   private ItemStack toItemStack(VillagerTrade trade, Player player, Game game) {
-    ItemStack tradeStack = trade.getRewardItem().clone();
+    ItemStack tradeStack = trade.getReward().getItem();
     Method colorable = Utils.getColorableMethod(tradeStack.getType());
     ItemMeta meta = tradeStack.getItemMeta();
     ItemStack item1 = trade.getItem1();

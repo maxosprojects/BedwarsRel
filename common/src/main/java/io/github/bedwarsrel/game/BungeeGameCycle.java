@@ -102,12 +102,9 @@ public class BungeeGameCycle extends GameCycle {
       // reset countdown prevention breaks
       this.setEndGameRunning(false);
 
-      // Reset team chests
+      // Reset teams
       for (Team team : this.getGame().getTeams().values()) {
-        team.setInventory(null);
-        team.getChests().clear();
-        team.setArmorUpgrade(ArmorUpgradeEnum.PROTECTION0);
-        team.setSwordUpgrade(SwordUpgradeEnum.SHARPNESS0);
+        team.reset();
       }
 
       // clear protections

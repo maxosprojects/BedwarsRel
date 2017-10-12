@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public enum SwordUpgradeEnum {
+public enum SwordUpgradeEnum implements UpgradeEnum {
     SHARPNESS0(null, 0, ""),
     SHARPNESS1(Material.GOLD_SWORD, 1, "sharpness1");
 
@@ -60,4 +60,8 @@ public enum SwordUpgradeEnum {
         }
         player.updateInventory();
     }
+
+  public int getLevel() {
+    return level;
+  }
 }

@@ -1,38 +1,40 @@
 package io.github.bedwarsrel.villager;
 
+import io.github.bedwarsrel.shop.Reward;
 import org.bukkit.inventory.ItemStack;
 
 public class VillagerTrade {
 
   private ItemStack item1;
   private ItemStack item2;
-  private ItemStack rewardItem;
+  private Reward reward;
 
-  public VillagerTrade(ItemStack item1, ItemStack item2, ItemStack rewardItem) {
+  public VillagerTrade(ItemStack item1, ItemStack item2, Reward reward) {
     this.item1 = item1;
     this.item2 = item2;
-    this.rewardItem = rewardItem;
+    this.reward = reward;
   }
 
-  public VillagerTrade(ItemStack item1, ItemStack rewardItem) {
-    this(item1, null, rewardItem);
+  public VillagerTrade(ItemStack item1, Reward reward) {
+    this(item1, null, reward);
   }
 
-  public VillagerTrade(MerchantRecipe handle) {
-    this.item1 = new CraftItemStack(handle.getItem1()).asBukkitCopy();
-    this.item2 =
-        (handle.getItem1() == null ? null : new CraftItemStack(handle.getItem2()).asBukkitCopy());
-    this.rewardItem = new CraftItemStack(handle.getRewardItem()).asBukkitCopy();
-  }
+//  public VillagerTrade(MerchantRecipe handle) {
+//    this.item1 = new CraftItemStack(handle.getItem1()).asBukkitCopy();
+//    this.item2 =
+//        (handle.getItem1() == null ? null : new CraftItemStack(handle.getItem2()).asBukkitCopy());
+//    this.reward = new ItemStackHolder(
+//        new CraftItemStack(handle.getReward()).asBukkitCopy(), null);
+//  }
 
   public MerchantRecipe getHandle() {
     if (this.item2 == null) {
       return new MerchantRecipe(new CraftItemStack(this.item1).asNMSCopy(),
-          new CraftItemStack(this.rewardItem).asNMSCopy());
+          new CraftItemStack(this.reward.getItem()).asNMSCopy());
     }
     return new MerchantRecipe(new CraftItemStack(this.item1).asNMSCopy(),
         new CraftItemStack(this.item2).asNMSCopy(),
-        new CraftItemStack(this.rewardItem).asNMSCopy());
+        new CraftItemStack(this.reward.getItem()).asNMSCopy());
   }
 
   public ItemStack getItem1() {
@@ -43,8 +45,8 @@ public class VillagerTrade {
     return this.item2;
   }
 
-  public ItemStack getRewardItem() {
-    return this.rewardItem;
+  public Reward getReward() {
+    return this.reward;
   }
 
   public boolean hasItem2() {

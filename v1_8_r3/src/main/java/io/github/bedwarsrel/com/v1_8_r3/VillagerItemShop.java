@@ -75,7 +75,7 @@ public class VillagerItemShop {
 
           for (VillagerTrade trade : VillagerItemShop.this.category
               .getFilteredOffers()) {
-            ItemStack reward = trade.getRewardItem();
+            ItemStack reward = trade.getReward().getItem();
             Method colorable = Utils.getColorableMethod(reward.getType());
 
             if (Utils.isColorable(reward)) {

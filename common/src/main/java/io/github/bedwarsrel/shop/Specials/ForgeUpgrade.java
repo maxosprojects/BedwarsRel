@@ -9,18 +9,18 @@ import io.github.bedwarsrel.utils.ChatWriter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-public class SwordUpgrade extends SpecialItem implements VirtualItem, Upgrade {
+public class ForgeUpgrade extends SpecialItem implements VirtualItem, Upgrade {
     private Game game;
     private Team team;
-    private final SwordUpgradeEnum upgrade;
+    private final ForgeUpgradeEnum upgrade;
 
-    public SwordUpgrade(SwordUpgradeEnum upgrade) {
+    public ForgeUpgrade(ForgeUpgradeEnum upgrade) {
         this.upgrade = upgrade;
     }
 
     @Override
     public VirtualItem create(Game game, Team team, Player player) {
-        SwordUpgrade item = new SwordUpgrade(this.upgrade);
+        ForgeUpgrade item = new ForgeUpgrade(this.upgrade);
 
         item.game = game;
         item.team = team;
@@ -30,7 +30,7 @@ public class SwordUpgrade extends SpecialItem implements VirtualItem, Upgrade {
 
     @Override
     public boolean init() {
-        SwordUpgradeEnum existingUpgrade = this.team.getUpgrade(SwordUpgradeEnum.class);
+        ForgeUpgradeEnum existingUpgrade = this.team.getUpgrade(ForgeUpgradeEnum.class);
 
         if (!this.upgrade.isHigherThan(existingUpgrade)) {
             return false;
@@ -38,15 +38,15 @@ public class SwordUpgrade extends SpecialItem implements VirtualItem, Upgrade {
 
         team.setUpgrade(this.upgrade);
 
-        this.upgrade.equipTeam(this.team);
+        this.upgrade.equipTeam(this.game, this.team);
 
         for (Player player : this.team.getPlayers()) {
             if (!player.isOnline()) {
                 continue;
             }
-            String translation = BedwarsRel._l(player, "ingame.swordupgrade." + this.upgrade.getTranslationKey());
+            String translation = BedwarsRel._l(player, "ingame.forgeupgrade.forge" + upgrade.ordinal());
             player.sendMessage(ChatWriter.pluginMessage(
-                    BedwarsRel._l(player, "success.swordsupgraded",
+                    BedwarsRel._l(player, "success.forgeupgraded",
                             ImmutableMap.of("upgrade", translation))));
         }
 
@@ -79,7 +79,6 @@ public class SwordUpgrade extends SpecialItem implements VirtualItem, Upgrade {
 
     @Override
     public boolean matches(String type, int level) {
-        return type != null && type.equals("SWORD") && level == this.upgrade.getLevel();
+        return type != null && type.equals("FORGE") && level == this.upgrade.ordinal();
     }
-
 }

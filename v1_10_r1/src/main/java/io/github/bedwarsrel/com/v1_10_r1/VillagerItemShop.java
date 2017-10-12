@@ -73,7 +73,7 @@ public class VillagerItemShop {
 
           for (VillagerTrade trade : VillagerItemShop.this.category
               .getFilteredOffers()) {
-            ItemStack reward = trade.getRewardItem();
+            ItemStack reward = trade.getReward().getItem();
             Method colorable = Utils.getColorableMethod(reward.getType());
 
             if (Utils.isColorable(reward)) {
@@ -92,7 +92,7 @@ public class VillagerItemShop {
               continue;
             }
 
-            MerchantRecipe recipe = new MerchantRecipe(trade.getRewardItem(), 1024);
+            MerchantRecipe recipe = new MerchantRecipe(trade.getReward().getItem(), 1024);
             recipe.addIngredient(trade.getItem1());
 
             if (trade.getItem2() != null) {
