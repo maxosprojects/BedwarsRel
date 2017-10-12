@@ -1,8 +1,7 @@
-package io.github.bedwarsrel.villager;
+package io.github.bedwarsrel.shop;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.shop.Reward;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
 import io.github.bedwarsrel.shop.Specials.Upgrade;
 import io.github.bedwarsrel.utils.Utils;

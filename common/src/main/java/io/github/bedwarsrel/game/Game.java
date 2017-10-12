@@ -15,7 +15,7 @@ import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.TitleWriter;
 import io.github.bedwarsrel.utils.Utils;
-import io.github.bedwarsrel.villager.MerchantCategory;
+import io.github.bedwarsrel.shop.MerchantCategory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

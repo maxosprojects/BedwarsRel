@@ -8,8 +8,6 @@ import io.github.bedwarsrel.shop.Specials.VirtualItem;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.SoundMachine;
 import io.github.bedwarsrel.utils.Utils;
-import io.github.bedwarsrel.villager.MerchantCategory;
-import io.github.bedwarsrel.villager.VillagerTrade;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +24,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 
 public class NewItemShop {
 

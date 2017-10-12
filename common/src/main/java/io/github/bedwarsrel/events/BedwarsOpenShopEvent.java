@@ -1,7 +1,7 @@
 package io.github.bedwarsrel.events;
 
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.villager.MerchantCategory;
+import io.github.bedwarsrel.shop.MerchantCategory;
 import java.util.HashMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;

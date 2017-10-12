@@ -10,7 +10,7 @@ import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.shop.NewItemShop;
 import io.github.bedwarsrel.utils.ChatWriter;
-import io.github.bedwarsrel.villager.MerchantCategory;
+import io.github.bedwarsrel.shop.MerchantCategory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -3,7 +3,7 @@ package io.github.bedwarsrel.game;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsResourceSpawnEvent;
 import io.github.bedwarsrel.utils.Utils;
-import io.github.bedwarsrel.villager.ItemStackParser;
+import io.github.bedwarsrel.shop.ItemStackParser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

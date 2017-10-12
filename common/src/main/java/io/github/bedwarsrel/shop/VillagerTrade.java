@@ -1,6 +1,5 @@
-package io.github.bedwarsrel.villager;
+package io.github.bedwarsrel.shop;
 
-import io.github.bedwarsrel.shop.Reward;
 import org.bukkit.inventory.ItemStack;
 
 public class VillagerTrade {
