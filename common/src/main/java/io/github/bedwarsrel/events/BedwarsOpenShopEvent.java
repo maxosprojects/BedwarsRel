@@ -3,7 +3,6 @@ package io.github.bedwarsrel.events;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.villager.MerchantCategory;
 import java.util.HashMap;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -17,11 +16,11 @@ public class BedwarsOpenShopEvent extends Event implements Cancellable {
   private boolean cancelled = false;
   private Entity clickedEntity = null;
   private Game game = null;
-  private HashMap<Material, MerchantCategory> itemshop = null;
+  private HashMap<String, MerchantCategory> itemshop = null;
   private Player player = null;
 
   public BedwarsOpenShopEvent(Game game, Player player,
-      HashMap<Material, MerchantCategory> itemshop, Entity clickedEntity) {
+      HashMap<String, MerchantCategory> itemshop, Entity clickedEntity) {
     this.player = player;
     this.game = game;
     this.itemshop = itemshop;
@@ -45,7 +44,7 @@ public class BedwarsOpenShopEvent extends Event implements Cancellable {
     return BedwarsOpenShopEvent.handlers;
   }
 
-  public HashMap<Material, MerchantCategory> getItemshop() {
+  public HashMap<String, MerchantCategory> getItemshop() {
     return this.itemshop;
   }
 

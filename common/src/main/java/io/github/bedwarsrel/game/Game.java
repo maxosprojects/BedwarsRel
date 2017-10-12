@@ -82,11 +82,11 @@ public class Game {
   private int minPlayers = 0;
   private String name = null;
   // Itemshops
-  private HashMap<Player, NewItemShop> newItemShops = null;
+  private HashMap<Player, NewItemShop> newItemShops = new HashMap<>();
   private List<MerchantCategory> shopCatsList = null;
   private Map<Player, DamageHolder> playerDamages = null;
   private Map<Player, BukkitTask> waitingRespawn = new HashMap<>();
-  private Map<Player, PlayerSettings> playerSettings = null;
+  private Map<Player, PlayerFlags> playerFlags = new HashMap<>();
   private HashMap<Player, PlayerStorage> playerStorages = null;
   private List<Team> playingTeams = null;
   private int record = 0;
@@ -124,7 +124,6 @@ public class Game {
     this.joinSigns = new HashMap<Location, GameJoinSign>();
     this.timeLeft = BedwarsRel.getInstance().getMaxLength();
     this.isOver = false;
-    this.newItemShops = new HashMap<Player, NewItemShop>();
     this.respawnProtections = new HashMap<Player, RespawnProtectionRunnable>();
     this.playerDamages = new HashMap<>();
     this.specialItems = new ArrayList<SpecialItem>();
@@ -132,8 +131,6 @@ public class Game {
     this.record = BedwarsRel.getInstance().getMaxLength();
     this.length = BedwarsRel.getInstance().getMaxLength();
     this.recordHolders = new ArrayList<String>();
-
-    this.playerSettings = new HashMap<Player, PlayerSettings>();
 
     this.autobalance = BedwarsRel.getInstance().getBooleanConfig("global-autobalance", false);
 
@@ -186,10 +183,6 @@ public class Game {
 
     this.joinSigns.put(signLocation, new GameJoinSign(this, signLocation));
     this.updateSignConfig();
-  }
-
-  public void addPlayerSettings(Player player) {
-    this.playerSettings.put(player, new PlayerSettings(player));
   }
 
   public PlayerStorage addPlayerStorage(Player p) {
@@ -634,10 +627,6 @@ public class Game {
     return max;
   }
 
-  public NewItemShop getNewItemShop(Player player) {
-    return this.newItemShops.get(player);
-  }
-
   public List<Player> getNonVipPlayers() {
     List<Player> players = this.getPlayers();
 
@@ -665,8 +654,8 @@ public class Game {
     return this.playerDamages.get(p);
   }
 
-  public PlayerSettings getPlayerSettings(Player player) {
-    return this.playerSettings.get(player);
+  public PlayerFlags getPlayerFlags(Player player) {
+    return this.playerFlags.get(player);
   }
 
   public PlayerStorage getPlayerStorage(Player p) {
@@ -1029,11 +1018,13 @@ public class Game {
     }
   }
 
-  public NewItemShop openNewItemShop(Player player) {
-    NewItemShop newShop = new NewItemShop(this.shopCatsList);
-    this.newItemShops.put(player, newShop);
-
-    return newShop;
+  public NewItemShop getNewItemShop(Player player) {
+    NewItemShop shop = this.newItemShops.get(player);
+    if (shop == null) {
+      shop = new NewItemShop(this.shopCatsList, player);
+      this.newItemShops.put(player, shop);
+    }
+    return shop;
   }
 
   public void openSpectatorCompass(Player player) {
@@ -1147,7 +1138,7 @@ public class Game {
     this.playerDamages.put(p, null);
 
     // add player settings
-    this.addPlayerSettings(p);
+    this.getOrCreatePlayerFlags(p);
 
     new BukkitRunnable() {
 
@@ -1173,7 +1164,7 @@ public class Game {
       if (!BedwarsRel.getInstance().isBungee()) {
         final Location location = this.getPlayerTeleportLocation(p);
         if (!p.getLocation().equals(location)) {
-          this.getPlayerSettings(p).setTeleporting(true);
+          this.getPlayerFlags(p).setTeleporting(true);
           if (BedwarsRel.getInstance().isBungee()) {
             new BukkitRunnable() {
 
@@ -1257,7 +1248,7 @@ public class Game {
   }
 
   public boolean playerLeave(Player p, boolean kicked) {
-    this.getPlayerSettings(p).setTeleporting(true);
+    this.getPlayerFlags(p).setTeleporting(true);
     Team team = this.getPlayerTeam(p);
 
     BedwarsPlayerLeaveEvent leaveEvent = new BedwarsPlayerLeaveEvent(this, p, team);
@@ -1362,7 +1353,7 @@ public class Game {
     storage.clean();
     storage.restore();
 
-    this.playerSettings.remove(p);
+    this.playerFlags.remove(p);
     this.updateScoreboard();
 
     try {
@@ -1405,7 +1396,7 @@ public class Game {
   }
 
   public void removePlayerSettings(Player player) {
-    this.playerSettings.remove(player);
+    this.playerFlags.remove(player);
   }
 
   public void removeProtection(Player player) {
@@ -1878,7 +1869,7 @@ public class Game {
     for (Team team : this.teams.values()) {
       for (Player player : team.getPlayers()) {
         if (!player.getWorld().equals(team.getSpawnLocation().getWorld())) {
-          this.getPlayerSettings(player).setTeleporting(true);
+          this.getPlayerFlags(player).setTeleporting(true);
         }
         player.setVelocity(new Vector(0, 0, 0));
         player.setFallDistance(0.0F);
@@ -1910,7 +1901,7 @@ public class Game {
     final Location location = this.getPlayerTeleportLocation(p);
 
     if (!p.getLocation().getWorld().equals(location.getWorld())) {
-      this.getPlayerSettings(p).setTeleporting(true);
+      this.getPlayerFlags(p).setTeleporting(true);
       if (BedwarsRel.getInstance().isBungee()) {
         new BukkitRunnable() {
 
@@ -2189,7 +2180,7 @@ public class Game {
   private PlayerFlags getOrCreatePlayerFlags(Player player) {
     PlayerFlags flags = this.playersFlags.get(player);
     if (flags == null) {
-      flags = new PlayerFlags();
+      flags = new PlayerFlags(player);
       this.playersFlags.put(player, flags);
     }
     return flags;

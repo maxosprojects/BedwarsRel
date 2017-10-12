@@ -55,6 +55,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.Wool;
@@ -88,41 +89,33 @@ public class PlayerListener extends BaseListener {
   }
 
   @SuppressWarnings("deprecation")
-  private void inGameInteractEntity(PlayerInteractEntityEvent iee, Game game, Player player) {
-
+  private void inGameInteractEntity(PlayerInteractEntityEvent event, Game game, Player player) {
+    List<Material> preventClickEggs = Arrays.asList(
+        Material.MONSTER_EGG,
+        Material.MONSTER_EGGS,
+        Material.DRAGON_EGG);
     if (BedwarsRel.getInstance().getCurrentVersion().startsWith("v1_8")) {
-      if (iee.getPlayer().getItemInHand().getType().equals(Material.MONSTER_EGG)
-          || iee.getPlayer().getItemInHand().getType().equals(Material.MONSTER_EGGS)
-          || iee.getPlayer().getItemInHand().getType().equals(Material.DRAGON_EGG)) {
-        iee.setCancelled(true);
+      if (preventClickEggs.contains(player.getItemInHand().getType())) {
+        event.setCancelled(true);
         return;
       }
     } else {
-      if (iee.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.MONSTER_EGG)
-          || iee.getPlayer().getInventory().getItemInMainHand().getType()
-          .equals(Material.MONSTER_EGGS)
-          || iee.getPlayer().getInventory().getItemInMainHand().getType()
-          .equals(Material.DRAGON_EGG)
-          || iee.getPlayer().getInventory().getItemInOffHand().getType()
-          .equals(Material.MONSTER_EGG)
-          || iee.getPlayer().getInventory().getItemInOffHand().getType()
-          .equals(Material.MONSTER_EGGS)
-          || iee.getPlayer().getInventory().getItemInOffHand().getType()
-          .equals(Material.DRAGON_EGG)) {
-        iee.setCancelled(true);
+      PlayerInventory inv = player.getInventory();
+      if (preventClickEggs.contains(inv.getItemInMainHand().getType())
+          || preventClickEggs.contains(inv.getItemInOffHand().getType())) {
+        event.setCancelled(true);
         return;
       }
     }
 
-    if (iee.getRightClicked() != null
-        && !iee.getRightClicked().getType().equals(EntityType.VILLAGER)) {
+    if (event.getRightClicked() != null
+        && !event.getRightClicked().getType().equals(EntityType.VILLAGER)) {
       List<EntityType> preventClickTypes =
           Arrays.asList(EntityType.ITEM_FRAME, EntityType.ARMOR_STAND);
 
-      if (preventClickTypes.contains(iee.getRightClicked().getType())) {
-        iee.setCancelled(true);
+      if (preventClickTypes.contains(event.getRightClicked().getType())) {
+        event.setCancelled(true);
       }
-
       return;
     }
 
@@ -134,26 +127,21 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    iee.setCancelled(true);
+    event.setCancelled(true);
 
     BedwarsOpenShopEvent openShopEvent =
-        new BedwarsOpenShopEvent(game, player, game.getShopCategories(), iee.getRightClicked());
+        new BedwarsOpenShopEvent(game, player, game.getShopCategories(), event.getRightClicked());
     BedwarsRel.getInstance().getServer().getPluginManager().callEvent(openShopEvent);
 
     if (openShopEvent.isCancelled()) {
       return;
     }
 
-    if (game.getPlayerSettings(player).useOldShop()) {
+    if (game.getPlayerFlags(player).isUseOldShop()) {
       MerchantCategory.openCategorySelection(player, game);
     } else {
       NewItemShop itemShop = game.getNewItemShop(player);
-      if (itemShop == null) {
-        itemShop = game.openNewItemShop(player);
-      }
-
-      itemShop.setCurrentCategory(null);
-      itemShop.openCategoryInventory(player);
+      itemShop.openInventory();
     }
   }
 
@@ -612,22 +600,24 @@ public class PlayerListener extends BaseListener {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private void onIngameInventoryClick(InventoryClickEvent ice, Player player, Game game) {
-    if (ice.getSlotType() == InventoryType.SlotType.ARMOR) {
-      ice.setCancelled(true);
+  private void onIngameInventoryClick(InventoryClickEvent event, Player player, Game game) {
+    // Prevent armor changes
+    if (event.getSlotType() == InventoryType.SlotType.ARMOR) {
+      event.setCancelled(true);
+      return;
     }
-    if (!ice.getInventory().getName().equals(BedwarsRel._l(player, "ingame.shop.name"))) {
+    if (!event.getInventory().getName().equals(BedwarsRel._l(player, "ingame.shop.name"))) {
       if (game.isSpectator(player)
           || (game.getCycle() instanceof BungeeGameCycle && game.getCycle().isEndGameRunning()
           && BedwarsRel.getInstance().getBooleanConfig("bungeecord.endgame-in-lobby", true))) {
 
-        ItemStack clickedStack = ice.getCurrentItem();
+        ItemStack clickedStack = event.getCurrentItem();
         if (clickedStack == null) {
           return;
         }
 
-        if (ice.getInventory().getName().equals(BedwarsRel._l(player, "ingame.spectator"))) {
-          ice.setCancelled(true);
+        if (event.getInventory().getName().equals(BedwarsRel._l(player, "ingame.spectator"))) {
+          event.setCancelled(true);
           if (!clickedStack.getType().equals(Material.SKULL_ITEM)) {
             return;
           }
@@ -647,7 +637,7 @@ public class PlayerListener extends BaseListener {
           return;
         }
 
-        Material clickedMat = ice.getCurrentItem().getType();
+        Material clickedMat = event.getCurrentItem().getType();
         if (clickedMat.equals(Material.SLIME_BALL)) {
           game.playerLeave(player, false);
         }
@@ -659,22 +649,22 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    ice.setCancelled(true);
-    ItemStack clickedStack = ice.getCurrentItem();
+    event.setCancelled(true);
+    ItemStack clickedStack = event.getCurrentItem();
 
     if (clickedStack == null) {
       return;
     }
 
-    if (game.getPlayerSettings(player).useOldShop()) {
+    if (game.getPlayerFlags(player).isUseOldShop()) {
       try {
         if (clickedStack.getType() == Material.SNOW_BALL) {
-          game.getPlayerSettings(player).setUseOldShop(false);
+          game.getPlayerFlags(player).setUseOldShop(false);
 
           // open new shop
-          NewItemShop itemShop = game.openNewItemShop(player);
+          NewItemShop itemShop = game.getNewItemShop(player);
           itemShop.setCurrentCategory(null);
-          itemShop.openCategoryInventory(player);
+          itemShop.openInventory();
           return;
         }
 
@@ -696,7 +686,7 @@ public class PlayerListener extends BaseListener {
         ex.printStackTrace();
       }
     } else {
-      game.getNewItemShop(player).handleInventoryClick(ice, game, player);
+      game.getNewItemShop(player).handleInventoryClick(event, game, player);
     }
   }
 
@@ -747,8 +737,8 @@ public class PlayerListener extends BaseListener {
   }
 
   @EventHandler
-  public void onInventoryClick(InventoryClickEvent ice) {
-    Player player = (Player) ice.getWhoClicked();
+  public void onInventoryClick(InventoryClickEvent event) {
+    Player player = (Player) event.getWhoClicked();
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
 
     if (game == null) {
@@ -756,11 +746,11 @@ public class PlayerListener extends BaseListener {
     }
 
     if (game.getState() == GameState.WAITING) {
-      this.onLobbyInventoryClick(ice, player, game);
+      this.onLobbyInventoryClick(event, player, game);
     }
 
     if (game.getState() == GameState.RUNNING) {
-      this.onIngameInventoryClick(ice, player, game);
+      this.onIngameInventoryClick(event, player, game);
     }
   }
 
@@ -1131,17 +1121,17 @@ public class PlayerListener extends BaseListener {
     if (game != null) {
       if (game.getState() == GameState.RUNNING) {
         if (!game.getCycle().isEndGameRunning()) {
-          if (!game.getPlayerSettings(change.getPlayer()).isTeleporting()) {
+          if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
             game.playerLeave(change.getPlayer(), false);
           } else {
-            game.getPlayerSettings(change.getPlayer()).setTeleporting(false);
+            game.getPlayerFlags(change.getPlayer()).setTeleporting(false);
           }
         }
       } else if (game.getState() == GameState.WAITING) {
-        if (!game.getPlayerSettings(change.getPlayer()).isTeleporting()) {
+        if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
           game.playerLeave(change.getPlayer(), false);
         } else {
-          game.getPlayerSettings(change.getPlayer()).setTeleporting(false);
+          game.getPlayerFlags(change.getPlayer()).setTeleporting(false);
         }
       }
     }

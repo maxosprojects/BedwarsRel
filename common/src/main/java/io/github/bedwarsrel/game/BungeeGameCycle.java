@@ -5,8 +5,6 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsGameEndEvent;
-import io.github.bedwarsrel.shop.Specials.ArmorUpgradeEnum;
-import io.github.bedwarsrel.shop.Specials.SwordUpgradeEnum;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.Utils;
 import java.io.ByteArrayOutputStream;
@@ -134,7 +132,7 @@ public class BungeeGameCycle extends GameCycle {
       for (Player player : players) {
 
         if (!player.getWorld().equals(this.getGame().getLobby().getWorld())) {
-          game.getPlayerSettings(player).setTeleporting(true);
+          game.getPlayerFlags(player).setTeleporting(true);
           player.teleport(this.getGame().getLobby());
           game.getPlayerStorage(player).clean();
         }
