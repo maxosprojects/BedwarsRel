@@ -1,4 +1,4 @@
-package io.github.bedwarsrel.shop.Specials;
+package io.github.bedwarsrel.shop.upgrades;
 
 import io.github.bedwarsrel.game.Team;
 import org.bukkit.Material;
@@ -7,26 +7,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public enum SwordUpgradeEnum {
-    SHARPNESS0(null, 0, ""),
-    SHARPNESS1(Material.GOLD_SWORD, 1, "sharpness1");
+public enum UpgradeSwordSharpnessEnum implements UpgradeEnum {
+    SHARPNESS0(0, ""),
+    SHARPNESS1(1, "sharpness1");
 
-    private final Material representation;
     private final int level;
     private final String translationKey;
 
-    SwordUpgradeEnum(Material representation, int level, String translationKey) {
-        this.representation = representation;
+    UpgradeSwordSharpnessEnum(int level, String translationKey) {
         this.level = level;
         this.translationKey = translationKey;
     }
 
-    public boolean isHigherThan(SwordUpgradeEnum purchase) {
+    public boolean isHigherThan(UpgradeSwordSharpnessEnum purchase) {
         return this.ordinal() > purchase.ordinal();
-    }
-
-    public Material getRepresentation() {
-        return representation;
     }
 
     public String getTranslationKey() {
@@ -60,4 +54,8 @@ public enum SwordUpgradeEnum {
         }
         player.updateInventory();
     }
+
+  public int getLevel() {
+    return level;
+  }
 }

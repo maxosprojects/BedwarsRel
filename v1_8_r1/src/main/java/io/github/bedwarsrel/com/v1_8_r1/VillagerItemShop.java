@@ -3,8 +3,8 @@ package io.github.bedwarsrel.com.v1_8_r1;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.utils.Utils;
-import io.github.bedwarsrel.villager.MerchantCategory;
-import io.github.bedwarsrel.villager.VillagerTrade;
+import io.github.bedwarsrel.shop.MerchantCategory;
+import io.github.bedwarsrel.shop.ShopTrade;
 import java.lang.reflect.Method;
 import net.minecraft.server.v1_8_R1.EntityHuman;
 import net.minecraft.server.v1_8_R1.EntityVillager;
@@ -69,9 +69,9 @@ public class VillagerItemShop {
           MerchantRecipeList recipeList = entityVillager.getOffers(entityHuman);
           recipeList.clear();
 
-          for (VillagerTrade trade : VillagerItemShop.this.category
+          for (ShopTrade trade : VillagerItemShop.this.category
               .getFilteredOffers()) {
-            ItemStack reward = trade.getRewardItem();
+            ItemStack reward = trade.getReward().getItem();
             Method colorable = Utils.getColorableMethod(reward.getType());
 
             if (Utils.isColorable(reward)) {

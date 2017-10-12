@@ -5,6 +5,7 @@ import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.game.ResourceSpawner;
+import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.utils.ChatWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,13 +30,13 @@ public class SetSpawnerCommand extends BaseCommand {
 
     Player player = (Player) sender;
     ArrayList<String> arguments = new ArrayList<String>(Arrays.asList(this.getResources()));
-    String material = args.get(1).toString().toLowerCase();
+    String material = args.get(1).toLowerCase();
     Game game = this.getPlugin().getGameManager().getGame(args.get(0));
 
     if (game == null) {
       player.sendMessage(ChatWriter.pluginMessage(ChatColor.RED
           + BedwarsRel
-          ._l(player, "errors.gamenotfound", ImmutableMap.of("game", args.get(0).toString()))));
+          ._l(player, "errors.gamenotfound", ImmutableMap.of("game", args.get(0)))));
       return false;
     }
 
@@ -57,6 +58,16 @@ public class SetSpawnerCommand extends BaseCommand {
     Location location = player.getLocation();
     ResourceSpawner spawner = new ResourceSpawner(game, material, location);
     game.addResourceSpawner(spawner);
+
+    if (args.size() == 3) {
+      Team team = game.getTeam(args.get(2));
+      if (team == null) {
+        player.sendMessage(ChatWriter.pluginMessage(ChatColor.RED
+            + BedwarsRel._l(player, "errors.teamnotfound")));
+        return false;
+      }
+      spawner.setTeam(team.getName());
+    }
     player.sendMessage(
         ChatWriter.pluginMessage(ChatColor.GREEN + BedwarsRel._l(player, "success.spawnerset",
             ImmutableMap.of("name", material + ChatColor.GREEN))));

@@ -3,14 +3,13 @@ package io.github.bedwarsrel.game;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsGameEndEvent;
-import io.github.bedwarsrel.shop.Specials.ArmorUpgradeEnum;
-import io.github.bedwarsrel.shop.Specials.SwordUpgradeEnum;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class SingleGameCycle extends GameCycle {
@@ -29,15 +28,16 @@ public class SingleGameCycle extends GameCycle {
       return;
     }
 
+    Location lobby = this.getGame().getLobby();
     if (BedwarsRel.getInstance().toMainLobby()) {
       if (BedwarsRel.getInstance().allPlayersBackToMainLobby()) {
         this.getGame().playerLeave(player, false);
         return;
       } else {
-        player.teleport(this.getGame().getLobby());
+        player.teleport(lobby);
       }
     } else {
-      player.teleport(this.getGame().getLobby());
+      player.teleport(lobby);
     }
 
     if (BedwarsRel.getInstance().isHologramsEnabled()
@@ -59,7 +59,7 @@ public class SingleGameCycle extends GameCycle {
     this.getGame().setPlayerDamager(player, null);
 
     PlayerStorage storage = this.getGame().getPlayerStorage(player);
-    storage.clean();
+    storage.clean(true);
     storage.loadLobbyInventory(this.getGame());
   }
 
@@ -82,12 +82,9 @@ public class SingleGameCycle extends GameCycle {
     // reset countdown prevention breaks
     this.setEndGameRunning(false);
 
-    // Reset team chests
+    // Reset teams
     for (Team team : this.getGame().getTeams().values()) {
-      team.setInventory(null);
-      team.getChests().clear();
-      team.setArmorUpgrade(ArmorUpgradeEnum.PROTECTION0);
-      team.setSwordUpgrade(SwordUpgradeEnum.SHARPNESS0);
+      team.reset();
     }
 
     // clear protections

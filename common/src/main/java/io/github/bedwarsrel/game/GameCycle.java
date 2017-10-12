@@ -276,7 +276,7 @@ public abstract class GameCycle {
       }
       pre.setRespawnLocation(team.getSpawnLocation());
 
-      storage.prepareForBattle();
+      storage.respawn();
     }
 
     new BukkitRunnable() {

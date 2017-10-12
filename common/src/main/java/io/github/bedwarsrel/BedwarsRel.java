@@ -3,6 +3,8 @@ package io.github.bedwarsrel;
 import com.bugsnag.Bugsnag;
 import com.bugsnag.Report;
 import com.bugsnag.callbacks.Callback;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.commands.*;
 import io.github.bedwarsrel.database.DatabaseManager;
@@ -17,6 +19,7 @@ import io.github.bedwarsrel.listener.BlockListener;
 import io.github.bedwarsrel.listener.ChunkListener;
 import io.github.bedwarsrel.listener.EntityListener;
 import io.github.bedwarsrel.listener.HangingListener;
+import io.github.bedwarsrel.listener.InvisibilityPotionListener;
 import io.github.bedwarsrel.listener.PlayerListener;
 import io.github.bedwarsrel.listener.PlayerSpigotListener;
 import io.github.bedwarsrel.listener.ServerListener;
@@ -27,6 +30,7 @@ import io.github.bedwarsrel.listener.events.PlayerPickUpItemEventListener;
 import io.github.bedwarsrel.listener.events.PlayerSwapHandItemsEventListener;
 import io.github.bedwarsrel.localization.LocalizationConfig;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
+import io.github.bedwarsrel.shop.upgrades.UpgradeRegistry;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.statistics.PlayerStatisticManager;
 import io.github.bedwarsrel.statistics.StorageType;
@@ -97,6 +101,8 @@ public class BedwarsRel extends JavaPlugin {
   private BukkitTask timeTask = null;
   private BukkitTask updateChecker = null;
   private String version = null;
+  @Getter
+  private ProtocolManager protocolManager;
 
   public static String _l(CommandSender commandSender, String key, String singularValue,
       Map<String, String> params) {
@@ -719,7 +725,9 @@ public class BedwarsRel extends JavaPlugin {
           + "*** Please download a stable build from https://github.com/BedwarsRel/BedwarsRel/releases ***"));
     }
 
-    this.registerBugsnag();
+//    this.registerBugsnag();
+
+    this.protocolManager = ProtocolLibrary.getProtocolManager();
 
     // register classes
     this.registerConfigurationClasses();
@@ -740,11 +748,11 @@ public class BedwarsRel extends JavaPlugin {
     this.saveConfiguration();
     this.loadConfigInUTF();
 
-    if (this.getBooleanConfig("send-error-data", true) && this.bugsnag != null) {
-      this.enableBugsnag();
-    } else {
-      this.disableBugsnag();
-    }
+//    if (this.getBooleanConfig("send-error-data", true) && this.bugsnag != null) {
+//      this.enableBugsnag();
+//    } else {
+//      this.disableBugsnag();
+//    }
 
     this.loadShop();
 
@@ -863,12 +871,14 @@ public class BedwarsRel extends JavaPlugin {
     new ServerListener();
     new SignListener();
     new ChunkListener();
+    new InvisibilityPotionListener().registerInterceptor();
 
     if (this.isSpigot()) {
       new PlayerSpigotListener();
     }
 
     SpecialItem.loadSpecials();
+    UpgradeRegistry.loadUpgrades();
   }
 
   public void reloadLocalization() {

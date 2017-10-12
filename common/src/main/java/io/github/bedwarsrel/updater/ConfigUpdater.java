@@ -1,7 +1,7 @@
 package io.github.bedwarsrel.updater;
 
 import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.villager.ItemStackParser;
+import io.github.bedwarsrel.shop.ItemStackParser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

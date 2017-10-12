@@ -7,18 +7,13 @@ import io.github.bedwarsrel.game.BungeeGameCycle;
 import io.github.bedwarsrel.game.DamageHolder;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.GameState;
-import io.github.bedwarsrel.game.PlayerStorage;
 import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.shop.NewItemShop;
+import io.github.bedwarsrel.shop.Shop;
 import io.github.bedwarsrel.utils.ChatWriter;
-import io.github.bedwarsrel.villager.MerchantCategory;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -49,24 +44,17 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.Wool;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 public class PlayerListener extends BaseListener {
-
-  private Map<Player, BukkitTask> invisibilityTasks = new HashMap<>();
 
   private String getChatFormat(String format, Team team, boolean isSpectator, boolean all) {
     String form = format;
@@ -89,41 +77,33 @@ public class PlayerListener extends BaseListener {
   }
 
   @SuppressWarnings("deprecation")
-  private void inGameInteractEntity(PlayerInteractEntityEvent iee, Game game, Player player) {
-
+  private void inGameInteractEntity(PlayerInteractEntityEvent event, Game game, Player player) {
+    List<Material> preventClickEggs = Arrays.asList(
+        Material.MONSTER_EGG,
+        Material.MONSTER_EGGS,
+        Material.DRAGON_EGG);
     if (BedwarsRel.getInstance().getCurrentVersion().startsWith("v1_8")) {
-      if (iee.getPlayer().getItemInHand().getType().equals(Material.MONSTER_EGG)
-          || iee.getPlayer().getItemInHand().getType().equals(Material.MONSTER_EGGS)
-          || iee.getPlayer().getItemInHand().getType().equals(Material.DRAGON_EGG)) {
-        iee.setCancelled(true);
+      if (preventClickEggs.contains(player.getItemInHand().getType())) {
+        event.setCancelled(true);
         return;
       }
     } else {
-      if (iee.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.MONSTER_EGG)
-          || iee.getPlayer().getInventory().getItemInMainHand().getType()
-          .equals(Material.MONSTER_EGGS)
-          || iee.getPlayer().getInventory().getItemInMainHand().getType()
-          .equals(Material.DRAGON_EGG)
-          || iee.getPlayer().getInventory().getItemInOffHand().getType()
-          .equals(Material.MONSTER_EGG)
-          || iee.getPlayer().getInventory().getItemInOffHand().getType()
-          .equals(Material.MONSTER_EGGS)
-          || iee.getPlayer().getInventory().getItemInOffHand().getType()
-          .equals(Material.DRAGON_EGG)) {
-        iee.setCancelled(true);
+      PlayerInventory inv = player.getInventory();
+      if (preventClickEggs.contains(inv.getItemInMainHand().getType())
+          || preventClickEggs.contains(inv.getItemInOffHand().getType())) {
+        event.setCancelled(true);
         return;
       }
     }
 
-    if (iee.getRightClicked() != null
-        && !iee.getRightClicked().getType().equals(EntityType.VILLAGER)) {
+    if (event.getRightClicked() != null
+        && !event.getRightClicked().getType().equals(EntityType.VILLAGER)) {
       List<EntityType> preventClickTypes =
           Arrays.asList(EntityType.ITEM_FRAME, EntityType.ARMOR_STAND);
 
-      if (preventClickTypes.contains(iee.getRightClicked().getType())) {
-        iee.setCancelled(true);
+      if (preventClickTypes.contains(event.getRightClicked().getType())) {
+        event.setCancelled(true);
       }
-
       return;
     }
 
@@ -131,31 +111,23 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (!BedwarsRel.getInstance().getBooleanConfig("use-build-in-shop", true)) {
+    if (!BedwarsRel.getInstance().getBooleanConfig("use-builtin-shop", true)) {
       return;
     }
 
-    iee.setCancelled(true);
+    event.setCancelled(true);
 
     BedwarsOpenShopEvent openShopEvent =
-        new BedwarsOpenShopEvent(game, player, game.getItemShopCategories(), iee.getRightClicked());
+        new BedwarsOpenShopEvent(game, player, game.getShopCategories(), event.getRightClicked());
     BedwarsRel.getInstance().getServer().getPluginManager().callEvent(openShopEvent);
 
     if (openShopEvent.isCancelled()) {
       return;
     }
 
-    if (game.getPlayerSettings(player).useOldShop()) {
-      MerchantCategory.openCategorySelection(player, game);
-    } else {
-      NewItemShop itemShop = game.getNewItemShop(player);
-      if (itemShop == null) {
-        itemShop = game.openNewItemShop(player);
-      }
-
-      itemShop.setCurrentCategory(null);
-      itemShop.openCategoryInventory(player);
-    }
+    Shop shop = game.getShop(player);
+    shop.resetCurrentCategory();
+    shop.render();
   }
 
   /*
@@ -330,64 +302,6 @@ public class PlayerListener extends BaseListener {
         Player recipient = recipiens.next();
         if (!game.isInGame(recipient) || !team.isInTeam(recipient)) {
           recipiens.remove();
-        }
-      }
-    }
-  }
-
-  @EventHandler(priority = EventPriority.HIGHEST)
-  public void onConsumeEvent(PlayerItemConsumeEvent event) {
-    final Player player = event.getPlayer();
-    ItemStack item = event.getItem();
-    if (item.getType() == Material.POTION) {
-      PotionMeta meta = (PotionMeta) item.getItemMeta();
-      if (meta.hasCustomEffect(PotionEffectType.INVISIBILITY)) {
-        // Default 30 sec
-        int duration = 600;
-        for (PotionEffect effect : meta.getCustomEffects()) {
-          if (PotionEffectType.INVISIBILITY.equals(effect.getType())) {
-            duration = effect.getDuration();
-          }
-        }
-        this.makePlayerInvisible(player, true);
-        if (invisibilityTasks.containsKey(player)) {
-          invisibilityTasks.get(player).cancel();
-        }
-        invisibilityTasks.put(player, new BukkitRunnable() {
-          @Override
-          public void run() {
-            invisibilityTasks.remove(player);
-            PlayerListener.this.makePlayerInvisible(player, false);
-          }
-        }.runTaskLater(BedwarsRel.getInstance(), duration));
-      }
-      new BukkitRunnable() {
-        public void run() {
-          player.getInventory().remove(Material.GLASS_BOTTLE);
-        }
-      }.runTaskLater(BedwarsRel.getInstance(), 1L);
-    }
-  }
-
-  /**
-   * Makes given player entirely invisible (including gear, bubbles etc.) to
-   * enemy teams.
-   * @param player player to hide
-   * @param hide   true to hide, false to show again
-   */
-  private void makePlayerInvisible(Player player, boolean hide) {
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
-    if (game != null && !game.isSpectator(player)) {
-      Team playerTeam = game.getPlayerTeam(player);
-      for (Team team : game.getTeams().values()) {
-        if (team != playerTeam) {
-          for (Player playerInTeam : team.getPlayers()) {
-            if (hide) {
-              playerInTeam.hidePlayer(player);
-            } else {
-              playerInTeam.showPlayer(player);
-            }
-          }
         }
       }
     }
@@ -613,22 +527,25 @@ public class PlayerListener extends BaseListener {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private void onIngameInventoryClick(InventoryClickEvent ice, Player player, Game game) {
-    if (ice.getSlotType() == InventoryType.SlotType.ARMOR) {
-      ice.setCancelled(true);
+  private void onIngameInventoryClick(InventoryClickEvent event, Player player, Game game) {
+    // Prevent armor changes
+    if (event.getSlotType() == InventoryType.SlotType.ARMOR) {
+      event.setCancelled(true);
+      return;
     }
-    if (!ice.getInventory().getName().equals(BedwarsRel._l(player, "ingame.shop.name"))) {
+    // If open inventory isn't shop
+    if (!event.getInventory().getName().equals(BedwarsRel._l(player, "ingame.shop.name"))) {
       if (game.isSpectator(player)
           || (game.getCycle() instanceof BungeeGameCycle && game.getCycle().isEndGameRunning()
           && BedwarsRel.getInstance().getBooleanConfig("bungeecord.endgame-in-lobby", true))) {
 
-        ItemStack clickedStack = ice.getCurrentItem();
+        ItemStack clickedStack = event.getCurrentItem();
         if (clickedStack == null) {
           return;
         }
 
-        if (ice.getInventory().getName().equals(BedwarsRel._l(player, "ingame.spectator"))) {
-          ice.setCancelled(true);
+        if (event.getInventory().getName().equals(BedwarsRel._l(player, "ingame.spectator"))) {
+          event.setCancelled(true);
           if (!clickedStack.getType().equals(Material.SKULL_ITEM)) {
             return;
           }
@@ -648,7 +565,7 @@ public class PlayerListener extends BaseListener {
           return;
         }
 
-        Material clickedMat = ice.getCurrentItem().getType();
+        Material clickedMat = event.getCurrentItem().getType();
         if (clickedMat.equals(Material.SLIME_BALL)) {
           game.playerLeave(player, false);
         }
@@ -660,45 +577,14 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    ice.setCancelled(true);
-    ItemStack clickedStack = ice.getCurrentItem();
+    event.setCancelled(true);
+    ItemStack clickedStack = event.getCurrentItem();
 
     if (clickedStack == null) {
       return;
     }
 
-    if (game.getPlayerSettings(player).useOldShop()) {
-      try {
-        if (clickedStack.getType() == Material.SNOW_BALL) {
-          game.getPlayerSettings(player).setUseOldShop(false);
-
-          // open new shop
-          NewItemShop itemShop = game.openNewItemShop(player);
-          itemShop.setCurrentCategory(null);
-          itemShop.openCategoryInventory(player);
-          return;
-        }
-
-        MerchantCategory cat = game.getItemShopCategories().get(clickedStack.getType());
-        if (cat == null) {
-          return;
-        }
-
-        Class clazz = Class.forName("io.github.bedwarsrel.com."
-            + BedwarsRel.getInstance().getCurrentVersion().toLowerCase() + ".VillagerItemShop");
-        Object villagerItemShop =
-            clazz.getDeclaredConstructor(Game.class, Player.class, MerchantCategory.class)
-                .newInstance(game, player, cat);
-
-        Method openTrade = clazz.getDeclaredMethod("openTrading", new Class[]{});
-        openTrade.invoke(villagerItemShop, new Object[]{});
-      } catch (Exception ex) {
-        BedwarsRel.getInstance().getBugsnag().notify(ex);
-        ex.printStackTrace();
-      }
-    } else {
-      game.getNewItemShop(player).handleInventoryClick(ice, game, player);
-    }
+    game.getShop(player).handleClick(event);
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
@@ -748,8 +634,8 @@ public class PlayerListener extends BaseListener {
   }
 
   @EventHandler
-  public void onInventoryClick(InventoryClickEvent ice) {
-    Player player = (Player) ice.getWhoClicked();
+  public void onInventoryClick(InventoryClickEvent event) {
+    Player player = (Player) event.getWhoClicked();
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
 
     if (game == null) {
@@ -757,11 +643,11 @@ public class PlayerListener extends BaseListener {
     }
 
     if (game.getState() == GameState.WAITING) {
-      this.onLobbyInventoryClick(ice, player, game);
+      this.onLobbyInventoryClick(event, player, game);
     }
 
     if (game.getState() == GameState.RUNNING) {
-      this.onIngameInventoryClick(ice, player, game);
+      this.onIngameInventoryClick(event, player, game);
     }
   }
 
@@ -771,7 +657,6 @@ public class PlayerListener extends BaseListener {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onJoin(PlayerJoinEvent je) {
-
     final Player player = je.getPlayer();
 
     if (BedwarsRel.getInstance().statisticsEnabled()) {
@@ -791,7 +676,6 @@ public class PlayerListener extends BaseListener {
 
     if (!BedwarsRel.getInstance().isBungee()) {
       Game game = BedwarsRel.getInstance().getGameManager().getGameByLocation(player.getLocation());
-
       if (game != null) {
         if (game.getMainLobby() != null) {
           player.teleport(game.getMainLobby());
@@ -959,7 +843,6 @@ public class PlayerListener extends BaseListener {
               } else {
                 oldLocation.setY(oldLocation.getY() - 2);
               }
-
               p.teleport(oldLocation);
             }
           }
@@ -1132,17 +1015,13 @@ public class PlayerListener extends BaseListener {
     if (game != null) {
       if (game.getState() == GameState.RUNNING) {
         if (!game.getCycle().isEndGameRunning()) {
-          if (!game.getPlayerSettings(change.getPlayer()).isTeleporting()) {
+          if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
             game.playerLeave(change.getPlayer(), false);
-          } else {
-            game.getPlayerSettings(change.getPlayer()).setTeleporting(false);
           }
         }
       } else if (game.getState() == GameState.WAITING) {
-        if (!game.getPlayerSettings(change.getPlayer()).isTeleporting()) {
+        if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
           game.playerLeave(change.getPlayer(), false);
-        } else {
-          game.getPlayerSettings(change.getPlayer()).setTeleporting(false);
         }
       }
     }

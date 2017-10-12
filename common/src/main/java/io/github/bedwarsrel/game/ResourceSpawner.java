@@ -3,7 +3,7 @@ package io.github.bedwarsrel.game;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsResourceSpawnEvent;
 import io.github.bedwarsrel.utils.Utils;
-import io.github.bedwarsrel.villager.ItemStackParser;
+import io.github.bedwarsrel.shop.ItemStackParser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,79 +24,65 @@ import org.bukkit.inventory.ItemStack;
 @SerializableAs("RessourceSpawner")
 public class ResourceSpawner implements Runnable, ConfigurationSerializable {
 
-  private Game game = null;
+  private Game game;
   private int interval = 1000;
   private List<ItemStack> resources = new ArrayList<>();
-  private Location location = null;
+  private Location location;
   private double spread = 1.0;
-  private String name = null;
+  private String name;
+  private String team;
 
   public ResourceSpawner(Map<String, Object> deserialize) {
     this.location = Utils.locationDeserialize(deserialize.get("location"));
+    this.name = deserialize.get("name").toString();
 
-    if (deserialize.containsKey("name")) {
-      String name = deserialize.get("name").toString();
+    if (!BedwarsRel.getInstance().getConfig().contains("resource." + this.name)) {
+      throw new IllegalArgumentException("Can't find resource " + this.name + " in config.yml");
+    }
+    parseResourceConfig(this.name);
 
-      if (BedwarsRel.getInstance().getConfig().contains("resource." + name)) {
-        List<Object> resourceList = (List<Object>) BedwarsRel.getInstance().getConfig()
-            .getList("resource." + name + ".item");
-        for (Object resource : resourceList) {
-          ItemStack itemStack = ItemStack.deserialize((Map<String, Object>) resource);
-          if (itemStack != null) {
-            this.resources.add(itemStack);
-          }
-        }
-        this.interval =
-            BedwarsRel.getInstance().getIntConfig("resource." + name + ".spawn-interval", 1000);
-        this.spread =
-            BedwarsRel.getInstance().getConfig().getDouble("resource." + name + ".spread", 1.0);
-        this.name = name;
-      } else {
-        List<Object> resourceList = (List<Object>) BedwarsRel.getInstance().getConfig()
-            .getList("resource." + name + ".item");
-        for (Object resource : resourceList) {
-          ItemStack itemStack = ItemStack.deserialize((Map<String, Object>) resource);
-          if (itemStack != null) {
-            this.resources.add(itemStack);
-          }
-        }
-        this.interval = Integer.parseInt(deserialize.get("interval").toString());
-        if (deserialize.containsKey("spread")) {
-          this.spread = Double.parseDouble(deserialize.get("spread").toString());
-        }
-      }
-    } else {
-      List<Object> resourceList = (List<Object>) BedwarsRel.getInstance().getConfig()
-          .getList("resource." + name + ".item");
-      for (Object resource : resourceList) {
-        ItemStack itemStack = ItemStack.deserialize((Map<String, Object>) resource);
-        if (itemStack != null) {
-          this.resources.add(itemStack);
-        }
-      }
+    if (deserialize.containsKey("interval")) {
       this.interval = Integer.parseInt(deserialize.get("interval").toString());
-      if (deserialize.containsKey("spread")) {
-        this.spread = Double.parseDouble(deserialize.get("spread").toString());
-      }
+    } else {
+      this.interval =
+          BedwarsRel.getInstance().getIntConfig("resource." + name + ".spawn-interval", 1000);
+    }
+
+    if (deserialize.containsKey("spread")) {
+      this.spread = Double.parseDouble(deserialize.get("spread").toString());
+    } else {
+      this.spread =
+          BedwarsRel.getInstance().getConfig().getDouble("resource." + name + ".spread", 1.0);
+    }
+
+    if (deserialize.containsKey("team")) {
+      this.team = deserialize.get("team").toString();
     }
   }
 
   public ResourceSpawner(Game game, String name, Location location) {
     this.game = game;
     this.name = name;
+    if (!BedwarsRel.getInstance().getConfig().contains("resource." + this.name)) {
+      throw new IllegalArgumentException("Can't find resource " + this.name + " in config.yml");
+    }
+    parseResourceConfig(this.name);
     this.interval =
         BedwarsRel.getInstance().getIntConfig("resource." + name + ".spawn-interval", 1000);
     this.location = location;
-    List<Object> resourceList = (List<Object>) BedwarsRel.getInstance().getConfig()
-        .getList("resource." + name + ".item");
+    this.spread =
+        BedwarsRel.getInstance().getConfig().getDouble("resource." + name + ".spread", 1.0);
+  }
+
+  private void parseResourceConfig(String name) {
+    List<Object> resourceList =
+        (List<Object>) BedwarsRel.getInstance().getConfig().getList("resource." + name + ".item");
     for (Object resource : resourceList) {
       ItemStack itemStack = ItemStack.deserialize((Map<String, Object>) resource);
       if (itemStack != null) {
         this.resources.add(itemStack);
       }
     }
-    this.spread =
-        BedwarsRel.getInstance().getConfig().getDouble("resource." + name + ".spread", 1.0);
   }
 
   public static ItemStack createSpawnerStackByConfig(Object section) {
@@ -123,6 +109,10 @@ public class ResourceSpawner implements Runnable, ConfigurationSerializable {
     if (this.spread != 1.0) {
       item.setVelocity(item.getVelocity().multiply(this.spread));
     }
+  }
+
+  public boolean isOfTeam(String teamName) {
+    return team != null && team.equals(teamName);
   }
 
   @Override
@@ -160,9 +150,9 @@ public class ResourceSpawner implements Runnable, ConfigurationSerializable {
   @Override
   public Map<String, Object> serialize() {
     HashMap<String, Object> rs = new HashMap<>();
-
     rs.put("location", Utils.locationSerialize(this.location));
     rs.put("name", this.name);
+    rs.put("team", this.team);
     return rs;
   }
 

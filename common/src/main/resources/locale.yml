@@ -14,7 +14,6 @@ errors:
   playeramount: "The maxium of players can't be lower than 1 or higher than 24!"
   teamcolornotallowed: "The given Team color isn't a allowed color"
   teamnamelength: "Team name must have between 2 and 20 characters!"
-  teamnotfound: "The given team was not found!"
   notingame: "You are currently not in a game!"
   bedtargeting: "You have to target or stand on a block of the configured 'game-block' type!"
   regionargument: "Your location argument has to be 'loc1' or 'loc2'!"
@@ -87,7 +86,8 @@ success:
   armorpurchased: "&aPermanent $type$ Armor applied!"
   armorupgraded: "&aArmor upgraded to $upgrade$!"
   swordsupgraded: "&aSwords upgraded to $upgrade$!"
-  permanentitempurchased: "&aPermanent $type$ applied!"
+  forgeupgraded: "&aForge upgraded to $upgrade$!"
+  itempurchased: "&aItem $item$ &apurchased!"
 gamecheck:
   LOC_NOT_SET_ERROR: "Locations for the region were not set properly!"
   LOC_BASE_NOT_SET_ERROR: "Locations for the base regions were not set properly!"
@@ -181,9 +181,11 @@ ingame:
     protection4: "Protection IV"
   swordupgrade:
     sharpness1: "Sharpness I"
-  permanentitems:
-    wood-sword: "Wood Sword"
-    shears: "Shears"
+  forgeupgrade:
+    forge1: "Iron Forge"
+    forge2: "Golden Forge"
+    forge3: "Emerald Forge"
+    forge4: "Molten Forge"
 lobby:
   countdown: "Game will start in $sec$ second(s)!"
   countdowncancel: "More players needed. Countdown was cancelled!"

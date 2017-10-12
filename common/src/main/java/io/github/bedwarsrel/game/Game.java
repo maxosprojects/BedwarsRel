@@ -9,21 +9,23 @@ import io.github.bedwarsrel.events.BedwarsPlayerJoinedEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerLeaveEvent;
 import io.github.bedwarsrel.events.BedwarsSaveGameEvent;
 import io.github.bedwarsrel.events.BedwarsTargetBlockDestroyedEvent;
-import io.github.bedwarsrel.shop.NewItemShop;
+import io.github.bedwarsrel.shop.Shop;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
+import io.github.bedwarsrel.shop.upgrades.Upgrade;
+import io.github.bedwarsrel.shop.upgrades.UpgradeItem;
+import io.github.bedwarsrel.shop.upgrades.UpgradeRegistry;
+import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.TitleWriter;
 import io.github.bedwarsrel.utils.Utils;
-import io.github.bedwarsrel.villager.MerchantCategory;
-import io.github.bedwarsrel.villager.MerchantCategoryComparator;
+import io.github.bedwarsrel.shop.MerchantCategory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -70,7 +72,6 @@ public class Game {
   private YamlConfiguration config = null;
   private GameCycle cycle = null;
   private List<Player> freePlayers = null;
-  private Map<Player, PlayerFlags> playersFlags = new HashMap<>();
   private GameLobbyCountdown gameLobbyCountdown = null;
   private Location hologramLocation = null;
   private boolean isOver = false;
@@ -84,12 +85,11 @@ public class Game {
   private int minPlayers = 0;
   private String name = null;
   // Itemshops
-  private HashMap<Player, NewItemShop> newItemShops = null;
-  private List<MerchantCategory> orderedShopCategories = null;
+  private HashMap<Player, Shop> shops = new HashMap<>();
+  private List<MerchantCategory> shopCategories = null;
   private Map<Player, DamageHolder> playerDamages = null;
   private Map<Player, BukkitTask> waitingRespawn = new HashMap<>();
-  private Map<Player, PlayerSettings> playerSettings = null;
-  private HashMap<Player, PlayerStorage> playerStorages = null;
+  private Map<Player, PlayerStorage> playerStorages = new HashMap<>();
   private List<Team> playingTeams = null;
   private int record = 0;
   private List<String> recordHolders = null;
@@ -99,13 +99,13 @@ public class Game {
   private Map<Player, RespawnProtectionRunnable> respawnProtections = null;
   private List<BukkitTask> runningTasks = null;
   private Scoreboard scoreboard = null;
-  private HashMap<Material, MerchantCategory> shopCategories = null;
   private List<SpecialItem> specialItems = null;
   private GameState state = null;
   private Material targetMaterial = null;
   private HashMap<String, Team> teams = null;
   private int time = 1000;
   private int timeLeft = 0;
+  private List<Map<String, Object>> defaultUpgrades;
 
   public Game(String name) {
     super();
@@ -118,7 +118,6 @@ public class Game {
     this.teams = new HashMap<String, Team>();
     this.playingTeams = new ArrayList<Team>();
 
-    this.playerStorages = new HashMap<Player, PlayerStorage>();
     this.state = GameState.STOPPED;
     this.scoreboard = BedwarsRel.getInstance().getScoreboardManager().getNewScoreboard();
 
@@ -126,7 +125,6 @@ public class Game {
     this.joinSigns = new HashMap<Location, GameJoinSign>();
     this.timeLeft = BedwarsRel.getInstance().getMaxLength();
     this.isOver = false;
-    this.newItemShops = new HashMap<Player, NewItemShop>();
     this.respawnProtections = new HashMap<Player, RespawnProtectionRunnable>();
     this.playerDamages = new HashMap<>();
     this.specialItems = new ArrayList<SpecialItem>();
@@ -134,8 +132,6 @@ public class Game {
     this.record = BedwarsRel.getInstance().getMaxLength();
     this.length = BedwarsRel.getInstance().getMaxLength();
     this.recordHolders = new ArrayList<String>();
-
-    this.playerSettings = new HashMap<Player, PlayerSettings>();
 
     this.autobalance = BedwarsRel.getInstance().getBooleanConfig("global-autobalance", false);
 
@@ -188,17 +184,6 @@ public class Game {
 
     this.joinSigns.put(signLocation, new GameJoinSign(this, signLocation));
     this.updateSignConfig();
-  }
-
-  public void addPlayerSettings(Player player) {
-    this.playerSettings.put(player, new PlayerSettings(player));
-  }
-
-  public PlayerStorage addPlayerStorage(Player p) {
-    PlayerStorage storage = new PlayerStorage(p);
-    this.playerStorages.put(p, storage);
-
-    return storage;
   }
 
   public RespawnProtectionRunnable addProtection(Player player) {
@@ -328,13 +313,52 @@ public class Game {
 
   private void cleanUsersInventory() {
     for (PlayerStorage storage : this.playerStorages.values()) {
-      storage.clean();
+      storage.clean(true);
     }
   }
 
   private void prepareUsersForBattle() {
-    for (PlayerStorage storage : this.playerStorages.values()) {
-      storage.prepareForBattle();
+    this.defaultUpgrades = (List<Map<String, Object>>) this.getConfig().getList("default-player-inventory");
+    List<Upgrade> playerUpgrades = new ArrayList<>();
+    List<Upgrade> teamUpgrades = new ArrayList<>();
+    for (Map<String, Object> item : this.defaultUpgrades) {
+      Map<String, Object> elem = (Map<String, Object>) item.get("upgrade");
+      Upgrade upgrade = UpgradeRegistry.getUpgrade(
+          (String)elem.get("type"), (int)elem.get("level"));
+      if (upgrade instanceof UpgradeItem) {
+        UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);
+        temp.setItem(MerchantCategory.fixMeta(
+            ItemStack.deserialize((Map<String, Object>) item.get("item"))));
+        upgrade = temp;
+      }
+      if (elem.containsKey("permanent")) {
+        boolean permanent = (boolean) elem.get("permanent");
+        upgrade.setPermanent(permanent);
+      }
+      if (elem.containsKey("multiple")) {
+        boolean multiple = (boolean) elem.get("multiple");
+        upgrade.setMultiple(multiple);
+      }
+      if (upgrade.getScope() == UpgradeScope.PLAYER) {
+        playerUpgrades.add(upgrade);
+      } else {
+        teamUpgrades.add(upgrade);
+      }
+    }
+
+    for (Player player : this.getPlayers()) {
+      Team team = this.getPlayerTeam(player);
+      PlayerStorage storage = this.getPlayerStorage(player);
+      for (Upgrade upgrade : playerUpgrades) {
+        storage.addUpgrade(upgrade.create(this, team, player));
+      }
+      // Respawn is executed later when player is added to the team
+      // storage.respawn();
+    }
+    for (Team team : this.getTeams().values()) {
+      for (Upgrade upgrade : teamUpgrades) {
+        team.setUpgrade(upgrade.create(this, team, null));
+      }
     }
   }
 
@@ -393,6 +417,8 @@ public class Game {
 
     yml.set("spawner", this.resourceSpawners);
     yml.createSection("teams", this.teams);
+
+    yml.set("default-player-inventory", this.defaultUpgrades);
 
     try {
       yml.save(config);
@@ -599,14 +625,6 @@ public class Game {
     return players;
   }
 
-  public HashMap<Material, MerchantCategory> getItemShopCategories() {
-    return this.shopCategories;
-  }
-
-  public void setItemShopCategories(HashMap<Material, MerchantCategory> cats) {
-    this.shopCategories = cats;
-  }
-
   public GameLobbyCountdown getLobbyCountdown() {
     return this.gameLobbyCountdown;
   }
@@ -640,10 +658,6 @@ public class Game {
     return max;
   }
 
-  public NewItemShop getNewItemShop(Player player) {
-    return this.newItemShops.get(player);
-  }
-
   public List<Player> getNonVipPlayers() {
     List<Player> players = this.getPlayers();
 
@@ -659,10 +673,6 @@ public class Game {
     return players;
   }
 
-  public List<MerchantCategory> getOrderedItemShopCategories() {
-    return this.orderedShopCategories;
-  }
-
   public int getPlayerAmount() {
     return this.getPlayers().size();
   }
@@ -671,12 +681,17 @@ public class Game {
     return this.playerDamages.get(p);
   }
 
-  public PlayerSettings getPlayerSettings(Player player) {
-    return this.playerSettings.get(player);
+  public PlayerFlags getPlayerFlags(Player player) {
+    return this.getPlayerStorage(player).getFlags();
   }
 
-  public PlayerStorage getPlayerStorage(Player p) {
-    return this.playerStorages.get(p);
+  public PlayerStorage getPlayerStorage(Player player) {
+    PlayerStorage storage = this.playerStorages.get(player);
+    if (storage == null) {
+      storage = new PlayerStorage(player);
+      this.playerStorages.put(player, storage);
+    }
+    return storage;
   }
 
   public Team getPlayerTeam(Player p) {
@@ -993,13 +1008,6 @@ public class Game {
 
   public void loadItemShopCategories() {
     this.shopCategories = MerchantCategory.loadCategories(BedwarsRel.getInstance().getShopConfig());
-    this.orderedShopCategories = this.loadOrderedItemShopCategories();
-  }
-
-  private List<MerchantCategory> loadOrderedItemShopCategories() {
-    List<MerchantCategory> list = new ArrayList<MerchantCategory>(this.shopCategories.values());
-    Collections.sort(list, new MerchantCategoryComparator());
-    return list;
   }
 
   private void makeTeamsReady() {
@@ -1038,11 +1046,13 @@ public class Game {
     }
   }
 
-  public NewItemShop openNewItemShop(Player player) {
-    NewItemShop newShop = new NewItemShop(this.orderedShopCategories);
-    this.newItemShops.put(player, newShop);
-
-    return newShop;
+  public Shop getShop(Player player) {
+    Shop shop = this.shops.get(player);
+    if (shop == null) {
+      shop = new Shop(this.shopCategories, player);
+      this.shops.put(player, shop);
+    }
+    return shop;
   }
 
   public void openSpectatorCompass(Player player) {
@@ -1111,7 +1121,8 @@ public class Game {
   }
 
   public boolean playerJoins(final Player p) {
-
+    // Add storage if doesn't exist
+    PlayerStorage storage = this.getPlayerStorage(p);
     if (this.state == GameState.STOPPED
         || (this.state == GameState.RUNNING && !BedwarsRel.getInstance().spectationEnabled())) {
       if (this.cycle instanceof BungeeGameCycle) {
@@ -1155,9 +1166,6 @@ public class Game {
     // add damager and set it to null
     this.playerDamages.put(p, null);
 
-    // add player settings
-    this.addPlayerSettings(p);
-
     new BukkitRunnable() {
 
       @Override
@@ -1174,15 +1182,15 @@ public class Game {
       this.toSpectator(p);
       this.displayMapInfo(p);
     } else {
-
-      PlayerStorage storage = this.addPlayerStorage(p);
       storage.store();
-      storage.clean();
+      storage.clean(true);
 
       if (!BedwarsRel.getInstance().isBungee()) {
         final Location location = this.getPlayerTeleportLocation(p);
         if (!p.getLocation().equals(location)) {
-          this.getPlayerSettings(p).setTeleporting(true);
+          this.setTeleportingIfWorldChange(p, location);
+          // TODO: Figure out what was this insane logic here for (not bungee outer if and
+          // bungee inner if)
           if (BedwarsRel.getInstance().isBungee()) {
             new BukkitRunnable() {
 
@@ -1265,8 +1273,14 @@ public class Game {
 
   }
 
+  protected void setTeleportingIfWorldChange(Player player, Location location) {
+    if (!player.getWorld().getName().equals(location.getWorld().getName())) {
+      this.getPlayerFlags(player).setTeleporting(true);
+    }
+  }
+
   public boolean playerLeave(Player p, boolean kicked) {
-    this.getPlayerSettings(p).setTeleporting(true);
+    this.getPlayerFlags(p).setTeleporting(true);
     Team team = this.getPlayerTeam(p);
 
     BedwarsPlayerLeaveEvent leaveEvent = new BedwarsPlayerLeaveEvent(this, p, team);
@@ -1367,11 +1381,10 @@ public class Game {
       BedwarsRel.getInstance().getPlayerStatisticManager().unloadStatistic(p);
     }
 
-    PlayerStorage storage = this.playerStorages.get(p);
-    storage.clean();
+    PlayerStorage storage = this.getPlayerStorage(p);
+    storage.clean(true);
     storage.restore();
 
-    this.playerSettings.remove(p);
     this.updateScoreboard();
 
     try {
@@ -1406,15 +1419,11 @@ public class Game {
   }
 
   public void removeNewItemShop(Player player) {
-    if (!this.newItemShops.containsKey(player)) {
+    if (!this.shops.containsKey(player)) {
       return;
     }
 
-    this.newItemShops.remove(player);
-  }
-
-  public void removePlayerSettings(Player player) {
-    this.playerSettings.remove(player);
+    this.shops.remove(player);
   }
 
   public void removeProtection(Player player) {
@@ -1886,52 +1895,47 @@ public class Game {
   private void teleportPlayersToTeamSpawn(boolean retainPlayerStorage) {
     for (Team team : this.teams.values()) {
       for (Player player : team.getPlayers()) {
-        if (!player.getWorld().equals(team.getSpawnLocation().getWorld())) {
-          this.getPlayerSettings(player).setTeleporting(true);
-        }
         player.setVelocity(new Vector(0, 0, 0));
         player.setFallDistance(0.0F);
-        player.teleport(team.getSpawnLocation());
+        Location location = team.getSpawnLocation();
+        this.setTeleportingIfWorldChange(player, location);
+        player.teleport(location);
         if (!retainPlayerStorage && this.getPlayerStorage(player) != null) {
-          this.getPlayerStorage(player).clean();
-          this.getPlayerStorage(player).prepareForBattle();
+          this.getPlayerStorage(player).clean(true);
+          this.getPlayerStorage(player).respawn();
         }
       }
     }
   }
 
-  public void toSpectator(Player player) {
-    final Player p = player;
-
+  public void toSpectator(final Player player) {
     if (!this.freePlayers.contains(player)) {
       this.freePlayers.add(player);
     }
 
-    PlayerStorage storage = this.getPlayerStorage(player);
-    if (storage != null) {
-      storage.clean();
-    } else {
-      storage = this.addPlayerStorage(player);
+    // Check if exists and then initialize if needed
+    if (this.playerStorages.get(player) == null) {
+      PlayerStorage storage = this.getPlayerStorage(player);
       storage.store();
-      storage.clean();
     }
+    PlayerStorage storage = this.getPlayerStorage(player);
+    storage.clean(true);
 
-    final Location location = this.getPlayerTeleportLocation(p);
+    final Location location = this.getPlayerTeleportLocation(player);
 
-    if (!p.getLocation().getWorld().equals(location.getWorld())) {
-      this.getPlayerSettings(p).setTeleporting(true);
+    if (!player.getLocation().getWorld().equals(location.getWorld())) {
+      this.setTeleportingIfWorldChange(player, location);
       if (BedwarsRel.getInstance().isBungee()) {
         new BukkitRunnable() {
 
           @Override
           public void run() {
-            p.teleport(location);
+            player.teleport(location);
           }
 
         }.runTaskLater(BedwarsRel.getInstance(), 10L);
-
       } else {
-        p.teleport(location);
+        player.teleport(location);
       }
     }
 
@@ -1939,8 +1943,8 @@ public class Game {
 
       @Override
       public void run() {
-        Game.this.setPlayerGameMode(p);
-        Game.this.setPlayerVisibility(p);
+        Game.this.setPlayerGameMode(player);
+        Game.this.setPlayerVisibility(player);
       }
 
     }.runTaskLater(BedwarsRel.getInstance(), 15L);
@@ -1950,24 +1954,23 @@ public class Game {
     ItemMeta im = leaveGame.getItemMeta();
     im.setDisplayName(BedwarsRel._l(player, "lobby.leavegame"));
     leaveGame.setItemMeta(im);
-    p.getInventory().setItem(8, leaveGame);
+    player.getInventory().setItem(8, leaveGame);
 
     if (this.getCycle() instanceof BungeeGameCycle && this.getCycle().isEndGameRunning()
         && BedwarsRel.getInstance().getBooleanConfig("bungeecord.endgame-in-lobby", true)) {
-      p.updateInventory();
+      player.updateInventory();
       return;
     }
 
     // Teleport to player (Compass)
-    ItemStack teleportPlayer = new ItemStack(Material.COMPASS, 1);
-    im = teleportPlayer.getItemMeta();
-    im.setDisplayName(BedwarsRel._l(p, "ingame.spectate"));
-    teleportPlayer.setItemMeta(im);
-    p.getInventory().setItem(0, teleportPlayer);
+    ItemStack compass = new ItemStack(Material.COMPASS, 1);
+    im = compass.getItemMeta();
+    im.setDisplayName(BedwarsRel._l(player, "ingame.spectate"));
+    compass.setItemMeta(im);
+    player.getInventory().setItem(0, compass);
 
-    p.updateInventory();
+    player.updateInventory();
     this.updateScoreboard();
-
   }
 
   private void updateLobbyScoreboard() {
@@ -2131,6 +2134,8 @@ public class Game {
       @Override
       public void run() {
         if (Game.this.getState() == GameState.RUNNING) {
+          Location location = Game.this.getPlayerTeam(player).getSpawnLocation();
+          Game.this.setTeleportingIfWorldChange(player, location);
           player.teleport(Game.this.getPlayerTeam(player).getSpawnLocation());
           player.setGameMode(GameMode.SURVIVAL);
           Game.this.setPlayerVirtuallyAlive(player, true);
@@ -2167,8 +2172,8 @@ public class Game {
     }
 
     PlayerStorage storage = this.getPlayerStorage(player);
-    storage.clean();
-    storage.prepareForBattle();
+    storage.clean(false);
+    storage.respawn();
 
     this.setPlayerVirtuallyAlive(player, false);
 
@@ -2181,6 +2186,8 @@ public class Game {
     }
 
     player.setGameMode(GameMode.SPECTATOR);
+    Location location = this.getTopMiddle();
+    this.setTeleportingIfWorldChange(player, location);
     player.teleport(this.getTopMiddle());
 
     if (this.getState() == GameState.RUNNING
@@ -2191,21 +2198,12 @@ public class Game {
   }
 
   private void setPlayerVirtuallyAlive(Player player, boolean alive) {
-    PlayerFlags flags = this.getOrCreatePlayerFlags(player);
+    PlayerFlags flags = this.getPlayerFlags(player);
     flags.setVirtuallyAlive(alive);
   }
 
-  private PlayerFlags getOrCreatePlayerFlags(Player player) {
-    PlayerFlags flags = this.playersFlags.get(player);
-    if (flags == null) {
-      flags = new PlayerFlags();
-      this.playersFlags.put(player, flags);
-    }
-    return flags;
-  }
-
   public boolean isPlayerVirtuallyAlive(Player player) {
-    PlayerFlags flags = this.playersFlags.get(player);
+    PlayerFlags flags = this.getPlayerStorage(player).getFlags();
     return (flags == null || flags.isVirtuallyAlive());
   }
 

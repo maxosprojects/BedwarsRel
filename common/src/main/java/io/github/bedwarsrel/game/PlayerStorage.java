@@ -4,10 +4,13 @@ import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsOpenTeamSelectionEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 
+import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
+import io.github.bedwarsrel.shop.upgrades.Upgrade;
+import io.github.bedwarsrel.shop.upgrades.UpgradeCycle;
 import java.util.*;
 
-import io.github.bedwarsrel.shop.Specials.ArmorPurchaseEnum;
-import io.github.bedwarsrel.shop.Specials.PermanentItemEnum;
+import java.util.Map.Entry;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -22,11 +25,9 @@ import org.bukkit.material.Wool;
 import org.bukkit.potion.PotionEffect;
 
 public class PlayerStorage {
-
   private ItemStack[] armor = null;
-  private ArmorPurchaseEnum inGameArmor = ArmorPurchaseEnum.LEATHER;
-  private Set<PermanentItemEnum> permanentItems = new HashSet<>();
   private String displayName = null;
+  private Map<Class<? extends Upgrade>, List<Upgrade>> upgrades = new HashMap<>();
   private Collection<PotionEffect> effects = null;
   private int foodLevel = 0;
   private ItemStack[] inventory = null;
@@ -36,11 +37,13 @@ public class PlayerStorage {
   private GameMode mode = null;
   private Player player = null;
   private float xp = 0.0F;
+  @Getter
+  private PlayerFlags flags;
 
   public PlayerStorage(Player p) {
     super();
-
     this.player = p;
+    this.flags = new PlayerFlags(this.player);
   }
 
   public void addGameStartItem() {
@@ -59,15 +62,32 @@ public class PlayerStorage {
     this.player.getInventory().addItem(reduceCountdownItem);
   }
 
-  public void clean() {
+  public void clean(boolean deep) {
+    this.flags = new PlayerFlags(this.player);
 
     PlayerInventory inv = this.player.getInventory();
     inv.setArmorContents(new ItemStack[4]);
     inv.setContents(new ItemStack[]{});
 
-    this.inGameArmor = ArmorPurchaseEnum.LEATHER;
-    this.permanentItems.clear();
-    this.permanentItems.add(PermanentItemEnum.WOOD_SWORD);
+    Map<Class<? extends Upgrade>, List<Upgrade>> permanent = new HashMap<>();
+    // Preserve permanent items if not deeply cleaned
+    if (!deep) {
+      for (Entry<Class<? extends Upgrade>, List<Upgrade>> entry : this.upgrades.entrySet()) {
+        List<Upgrade> permanentList = permanent.get(entry.getKey());
+        if (permanentList == null) {
+          permanentList = new ArrayList<>();
+        }
+        for (Upgrade upgrade : entry.getValue()) {
+          if (upgrade.isPermanent()) {
+            permanentList.add(upgrade);
+            permanent.put(entry.getKey(), permanentList);
+          }
+        }
+      }
+    }
+    this.upgrades = permanent;
+
+    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
 
     this.player.setAllowFlight(false);
     this.player.setFlying(false);
@@ -89,8 +109,8 @@ public class PlayerStorage {
     String playerListName = this.player.getPlayerListName();
 
     if (overwriteNames || teamnameOnTab) {
-      Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
       if (game != null) {
+
         game.setPlayerGameMode(player);
         Team team = game.getPlayerTeam(this.player);
 
@@ -133,36 +153,20 @@ public class PlayerStorage {
     this.player.updateInventory();
   }
 
-  public ArmorPurchaseEnum getInGameArmor() {
-    return this.inGameArmor;
-  }
-
-  public void setIngameArmor(ArmorPurchaseEnum armor) {
-    this.inGameArmor = armor;
-  }
-
-  public Set<PermanentItemEnum> getPermanentItems() {
-    return Collections.unmodifiableSet(this.permanentItems);
-  }
-
-  public void addPermanentItem(PermanentItemEnum item) {
-    this.permanentItems.add(item);
-  }
-
-  public void prepareForBattle() {
-    for (PermanentItemEnum item : this.permanentItems) {
-      item.equipPlayer(this.player);
+  public void respawn() {
+    for (List<Upgrade> list : this.upgrades.values()) {
+      for (Upgrade upgrade : list) {
+        upgrade.activate(UpgradeScope.PLAYER, UpgradeCycle.RESPAWN);
+      }
+    }
+    Team team = BedwarsRel.getInstance().getGameManager()
+        .getGameOfPlayer(this.player).getPlayerTeam(this.player);
+    for (Upgrade up : team.getUpgrades().values()) {
+      if (up.getApplyTo() == UpgradeScope.PLAYER) {
+        up.activate(UpgradeScope.PLAYER, UpgradeCycle.RESPAWN);
+      }
     }
     this.player.getInventory().setHeldItemSlot(0);
-
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
-    Team team = game.getPlayerTeam(this.player);
-    if (team != null) {
-      this.inGameArmor.equipPlayer(this.player, team);
-      team.getArmorUpgrade().equipPlayer(this.player);
-      team.getSwordUpgrade().equipPlayer(this.player);
-    }
-
     this.player.updateInventory();
   }
 
@@ -299,6 +303,36 @@ public class PlayerStorage {
     this.listName = this.player.getPlayerListName();
     this.displayName = this.player.getDisplayName();
     this.foodLevel = this.player.getFoodLevel();
+  }
+
+  public <T extends Upgrade> List<T> getUpgrades(Class<T> upgradeClass) {
+    return (List<T>) this.upgrades.get(upgradeClass);
+  }
+
+  /**
+   * Replaces any existing upgrade of the same java class
+   * @param upgrade
+   * @param <T>
+   */
+  public <T extends Upgrade> void setUpgrade(T upgrade) {
+    List<Upgrade> list = new ArrayList<>();
+    list.add(upgrade);
+    this.upgrades.put(upgrade.getClass(), list);
+  }
+
+  /**
+   * Adds an upgrade.
+   * Multiple upgrades of the same java class are possible
+   * @param upgrade
+   * @param <T>
+   */
+  public <T extends Upgrade> void addUpgrade(T upgrade) {
+    List<Upgrade> list = this.upgrades.get(upgrade.getClass());
+    if (list == null) {
+      list = new ArrayList<>();
+      this.upgrades.put(upgrade.getClass(), list);
+    }
+    list.add(upgrade);
   }
 
 }

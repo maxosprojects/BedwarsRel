@@ -20,6 +20,20 @@
       <systemPath>${pom.basedir}/../lib/HolographicDisplaysAPI_v2.1.7.jar</systemPath>
     </dependency>
     <dependency>
+      <groupId>com.comphenix</groupId>
+      <artifactId>protocol</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${pom.basedir}/../lib/ProtocolLib.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.comphenix</groupId>
+      <artifactId>wrapper</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${pom.basedir}/../lib/PacketWrapper.jar</systemPath>
+    </dependency>
+    <dependency>
       <groupId>org.inventivetalent</groupId>
       <artifactId>hologramapi</artifactId>
       <version>1.6.0</version>

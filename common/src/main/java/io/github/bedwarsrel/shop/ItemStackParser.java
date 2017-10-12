@@ -1,4 +1,4 @@
-package io.github.bedwarsrel.villager;
+package io.github.bedwarsrel.shop;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.utils.Utils;
