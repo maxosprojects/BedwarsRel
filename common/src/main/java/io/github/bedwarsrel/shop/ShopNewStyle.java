@@ -25,13 +25,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class NewItemShop {
+public class ShopNewStyle {
 
   private final Player player;
   private List<MerchantCategory> categories = null;
   private MerchantCategory currentCategory = null;
 
-  public NewItemShop(List<MerchantCategory> categories, Player player) {
+  public ShopNewStyle(List<MerchantCategory> categories, Player player) {
     this.categories = categories;
     this.player = player;
   }
@@ -57,10 +57,10 @@ public class NewItemShop {
 
   // Caller must ensure that the player has enough resources to pay for the item.
   @SuppressWarnings("unchecked")
-  private boolean buyItem(VillagerTrade trade) {
+  private boolean buyItem(ShopTrade trade) {
     PlayerInventory inventory = this.player.getInventory();
     boolean success = true;
-    Reward reward = trade.getReward();
+    ShopReward reward = trade.getReward();
     boolean isVirtualItem = SpecialItem.isVirtualRepresentation(reward);
 
     if (isVirtualItem) {
@@ -238,9 +238,9 @@ public class NewItemShop {
     return size;
   }
 
-  private VillagerTrade getTradingItem(int slot) {
+  private ShopTrade getTradingItem(int slot) {
     int count = this.calcInventorySizeForItems(this.getAccessibleNumberOfCategories());
-    for (VillagerTrade trade : this.currentCategory.getOffers()) {
+    for (ShopTrade trade : this.currentCategory.getOffers()) {
       if (count == slot) {
         return trade;
       }
@@ -251,7 +251,7 @@ public class NewItemShop {
 
   private void handleBuyClick(InventoryClickEvent event, Game game) {
     int cats = this.getAccessibleNumberOfCategories();
-    List<VillagerTrade> offers = this.currentCategory.getOffers();
+    List<ShopTrade> offers = this.currentCategory.getOffers();
     int items = offers.size();
     int size = this.getBuyInventorySize(cats, items);
 
@@ -290,7 +290,7 @@ public class NewItemShop {
         return;
       }
 
-      VillagerTrade trade = this.getTradingItem(slot);
+      ShopTrade trade = this.getTradingItem(slot);
 
       if (trade == null) {
         return;
@@ -382,7 +382,7 @@ public class NewItemShop {
     }
   }
 
-  private boolean hasEnoughResources(VillagerTrade trade) {
+  private boolean hasEnoughResources(ShopTrade trade) {
     ItemStack item1 = trade.getItem1();
     ItemStack item2 = trade.getItem2();
     PlayerInventory inventory = this.player.getInventory();
@@ -414,7 +414,7 @@ public class NewItemShop {
   }
 
   private void openBuyInventory(MerchantCategory category, Game game) {
-    List<VillagerTrade> offers = category.getOffers();
+    List<ShopTrade> offers = category.getOffers();
     int cats = this.getAccessibleNumberOfCategories();
     int items = offers.size();
     int size = this.getBuyInventorySize(cats, items);
@@ -428,7 +428,7 @@ public class NewItemShop {
     this.addCategoriesToInventory(buyInventory, game);
 
     for (int i = 0; i < offers.size(); i++) {
-      VillagerTrade trade = offers.get(i);
+      ShopTrade trade = offers.get(i);
       if (trade.getItem1().getType() == Material.AIR
           && trade.getReward().getItem().getType() == Material.AIR) {
         continue;
@@ -490,7 +490,7 @@ public class NewItemShop {
   }
 
   @SuppressWarnings("deprecation")
-  private ItemStack toItemStack(VillagerTrade trade, Game game) {
+  private ItemStack toItemStack(ShopTrade trade, Game game) {
     ItemStack tradeStack = trade.getReward().getItem().clone();
     Method colorable = Utils.getColorableMethod(tradeStack.getType());
     ItemMeta meta = tradeStack.getItemMeta();

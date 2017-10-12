@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.shop.Reward;
+import io.github.bedwarsrel.shop.ShopReward;
 import io.github.bedwarsrel.utils.ChatWriter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -68,7 +68,7 @@ public class ArmorUpgrade extends SpecialItem implements VirtualItem, Upgrade {
     }
 
     @Override
-    public boolean isRepresentation(Reward holder) {
+    public boolean isRepresentation(ShopReward holder) {
         return holder.isUpgrade() && holder.getUpgrade().getScope() == this.getScope();
     }
 

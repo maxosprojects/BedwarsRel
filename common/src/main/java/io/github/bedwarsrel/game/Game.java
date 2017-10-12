@@ -9,7 +9,7 @@ import io.github.bedwarsrel.events.BedwarsPlayerJoinedEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerLeaveEvent;
 import io.github.bedwarsrel.events.BedwarsSaveGameEvent;
 import io.github.bedwarsrel.events.BedwarsTargetBlockDestroyedEvent;
-import io.github.bedwarsrel.shop.NewItemShop;
+import io.github.bedwarsrel.shop.ShopNewStyle;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
@@ -82,7 +82,7 @@ public class Game {
   private int minPlayers = 0;
   private String name = null;
   // Itemshops
-  private HashMap<Player, NewItemShop> newItemShops = new HashMap<>();
+  private HashMap<Player, ShopNewStyle> newItemShops = new HashMap<>();
   private List<MerchantCategory> shopCatsList = null;
   private Map<Player, DamageHolder> playerDamages = null;
   private Map<Player, BukkitTask> waitingRespawn = new HashMap<>();
@@ -1020,10 +1020,10 @@ public class Game {
     }
   }
 
-  public NewItemShop getNewItemShop(Player player) {
-    NewItemShop shop = this.newItemShops.get(player);
+  public ShopNewStyle getNewItemShop(Player player) {
+    ShopNewStyle shop = this.newItemShops.get(player);
     if (shop == null) {
-      shop = new NewItemShop(this.shopCatsList, player);
+      shop = new ShopNewStyle(this.shopCatsList, player);
       this.newItemShops.put(player, shop);
     }
     return shop;

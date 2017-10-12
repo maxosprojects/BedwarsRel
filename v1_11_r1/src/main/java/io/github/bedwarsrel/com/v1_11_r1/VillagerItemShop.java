@@ -4,7 +4,7 @@ import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.utils.Utils;
 import io.github.bedwarsrel.shop.MerchantCategory;
-import io.github.bedwarsrel.shop.VillagerTrade;
+import io.github.bedwarsrel.shop.ShopTrade;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +71,7 @@ public class VillagerItemShop {
           // set location
           List<MerchantRecipe> recipeList = new ArrayList<MerchantRecipe>();
 
-          for (VillagerTrade trade : VillagerItemShop.this.category
+          for (ShopTrade trade : VillagerItemShop.this.category
               .getFilteredOffers()) {
             ItemStack reward = trade.getReward().getItem();
             Method colorable = Utils.getColorableMethod(reward.getType());

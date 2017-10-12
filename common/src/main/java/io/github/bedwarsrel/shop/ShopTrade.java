@@ -2,19 +2,19 @@ package io.github.bedwarsrel.shop;
 
 import org.bukkit.inventory.ItemStack;
 
-public class VillagerTrade {
+public class ShopTrade {
 
   private ItemStack item1;
   private ItemStack item2;
-  private Reward reward;
+  private ShopReward reward;
 
-  public VillagerTrade(ItemStack item1, ItemStack item2, Reward reward) {
+  public ShopTrade(ItemStack item1, ItemStack item2, ShopReward reward) {
     this.item1 = item1;
     this.item2 = item2;
     this.reward = reward;
   }
 
-  public VillagerTrade(ItemStack item1, Reward reward) {
+  public ShopTrade(ItemStack item1, ShopReward reward) {
     this(item1, null, reward);
   }
 
@@ -44,7 +44,7 @@ public class VillagerTrade {
     return this.item2;
   }
 
-  public Reward getReward() {
+  public ShopReward getReward() {
     return this.reward;
   }
 

@@ -2,7 +2,7 @@ package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.shop.Reward;
+import io.github.bedwarsrel.shop.ShopReward;
 import org.bukkit.entity.Player;
 
 public interface VirtualItem {
@@ -23,5 +23,5 @@ public interface VirtualItem {
      */
     boolean init();
 
-    boolean isRepresentation(Reward holder);
+    boolean isRepresentation(ShopReward holder);
 }

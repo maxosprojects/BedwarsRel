@@ -3,7 +3,7 @@ package io.github.bedwarsrel.shop.Specials;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.shop.Reward;
+import io.github.bedwarsrel.shop.ShopReward;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.SoundMachine;
 import io.github.bedwarsrel.utils.TitleWriter;
@@ -167,7 +167,7 @@ public class BaseAlarm extends SpecialItem implements VirtualItem {
     }
 
     @Override
-    public boolean isRepresentation(Reward holder) {
+    public boolean isRepresentation(ShopReward holder) {
         ItemStack item = holder.getItem();
         return item != null && item.getType() == Material.TRIPWIRE_HOOK;
     }

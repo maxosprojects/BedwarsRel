@@ -8,7 +8,7 @@ import io.github.bedwarsrel.game.DamageHolder;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.shop.NewItemShop;
+import io.github.bedwarsrel.shop.ShopNewStyle;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.shop.MerchantCategory;
 import java.lang.reflect.Method;
@@ -140,7 +140,7 @@ public class PlayerListener extends BaseListener {
     if (game.getPlayerFlags(player).isUseOldShop()) {
       MerchantCategory.openCategorySelection(player, game);
     } else {
-      NewItemShop itemShop = game.getNewItemShop(player);
+      ShopNewStyle itemShop = game.getNewItemShop(player);
       itemShop.openInventory();
     }
   }
@@ -662,7 +662,7 @@ public class PlayerListener extends BaseListener {
           game.getPlayerFlags(player).setUseOldShop(false);
 
           // open new shop
-          NewItemShop itemShop = game.getNewItemShop(player);
+          ShopNewStyle itemShop = game.getNewItemShop(player);
           itemShop.setCurrentCategory(null);
           itemShop.openInventory();
           return;

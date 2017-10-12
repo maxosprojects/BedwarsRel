@@ -1,7 +1,7 @@
 package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.shop.Reward;
+import io.github.bedwarsrel.shop.ShopReward;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,7 +78,7 @@ public abstract class SpecialItem {
 
   public abstract Material getItemMaterial();
 
-  private static VirtualItem getVirtualItemBuilder(Reward holder) {
+  private static VirtualItem getVirtualItemBuilder(ShopReward holder) {
     for (VirtualItem virtualItem : virtualItems) {
       if (virtualItem.isRepresentation(holder)) {
         return virtualItem;
@@ -87,7 +87,7 @@ public abstract class SpecialItem {
     return null;
   }
 
-  public static boolean isVirtualRepresentation(Reward holder) {
+  public static boolean isVirtualRepresentation(ShopReward holder) {
     VirtualItem builder = getVirtualItemBuilder(holder);
     if (builder == null) {
       return false;
@@ -95,7 +95,7 @@ public abstract class SpecialItem {
     return true;
   }
 
-  public static VirtualItem newVirtualInstance(Player player, Reward holder) {
+  public static VirtualItem newVirtualInstance(Player player, ShopReward holder) {
     VirtualItem builder = getVirtualItemBuilder(holder);
     if (builder == null) {
       return null;

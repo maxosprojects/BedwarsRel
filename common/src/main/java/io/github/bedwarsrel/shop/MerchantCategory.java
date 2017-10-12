@@ -24,14 +24,14 @@ public class MerchantCategory {
 
   private ItemStack button = null;
   private String name = null;
-  private ArrayList<VillagerTrade> offers = null;
+  private ArrayList<ShopTrade> offers = null;
   private String permission = null;
 
   public MerchantCategory(String name, ItemStack button) {
-    this(name, button, new ArrayList<VillagerTrade>(), "bw.base");
+    this(name, button, new ArrayList<ShopTrade>(), "bw.base");
   }
 
-  public MerchantCategory(String name, ItemStack button, ArrayList<VillagerTrade> offers, String permission) {
+  public MerchantCategory(String name, ItemStack button, ArrayList<ShopTrade> offers, String permission) {
     this.name = name;
     this.button = button;
     this.offers = offers;
@@ -100,15 +100,15 @@ public class MerchantCategory {
         permission = (String) cat.get("permission");
       }
 
-      ArrayList<VillagerTrade> offers = new ArrayList<VillagerTrade>();
+      ArrayList<ShopTrade> offers = new ArrayList<ShopTrade>();
 
       for (Object offer : (List<Object>)cat.get("offers")) {
         if (offer instanceof String) {
           if (offer.toString().equalsIgnoreCase("empty")
               || offer.toString().equalsIgnoreCase("null")
               || offer.toString().equalsIgnoreCase("e")) {
-            VillagerTrade trade = new VillagerTrade(new ItemStack(Material.AIR, 1),
-                    new Reward(new ItemStack(Material.AIR, 1), null));
+            ShopTrade trade = new ShopTrade(new ItemStack(Material.AIR, 1),
+                    new ShopReward(new ItemStack(Material.AIR, 1), null));
             offers.add(trade);
           }
           continue;
@@ -153,14 +153,14 @@ public class MerchantCategory {
         } catch (Exception e) {
           logParseError(catName);
         }
-        Reward reward = new Reward(rewardButton, upgrade);
+        ShopReward reward = new ShopReward(rewardButton, upgrade);
 
         if (item1 == null || rewardButton == null) {
           logParseError(catName);
           continue;
         }
 
-        offers.add(new VillagerTrade(item1, item2, reward));
+        offers.add(new ShopTrade(item1, item2, reward));
       }
 
       res.add(new MerchantCategory(catName, catButton, offers, permission));
@@ -230,12 +230,12 @@ public class MerchantCategory {
   }
 
   @SuppressWarnings("unchecked")
-  public ArrayList<VillagerTrade> getFilteredOffers() {
-    ArrayList<VillagerTrade> trades = (ArrayList<VillagerTrade>) this.offers.clone();
-    Iterator<VillagerTrade> iterator = trades.iterator();
+  public ArrayList<ShopTrade> getFilteredOffers() {
+    ArrayList<ShopTrade> trades = (ArrayList<ShopTrade>) this.offers.clone();
+    Iterator<ShopTrade> iterator = trades.iterator();
 
     while (iterator.hasNext()) {
-      VillagerTrade trade = iterator.next();
+      ShopTrade trade = iterator.next();
       if (trade.getItem1().getType() == Material.AIR
           && trade.getReward().getItem().getType() == Material.AIR) {
         iterator.remove();
@@ -249,7 +249,7 @@ public class MerchantCategory {
     return this.name;
   }
 
-  public ArrayList<VillagerTrade> getOffers() {
+  public ArrayList<ShopTrade> getOffers() {
     return this.offers;
   }
 

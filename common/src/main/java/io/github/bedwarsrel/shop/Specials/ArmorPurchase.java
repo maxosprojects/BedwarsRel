@@ -5,7 +5,7 @@ import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.PlayerStorage;
 import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.shop.Reward;
+import io.github.bedwarsrel.shop.ShopReward;
 import io.github.bedwarsrel.utils.ChatWriter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -67,7 +67,7 @@ public class ArmorPurchase extends SpecialItem implements VirtualItem {
     }
 
     @Override
-    public boolean isRepresentation(Reward holder) {
+    public boolean isRepresentation(ShopReward holder) {
         ItemStack item = holder.getItem();
         return item != null && item.getType() == purchase.getRepresentation();
     }

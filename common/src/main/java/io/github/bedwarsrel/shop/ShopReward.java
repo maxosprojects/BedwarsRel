@@ -5,7 +5,7 @@ import lombok.Data;
 import org.bukkit.inventory.ItemStack;
 
 @Data
-public class Reward {
+public class ShopReward {
   private final ItemStack item;
   private final Upgrade upgrade;
 
