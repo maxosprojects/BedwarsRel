@@ -87,7 +87,7 @@ public class Game {
   private Map<Player, DamageHolder> playerDamages = null;
   private Map<Player, BukkitTask> waitingRespawn = new HashMap<>();
   private Map<Player, PlayerFlags> playerFlags = new HashMap<>();
-  private HashMap<Player, PlayerStorage> playerStorages = null;
+  private Map<Player, PlayerStorage> playerStorages = new HashMap<>();
   private List<Team> playingTeams = null;
   private int record = 0;
   private List<String> recordHolders = null;
@@ -116,7 +116,6 @@ public class Game {
     this.teams = new HashMap<String, Team>();
     this.playingTeams = new ArrayList<Team>();
 
-    this.playerStorages = new HashMap<Player, PlayerStorage>();
     this.state = GameState.STOPPED;
     this.scoreboard = BedwarsRel.getInstance().getScoreboardManager().getNewScoreboard();
 
@@ -183,13 +182,6 @@ public class Game {
 
     this.joinSigns.put(signLocation, new GameJoinSign(this, signLocation));
     this.updateSignConfig();
-  }
-
-  public PlayerStorage addPlayerStorage(Player p) {
-    PlayerStorage storage = new PlayerStorage(p);
-    this.playerStorages.put(p, storage);
-
-    return storage;
   }
 
   public RespawnProtectionRunnable addProtection(Player player) {
@@ -655,11 +647,21 @@ public class Game {
   }
 
   public PlayerFlags getPlayerFlags(Player player) {
-    return this.playerFlags.get(player);
+    PlayerFlags flags = this.playerFlags.get(player);
+    if (flags == null) {
+      flags = new PlayerFlags(player);
+      this.playersFlags.put(player, flags);
+    }
+    return flags;
   }
 
-  public PlayerStorage getPlayerStorage(Player p) {
-    return this.playerStorages.get(p);
+  public PlayerStorage getPlayerStorage(Player player) {
+    PlayerStorage storage = this.playerStorages.get(player);
+    if (storage == null) {
+      storage = new PlayerStorage(player);
+      this.playerStorages.put(player, storage);
+    }
+    return storage;
   }
 
   public Team getPlayerTeam(Player p) {
@@ -1093,7 +1095,8 @@ public class Game {
   }
 
   public boolean playerJoins(final Player p) {
-
+    // Add storage if doesn't exist
+    PlayerStorage storage = this.getPlayerStorage(p);
     if (this.state == GameState.STOPPED
         || (this.state == GameState.RUNNING && !BedwarsRel.getInstance().spectationEnabled())) {
       if (this.cycle instanceof BungeeGameCycle) {
@@ -1137,9 +1140,6 @@ public class Game {
     // add damager and set it to null
     this.playerDamages.put(p, null);
 
-    // add player settings
-    this.getOrCreatePlayerFlags(p);
-
     new BukkitRunnable() {
 
       @Override
@@ -1156,8 +1156,6 @@ public class Game {
       this.toSpectator(p);
       this.displayMapInfo(p);
     } else {
-
-      PlayerStorage storage = this.addPlayerStorage(p);
       storage.store();
       storage.clean();
 
@@ -1889,14 +1887,13 @@ public class Game {
       this.freePlayers.add(player);
     }
 
-    PlayerStorage storage = this.getPlayerStorage(player);
-    if (storage != null) {
-      storage.clean();
-    } else {
-      storage = this.addPlayerStorage(player);
+    // Check if exists and then initialize if needed
+    if (this.playerStorages.get(player) == null) {
+      PlayerStorage storage = this.getPlayerStorage(player);
       storage.store();
-      storage.clean();
     }
+    PlayerStorage storage = this.getPlayerStorage(player);
+    storage.clean();
 
     final Location location = this.getPlayerTeleportLocation(p);
 
@@ -2173,17 +2170,8 @@ public class Game {
   }
 
   private void setPlayerVirtuallyAlive(Player player, boolean alive) {
-    PlayerFlags flags = this.getOrCreatePlayerFlags(player);
+    PlayerFlags flags = this.getPlayerFlags(player);
     flags.setVirtuallyAlive(alive);
-  }
-
-  private PlayerFlags getOrCreatePlayerFlags(Player player) {
-    PlayerFlags flags = this.playersFlags.get(player);
-    if (flags == null) {
-      flags = new PlayerFlags(player);
-      this.playersFlags.put(player, flags);
-    }
-    return flags;
   }
 
   public boolean isPlayerVirtuallyAlive(Player player) {
