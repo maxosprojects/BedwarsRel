@@ -27,6 +27,7 @@ import io.github.bedwarsrel.listener.events.PlayerPickUpItemEventListener;
 import io.github.bedwarsrel.listener.events.PlayerSwapHandItemsEventListener;
 import io.github.bedwarsrel.localization.LocalizationConfig;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
+import io.github.bedwarsrel.shop.upgrades.UpgradeRegistry;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.statistics.PlayerStatisticManager;
 import io.github.bedwarsrel.statistics.StorageType;
@@ -869,6 +870,7 @@ public class BedwarsRel extends JavaPlugin {
     }
 
     SpecialItem.loadSpecials();
+    UpgradeRegistry.loadUpgrades();
   }
 
   public void reloadLocalization() {

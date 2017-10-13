@@ -1,21 +1,17 @@
 package io.github.bedwarsrel.shop;
 
 import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
-import io.github.bedwarsrel.shop.Specials.Upgrade;
-import io.github.bedwarsrel.utils.Utils;
+import io.github.bedwarsrel.shop.upgrades.Upgrade;
+import io.github.bedwarsrel.shop.upgrades.UpgradeRegistry;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -140,11 +136,11 @@ public class MerchantCategory {
         Upgrade upgrade = null;
         try {
           Map<String, Object> rewardElem = (Map<String, Object>) offerSection.get("reward");
-          if (rewardElem.containsKey("button")) {
+          if (rewardElem.containsKey("upgrade")) {
             rewardButton = color(ItemStack.deserialize(
                 (Map<String, Object>) rewardElem.get("button")));
             Map<String, Object> upgradeElem = (Map<String, Object>) rewardElem.get("upgrade");
-            upgrade = SpecialItem.getUpgrade(
+            upgrade = UpgradeRegistry.getUpgrade(
                 (String)upgradeElem.get("type"), (int)upgradeElem.get("level"));
           } else {
             rewardButton = color(setResourceName(ItemStack.deserialize(
@@ -167,37 +163,6 @@ public class MerchantCategory {
     }
 
     return res;
-  }
-
-  @SuppressWarnings("deprecation")
-  public static void openCategorySelection(Player player, Game game) {
-    if (player == null) {
-      return;
-    }
-    List<MerchantCategory> cats = game.getShopCatList();
-
-    int part = cats.size() % 9;
-    // Complete lines
-    int size = cats.size() / 9 * 9;
-    if (part > 0) {
-      size += 9;
-    }
-
-    Inventory inv = Bukkit.createInventory(player, size, BedwarsRel._l(player, "ingame.shop.name"));
-    for (MerchantCategory cat : cats) {
-      if (!player.hasPermission(cat.getPermission())) {
-        continue;
-      }
-      ItemStack is = cat.getButton().clone();
-      ItemMeta im = is.getItemMeta();
-      if (Utils.isColorable(is)) {
-        is.setDurability(game.getPlayerTeam(player).getColor().getDyeColor().getWoolData());
-      }
-      is.setItemMeta(im);
-      inv.addItem(is);
-    }
-
-    player.openInventory(inv);
   }
 
   @SuppressWarnings("deprecation")

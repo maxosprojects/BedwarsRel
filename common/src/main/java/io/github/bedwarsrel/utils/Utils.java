@@ -348,7 +348,6 @@ public final class Utils {
       Integer.parseInt(numberString);
       return true;
     } catch (Exception ex) {
-      // NO ERROR
       return false;
     }
   }

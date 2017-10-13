@@ -1,4 +1,4 @@
-package io.github.bedwarsrel.shop.Specials;
+package io.github.bedwarsrel.shop.upgrades;
 
 import io.github.bedwarsrel.game.Team;
 import org.bukkit.Material;
@@ -7,24 +7,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public enum ArmorUpgradeEnum implements UpgradeEnum {
-    PROTECTION0(null, 0, ""),
-    PROTECTION1(Material.CHAINMAIL_CHESTPLATE, 1, "protection1"),
-    PROTECTION2(Material.IRON_CHESTPLATE, 2, "protection2"),
-    PROTECTION3(Material.GOLD_CHESTPLATE, 3, "protection3"),
-    PROTECTION4(Material.DIAMOND_CHESTPLATE, 4, "protection4");
+public enum UpgradeSwordEnum implements UpgradeEnum {
+    SHARPNESS0(null, 0, ""),
+    SHARPNESS1(Material.GOLD_SWORD, 1, "sharpness1");
 
     private final Material representation;
     private final int level;
     private final String translationKey;
 
-    ArmorUpgradeEnum(Material representation, int level, String translationKey) {
+    UpgradeSwordEnum(Material representation, int level, String translationKey) {
         this.representation = representation;
         this.level = level;
         this.translationKey = translationKey;
     }
 
-    public boolean isHigherThan(ArmorUpgradeEnum purchase) {
+    public boolean isHigherThan(UpgradeSwordEnum purchase) {
         return this.ordinal() > purchase.ordinal();
     }
 
@@ -46,8 +43,16 @@ public enum ArmorUpgradeEnum implements UpgradeEnum {
         if (this.level == 0) {
             return;
         }
-        Enchantment enchant = Enchantment.PROTECTION_ENVIRONMENTAL;
-        for (ItemStack item : player.getInventory().getArmorContents()) {
+        Enchantment enchant = Enchantment.DAMAGE_ALL;
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null
+                || (item.getType() != Material.WOOD_SWORD
+                    && item.getType() != Material.STONE_SWORD
+                    && item.getType() != Material.IRON_SWORD
+                    && item.getType() != Material.GOLD_SWORD
+                    && item.getType() != Material.DIAMOND_SWORD)) {
+                continue;
+            }
             ItemMeta meta = item.getItemMeta();
             meta.removeEnchant(enchant);
             meta.addEnchant(enchant, this.level, true);
@@ -56,7 +61,7 @@ public enum ArmorUpgradeEnum implements UpgradeEnum {
         player.updateInventory();
     }
 
-    public int getLevel() {
-        return level;
-    }
+  public int getLevel() {
+    return level;
+  }
 }

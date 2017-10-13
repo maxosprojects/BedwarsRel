@@ -3,8 +3,6 @@ package io.github.bedwarsrel.game;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsGameEndEvent;
-import io.github.bedwarsrel.shop.Specials.ArmorUpgradeEnum;
-import io.github.bedwarsrel.shop.Specials.SwordUpgradeEnum;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.Utils;
@@ -34,9 +32,11 @@ public class SingleGameCycle extends GameCycle {
         this.getGame().playerLeave(player, false);
         return;
       } else {
+        this.getGame().getPlayerFlags(player).setTeleporting(true);
         player.teleport(this.getGame().getLobby());
       }
     } else {
+      this.getGame().getPlayerFlags(player).setTeleporting(true);
       player.teleport(this.getGame().getLobby());
     }
 
@@ -214,6 +214,7 @@ public class SingleGameCycle extends GameCycle {
         BedwarsRel.getInstance().getHolographicInteractor().updateHolograms(player);
       }
 
+      this.getGame().getPlayerFlags(player).setTeleporting(true);
       player.teleport(this.getGame().getMainLobby());
     } else {
       if (BedwarsRel.getInstance().isHologramsEnabled()
@@ -222,6 +223,7 @@ public class SingleGameCycle extends GameCycle {
         BedwarsRel.getInstance().getHolographicInteractor().updateHolograms(player);
       }
 
+      this.getGame().getPlayerFlags(player).setTeleporting(true);
       player.teleport(storage.getLeft());
     }
 

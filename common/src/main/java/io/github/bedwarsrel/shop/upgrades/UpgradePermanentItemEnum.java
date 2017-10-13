@@ -1,23 +1,23 @@
-package io.github.bedwarsrel.shop.Specials;
+package io.github.bedwarsrel.shop.upgrades;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public enum PermanentItemEnum {
+public enum UpgradePermanentItemEnum {
     WOOD_SWORD(Material.WOOD_SWORD, "wood-sword"),
     SHEARS(Material.SHEARS, "shears");
 
     private final Material representation;
     private final String translationKey;
 
-    PermanentItemEnum(Material representation, String translationKey) {
+    UpgradePermanentItemEnum(Material representation, String translationKey) {
         this.representation = representation;
         this.translationKey = translationKey;
     }
 
-    public boolean isHigherThan(PermanentItemEnum purchase) {
+    public boolean isHigherThan(UpgradePermanentItemEnum purchase) {
         return this.ordinal() > purchase.ordinal();
     }
 

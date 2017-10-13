@@ -4,12 +4,15 @@ import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsOpenTeamSelectionEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 
-import io.github.bedwarsrel.shop.Specials.ArmorUpgradeEnum;
-import io.github.bedwarsrel.shop.Specials.SwordUpgradeEnum;
+import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
+import io.github.bedwarsrel.shop.upgrades.UpgradeArmorItems;
+import io.github.bedwarsrel.shop.upgrades.UpgradePermanentItem;
+import io.github.bedwarsrel.shop.upgrades.Upgrade;
+import io.github.bedwarsrel.shop.upgrades.UpgradeCycle;
 import java.util.*;
 
-import io.github.bedwarsrel.shop.Specials.ArmorPurchaseEnum;
-import io.github.bedwarsrel.shop.Specials.PermanentItemEnum;
+import io.github.bedwarsrel.shop.upgrades.UpgradeArmorItemsEnum;
+import io.github.bedwarsrel.shop.upgrades.UpgradePermanentItemEnum;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -26,9 +29,8 @@ import org.bukkit.potion.PotionEffect;
 public class PlayerStorage {
 
   private ItemStack[] armor = null;
-  private ArmorPurchaseEnum inGameArmor = ArmorPurchaseEnum.LEATHER;
-  private Set<PermanentItemEnum> permanentItems = new HashSet<>();
   private String displayName = null;
+  private Map<Class<? extends Upgrade>, List<Upgrade>> upgrades = new HashMap<>();
   private Collection<PotionEffect> effects = null;
   private int foodLevel = 0;
   private ItemStack[] inventory = null;
@@ -62,14 +64,27 @@ public class PlayerStorage {
   }
 
   public void clean() {
-
     PlayerInventory inv = this.player.getInventory();
     inv.setArmorContents(new ItemStack[4]);
     inv.setContents(new ItemStack[]{});
 
-    this.inGameArmor = ArmorPurchaseEnum.LEATHER;
-    this.permanentItems.clear();
-    this.permanentItems.add(PermanentItemEnum.WOOD_SWORD);
+    this.upgrades.clear();
+    List<Upgrade> armor = new ArrayList<>();
+    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
+    if (game != null) {
+      Team team = game.getPlayerTeam(this.player);
+      if (team != null) {
+        armor.add(
+            new UpgradeArmorItems(UpgradeArmorItemsEnum.LEATHER).create(game, team, this.player));
+        this.upgrades.put(UpgradeArmorItems.class, armor);
+        List<Upgrade> permanent = new ArrayList<>();
+        permanent.add(new UpgradePermanentItem(UpgradePermanentItemEnum.WOOD_SWORD)
+            .create(game, team, this.player));
+        this.upgrades.put(UpgradeArmorItems.class, permanent);
+      }
+    }
+
+    System.out.println("Checkpoint 13");
 
     this.player.setAllowFlight(false);
     this.player.setFlying(false);
@@ -90,9 +105,13 @@ public class PlayerStorage {
     String displayName = this.player.getDisplayName();
     String playerListName = this.player.getPlayerListName();
 
+    System.out.println("Checkpoint 14");
+
     if (overwriteNames || teamnameOnTab) {
-      Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
       if (game != null) {
+
+        System.out.println("Checkpoint 15");
+
         game.setPlayerGameMode(player);
         Team team = game.getPlayerTeam(this.player);
 
@@ -103,6 +122,8 @@ public class PlayerStorage {
             displayName = ChatColor.stripColor(this.player.getName());
           }
         }
+
+        System.out.println("Checkpoint 16");
 
         if (teamnameOnTab) {
           if (team != null) {
@@ -117,9 +138,14 @@ public class PlayerStorage {
             new BedwarsPlayerSetNameEvent(team, displayName, playerListName, player);
         BedwarsRel.getInstance().getServer().getPluginManager().callEvent(playerSetNameEvent);
 
+        System.out.println("Checkpoint 17");
+
         if (!playerSetNameEvent.isCancelled()) {
           this.player.setDisplayName(playerSetNameEvent.getDisplayName());
           this.player.setPlayerListName(playerSetNameEvent.getPlayerListName());
+
+          System.out.println("Checkpoint 18");
+
         }
       }
     }
@@ -132,41 +158,18 @@ public class PlayerStorage {
       this.player.removePotionEffect(e.getType());
     }
 
+    System.out.println("Checkpoint 19");
+
     this.player.updateInventory();
   }
 
-  public ArmorPurchaseEnum getInGameArmor() {
-    return this.inGameArmor;
-  }
-
-  public void setIngameArmor(ArmorPurchaseEnum armor) {
-    this.inGameArmor = armor;
-  }
-
-  public Set<PermanentItemEnum> getPermanentItems() {
-    return Collections.unmodifiableSet(this.permanentItems);
-  }
-
-  public void addPermanentItem(PermanentItemEnum item) {
-    this.permanentItems.add(item);
-  }
-
-  public void prepareForBattle() {
-    for (PermanentItemEnum item : this.permanentItems) {
-      item.equipPlayer(this.player);
+  public void respawn() {
+    for (List<Upgrade> list : this.upgrades.values()) {
+      for (Upgrade upgrade : list) {
+        upgrade.activate(UpgradeScope.PLAYER, UpgradeCycle.RESPAWN);
+      }
     }
     this.player.getInventory().setHeldItemSlot(0);
-
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
-    Team team = game.getPlayerTeam(this.player);
-    if (team != null) {
-      this.inGameArmor.equipPlayer(this.player, team);
-      ArmorUpgradeEnum armor = team.getUpgrade(ArmorUpgradeEnum.class);
-      armor.equipPlayer(this.player);
-      SwordUpgradeEnum sword = team.getUpgrade(SwordUpgradeEnum.class);
-      sword.equipPlayer(this.player);
-    }
-
     this.player.updateInventory();
   }
 
@@ -303,6 +306,25 @@ public class PlayerStorage {
     this.listName = this.player.getPlayerListName();
     this.displayName = this.player.getDisplayName();
     this.foodLevel = this.player.getFoodLevel();
+  }
+
+  public <T extends Upgrade> List<T> getUpgrades(Class<T> upgradeClass) {
+    return (List<T>) this.upgrades.get(upgradeClass);
+  }
+
+  public <T extends Upgrade> void setUpgrade(T upgrade) {
+    List<Upgrade> list = new ArrayList<>();
+    list.add(upgrade);
+    this.upgrades.put(upgrade.getClass(), list);
+  }
+
+  public <T extends Upgrade> void addUpgrade(T upgrade) {
+    List<Upgrade> list = this.upgrades.get(upgrade.getClass());
+    if (list == null) {
+      list = new ArrayList<>();
+      this.upgrades.put(upgrade.getClass(), list);
+    }
+    list.add(upgrade);
   }
 
 }

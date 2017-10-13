@@ -9,7 +9,7 @@ import io.github.bedwarsrel.events.BedwarsPlayerJoinedEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerLeaveEvent;
 import io.github.bedwarsrel.events.BedwarsSaveGameEvent;
 import io.github.bedwarsrel.events.BedwarsTargetBlockDestroyedEvent;
-import io.github.bedwarsrel.shop.ShopNewStyle;
+import io.github.bedwarsrel.shop.Shop;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
@@ -82,8 +82,8 @@ public class Game {
   private int minPlayers = 0;
   private String name = null;
   // Itemshops
-  private HashMap<Player, ShopNewStyle> newItemShops = new HashMap<>();
-  private List<MerchantCategory> shopCatsList = null;
+  private HashMap<Player, Shop> shops = new HashMap<>();
+  private List<MerchantCategory> shopCategories = null;
   private Map<Player, DamageHolder> playerDamages = null;
   private Map<Player, BukkitTask> waitingRespawn = new HashMap<>();
   private Map<Player, PlayerFlags> playerFlags = new HashMap<>();
@@ -97,7 +97,6 @@ public class Game {
   private Map<Player, RespawnProtectionRunnable> respawnProtections = null;
   private List<BukkitTask> runningTasks = null;
   private Scoreboard scoreboard = null;
-  private HashMap<String, MerchantCategory> shopCatsMap;
   private List<SpecialItem> specialItems = null;
   private GameState state = null;
   private Material targetMaterial = null;
@@ -317,7 +316,7 @@ public class Game {
 
   private void prepareUsersForBattle() {
     for (PlayerStorage storage : this.playerStorages.values()) {
-      storage.prepareForBattle();
+      storage.respawn();
     }
   }
 
@@ -582,10 +581,6 @@ public class Game {
     return players;
   }
 
-  public HashMap<String, MerchantCategory> getShopCategories() {
-    return this.shopCatsMap;
-  }
-
   public GameLobbyCountdown getLobbyCountdown() {
     return this.gameLobbyCountdown;
   }
@@ -632,10 +627,6 @@ public class Game {
     }
 
     return players;
-  }
-
-  public List<MerchantCategory> getShopCatList() {
-    return this.shopCatsList;
   }
 
   public int getPlayerAmount() {
@@ -977,11 +968,7 @@ public class Game {
   }
 
   public void loadItemShopCategories() {
-    this.shopCatsList = MerchantCategory.loadCategories(BedwarsRel.getInstance().getShopConfig());
-    this.shopCatsMap = new HashMap<>();
-    for (MerchantCategory cat : this.shopCatsList) {
-      this.shopCatsMap.put(cat.getName(), cat);
-    }
+    this.shopCategories = MerchantCategory.loadCategories(BedwarsRel.getInstance().getShopConfig());
   }
 
   private void makeTeamsReady() {
@@ -1020,11 +1007,11 @@ public class Game {
     }
   }
 
-  public ShopNewStyle getNewItemShop(Player player) {
-    ShopNewStyle shop = this.newItemShops.get(player);
+  public Shop getShop(Player player) {
+    Shop shop = this.shops.get(player);
     if (shop == null) {
-      shop = new ShopNewStyle(this.shopCatsList, player);
-      this.newItemShops.put(player, shop);
+      shop = new Shop(this.shopCategories, player);
+      this.shops.put(player, shop);
     }
     return shop;
   }
@@ -1116,6 +1103,9 @@ public class Game {
     BedwarsPlayerJoinEvent joiningEvent = new BedwarsPlayerJoinEvent(this, p);
     BedwarsRel.getInstance().getServer().getPluginManager().callEvent(joiningEvent);
 
+
+    System.out.println("joiningEvent.isCancelled() " + joiningEvent.isCancelled());
+
     if (joiningEvent.isCancelled()) {
       if (joiningEvent.getKickOnCancel()) {
         new BukkitRunnable() {
@@ -1168,17 +1158,22 @@ public class Game {
 
               @Override
               public void run() {
+                Game.this.getPlayerFlags(p).setTeleporting(true);
                 p.teleport(location);
               }
 
             }.runTaskLater(BedwarsRel.getInstance(), 10L);
           } else {
+            System.out.println(location);
+            Game.this.getPlayerFlags(p).setTeleporting(true);
             p.teleport(location);
           }
         }
       }
 
       storage.loadLobbyInventory(this);
+
+      System.out.println("Checkpoint 1");
 
       new BukkitRunnable() {
 
@@ -1204,6 +1199,8 @@ public class Game {
         Team team = this.getLowestTeam();
         team.addPlayer(p);
       }
+
+      System.out.println("Checkpoint 2");
 
       if (BedwarsRel.getInstance().getBooleanConfig("store-game-records", true)) {
         this.displayRecord(p);
@@ -1236,16 +1233,21 @@ public class Game {
       }
     }
 
+    System.out.println("Checkpoint 3");
+
     BedwarsPlayerJoinedEvent joinEvent = new BedwarsPlayerJoinedEvent(this, null, p);
     BedwarsRel.getInstance().getServer().getPluginManager().callEvent(joinEvent);
 
     this.updateScoreboard();
+    System.out.println("Checkpoint 4");
     this.updateSigns();
+    System.out.println("Checkpoint 5");
     return true;
 
   }
 
   public boolean playerLeave(Player p, boolean kicked) {
+    System.out.println("Checkpoint 6");
     this.getPlayerFlags(p).setTeleporting(true);
     Team team = this.getPlayerTeam(p);
 
@@ -1257,6 +1259,7 @@ public class Game {
       statistic = BedwarsRel.getInstance().getPlayerStatisticManager().getStatistic(p);
     }
 
+    System.out.println("Checkpoint 7");
     if (this.isSpectator(p)) {
       if (!this.getCycle().isEndGameRunning()) {
         for (Player player : this.getPlayers()) {
@@ -1294,6 +1297,8 @@ public class Game {
       this.removeProtection(p);
     }
 
+    System.out.println("Checkpoint 8");
+
     this.playerDamages.remove(p);
     if (team != null && BedwarsRel.getInstance().getGameManager().getGameOfPlayer(p) != null
         && !BedwarsRel.getInstance().getGameManager().getGameOfPlayer(p).isSpectator(p)) {
@@ -1327,6 +1332,8 @@ public class Game {
       this.freePlayers.remove(p);
     }
 
+    System.out.println("Checkpoint 9");
+
     if (BedwarsRel.getInstance().isBungee()) {
       this.cycle.onPlayerLeave(p);
     }
@@ -1347,7 +1354,7 @@ public class Game {
       BedwarsRel.getInstance().getPlayerStatisticManager().unloadStatistic(p);
     }
 
-    PlayerStorage storage = this.playerStorages.get(p);
+    PlayerStorage storage = this.getPlayerStorage(p);
     storage.clean();
     storage.restore();
 
@@ -1371,12 +1378,15 @@ public class Game {
       }
     }
 
+    System.out.println("Checkpoint 10");
+
     if (!BedwarsRel.getInstance().isBungee()) {
       this.cycle.onPlayerLeave(p);
     }
 
     this.updateSigns();
     this.playerStorages.remove(p);
+    System.out.println("Checkpoint 11");
     return true;
   }
 
@@ -1386,11 +1396,11 @@ public class Game {
   }
 
   public void removeNewItemShop(Player player) {
-    if (!this.newItemShops.containsKey(player)) {
+    if (!this.shops.containsKey(player)) {
       return;
     }
 
-    this.newItemShops.remove(player);
+    this.shops.remove(player);
   }
 
   public void removePlayerSettings(Player player) {
@@ -1871,10 +1881,11 @@ public class Game {
         }
         player.setVelocity(new Vector(0, 0, 0));
         player.setFallDistance(0.0F);
+        this.getPlayerFlags(player).setTeleporting(true);
         player.teleport(team.getSpawnLocation());
         if (!retainPlayerStorage && this.getPlayerStorage(player) != null) {
           this.getPlayerStorage(player).clean();
-          this.getPlayerStorage(player).prepareForBattle();
+          this.getPlayerStorage(player).respawn();
         }
       }
     }
@@ -1904,12 +1915,14 @@ public class Game {
 
           @Override
           public void run() {
+            Game.this.getPlayerFlags(p).setTeleporting(true);
             p.teleport(location);
           }
 
         }.runTaskLater(BedwarsRel.getInstance(), 10L);
 
       } else {
+        Game.this.getPlayerFlags(p).setTeleporting(true);
         p.teleport(location);
       }
     }
@@ -2110,6 +2123,7 @@ public class Game {
       @Override
       public void run() {
         if (Game.this.getState() == GameState.RUNNING) {
+          Game.this.getPlayerFlags(player).setTeleporting(true);
           player.teleport(Game.this.getPlayerTeam(player).getSpawnLocation());
           player.setGameMode(GameMode.SURVIVAL);
           Game.this.setPlayerVirtuallyAlive(player, true);
@@ -2147,7 +2161,7 @@ public class Game {
 
     PlayerStorage storage = this.getPlayerStorage(player);
     storage.clean();
-    storage.prepareForBattle();
+    storage.respawn();
 
     this.setPlayerVirtuallyAlive(player, false);
 
@@ -2160,6 +2174,7 @@ public class Game {
     }
 
     player.setGameMode(GameMode.SPECTATOR);
+    this.getPlayerFlags(player).setTeleporting(true);
     player.teleport(this.getTopMiddle());
 
     if (this.getState() == GameState.RUNNING

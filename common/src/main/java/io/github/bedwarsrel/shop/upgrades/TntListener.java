@@ -1,4 +1,4 @@
-package io.github.bedwarsrel.shop.Specials;
+package io.github.bedwarsrel.shop.upgrades;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;

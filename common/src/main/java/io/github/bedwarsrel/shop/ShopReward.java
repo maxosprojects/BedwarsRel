@@ -1,6 +1,6 @@
 package io.github.bedwarsrel.shop;
 
-import io.github.bedwarsrel.shop.Specials.Upgrade;
+import io.github.bedwarsrel.shop.upgrades.Upgrade;
 import lombok.Data;
 import org.bukkit.inventory.ItemStack;
 

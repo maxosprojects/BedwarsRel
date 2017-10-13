@@ -1,4 +1,4 @@
-package io.github.bedwarsrel.shop.Specials;
+package io.github.bedwarsrel.shop.upgrades;
 
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.game.TeamColor;
@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-public enum ArmorPurchaseEnum {
+public enum UpgradeArmorItemsEnum {
     LEATHER(Material.LEATHER_LEGGINGS,
             Material.LEATHER_LEGGINGS,
             Material.LEATHER_BOOTS,
@@ -30,14 +30,14 @@ public enum ArmorPurchaseEnum {
     private final Material boots;
     private final String translationKey;
 
-    ArmorPurchaseEnum(Material representation, Material leggings, Material boots, String translationKey) {
+    UpgradeArmorItemsEnum(Material representation, Material leggings, Material boots, String translationKey) {
         this.representation = representation;
         this.leggings = leggings;
         this.boots = boots;
         this.translationKey = translationKey;
     }
 
-    public boolean isHigherThan(ArmorPurchaseEnum purchase) {
+    public boolean isHigherThan(UpgradeArmorItemsEnum purchase) {
         return this.ordinal() > purchase.ordinal();
     }
 
@@ -81,6 +81,6 @@ public enum ArmorPurchaseEnum {
 
         player.updateInventory();
 
-        team.getUpgrade(ArmorUpgradeEnum.class).equipPlayer(player);
+        team.getUpgrade(UpgradeArmorProtection.class).getUpgrade().equipPlayer(player);
     }
 }
