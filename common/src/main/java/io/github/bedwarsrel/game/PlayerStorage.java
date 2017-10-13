@@ -13,6 +13,7 @@ import java.util.*;
 
 import io.github.bedwarsrel.shop.upgrades.UpgradeArmorItemsEnum;
 import io.github.bedwarsrel.shop.upgrades.UpgradePermanentItemEnum;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -40,11 +41,13 @@ public class PlayerStorage {
   private GameMode mode = null;
   private Player player = null;
   private float xp = 0.0F;
+  @Getter
+  private final PlayerFlags flags;
 
   public PlayerStorage(Player p) {
     super();
-
     this.player = p;
+    this.flags = new PlayerFlags(this.player);
   }
 
   public void addGameStartItem() {

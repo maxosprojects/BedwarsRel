@@ -1131,7 +1131,9 @@ public class PlayerListener extends BaseListener {
         }
       } else if (game.getState() == GameState.WAITING) {
         if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
-          System.out.println("Checkpoint 20");
+
+          System.out.println("Checkpoint 40");
+
           game.playerLeave(change.getPlayer(), false);
         } else {
           game.getPlayerFlags(change.getPlayer()).setTeleporting(false);

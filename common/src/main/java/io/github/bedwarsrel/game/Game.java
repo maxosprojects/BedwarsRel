@@ -68,7 +68,6 @@ public class Game {
   private YamlConfiguration config = null;
   private GameCycle cycle = null;
   private List<Player> freePlayers = null;
-  private Map<Player, PlayerFlags> playersFlags = new HashMap<>();
   private GameLobbyCountdown gameLobbyCountdown = null;
   private Location hologramLocation = null;
   private boolean isOver = false;
@@ -86,7 +85,6 @@ public class Game {
   private List<MerchantCategory> shopCategories = null;
   private Map<Player, DamageHolder> playerDamages = null;
   private Map<Player, BukkitTask> waitingRespawn = new HashMap<>();
-  private Map<Player, PlayerFlags> playerFlags = new HashMap<>();
   private Map<Player, PlayerStorage> playerStorages = new HashMap<>();
   private List<Team> playingTeams = null;
   private int record = 0;
@@ -638,12 +636,7 @@ public class Game {
   }
 
   public PlayerFlags getPlayerFlags(Player player) {
-    PlayerFlags flags = this.playerFlags.get(player);
-    if (flags == null) {
-      flags = new PlayerFlags(player);
-      this.playersFlags.put(player, flags);
-    }
-    return flags;
+    return this.getPlayerStorage(player).getFlags();
   }
 
   public PlayerStorage getPlayerStorage(Player player) {
@@ -1164,7 +1157,10 @@ public class Game {
 
             }.runTaskLater(BedwarsRel.getInstance(), 10L);
           } else {
+
+            System.out.println("LOCATION HERE");
             System.out.println(location);
+
             Game.this.getPlayerFlags(p).setTeleporting(true);
             p.teleport(location);
           }
@@ -1248,7 +1244,7 @@ public class Game {
 
   public boolean playerLeave(Player p, boolean kicked) {
     System.out.println("Checkpoint 6");
-    this.getPlayerFlags(p).setTeleporting(true);
+//    this.getPlayerFlags(p).setTeleporting(true);
     Team team = this.getPlayerTeam(p);
 
     BedwarsPlayerLeaveEvent leaveEvent = new BedwarsPlayerLeaveEvent(this, p, team);
@@ -1358,7 +1354,6 @@ public class Game {
     storage.clean();
     storage.restore();
 
-    this.playerFlags.remove(p);
     this.updateScoreboard();
 
     try {
@@ -1401,10 +1396,6 @@ public class Game {
     }
 
     this.shops.remove(player);
-  }
-
-  public void removePlayerSettings(Player player) {
-    this.playerFlags.remove(player);
   }
 
   public void removeProtection(Player player) {
@@ -2190,7 +2181,7 @@ public class Game {
   }
 
   public boolean isPlayerVirtuallyAlive(Player player) {
-    PlayerFlags flags = this.playersFlags.get(player);
+    PlayerFlags flags = this.getPlayerStorage(player).getFlags();
     return (flags == null || flags.isVirtuallyAlive());
   }
 
