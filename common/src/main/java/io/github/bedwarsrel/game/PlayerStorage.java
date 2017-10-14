@@ -89,8 +89,6 @@ public class PlayerStorage {
 
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
 
-    System.out.println("Checkpoint 13");
-
     this.player.setAllowFlight(false);
     this.player.setFlying(false);
     this.player.setExp(0.0F);
@@ -110,12 +108,8 @@ public class PlayerStorage {
     String displayName = this.player.getDisplayName();
     String playerListName = this.player.getPlayerListName();
 
-    System.out.println("Checkpoint 14");
-
     if (overwriteNames || teamnameOnTab) {
       if (game != null) {
-
-        System.out.println("Checkpoint 15");
 
         game.setPlayerGameMode(player);
         Team team = game.getPlayerTeam(this.player);
@@ -127,8 +121,6 @@ public class PlayerStorage {
             displayName = ChatColor.stripColor(this.player.getName());
           }
         }
-
-        System.out.println("Checkpoint 16");
 
         if (teamnameOnTab) {
           if (team != null) {
@@ -143,14 +135,9 @@ public class PlayerStorage {
             new BedwarsPlayerSetNameEvent(team, displayName, playerListName, player);
         BedwarsRel.getInstance().getServer().getPluginManager().callEvent(playerSetNameEvent);
 
-        System.out.println("Checkpoint 17");
-
         if (!playerSetNameEvent.isCancelled()) {
           this.player.setDisplayName(playerSetNameEvent.getDisplayName());
           this.player.setPlayerListName(playerSetNameEvent.getPlayerListName());
-
-          System.out.println("Checkpoint 18");
-
         }
       }
     }
@@ -162,8 +149,6 @@ public class PlayerStorage {
     for (PotionEffect e : this.player.getActivePotionEffects()) {
       this.player.removePotionEffect(e.getType());
     }
-
-    System.out.println("Checkpoint 19");
 
     this.player.updateInventory();
   }

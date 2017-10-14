@@ -1141,9 +1141,6 @@ public class Game {
     BedwarsPlayerJoinEvent joiningEvent = new BedwarsPlayerJoinEvent(this, p);
     BedwarsRel.getInstance().getServer().getPluginManager().callEvent(joiningEvent);
 
-
-    System.out.println("joiningEvent.isCancelled() " + joiningEvent.isCancelled());
-
     if (joiningEvent.isCancelled()) {
       if (joiningEvent.getKickOnCancel()) {
         new BukkitRunnable() {
@@ -1203,18 +1200,12 @@ public class Game {
 
             }.runTaskLater(BedwarsRel.getInstance(), 10L);
           } else {
-
-            System.out.println("LOCATION HERE");
-            System.out.println(location);
-
             p.teleport(location);
           }
         }
       }
 
       storage.loadLobbyInventory(this);
-
-      System.out.println("Checkpoint 1");
 
       new BukkitRunnable() {
 
@@ -1240,8 +1231,6 @@ public class Game {
         Team team = this.getLowestTeam();
         team.addPlayer(p);
       }
-
-      System.out.println("Checkpoint 2");
 
       if (BedwarsRel.getInstance().getBooleanConfig("store-game-records", true)) {
         this.displayRecord(p);
@@ -1274,15 +1263,11 @@ public class Game {
       }
     }
 
-    System.out.println("Checkpoint 3");
-
     BedwarsPlayerJoinedEvent joinEvent = new BedwarsPlayerJoinedEvent(this, null, p);
     BedwarsRel.getInstance().getServer().getPluginManager().callEvent(joinEvent);
 
     this.updateScoreboard();
-    System.out.println("Checkpoint 4");
     this.updateSigns();
-    System.out.println("Checkpoint 5");
     return true;
 
   }
@@ -1294,7 +1279,6 @@ public class Game {
   }
 
   public boolean playerLeave(Player p, boolean kicked) {
-    System.out.println("Checkpoint 6");
     this.getPlayerFlags(p).setTeleporting(true);
     Team team = this.getPlayerTeam(p);
 
@@ -1306,7 +1290,6 @@ public class Game {
       statistic = BedwarsRel.getInstance().getPlayerStatisticManager().getStatistic(p);
     }
 
-    System.out.println("Checkpoint 7");
     if (this.isSpectator(p)) {
       if (!this.getCycle().isEndGameRunning()) {
         for (Player player : this.getPlayers()) {
@@ -1344,8 +1327,6 @@ public class Game {
       this.removeProtection(p);
     }
 
-    System.out.println("Checkpoint 8");
-
     this.playerDamages.remove(p);
     if (team != null && BedwarsRel.getInstance().getGameManager().getGameOfPlayer(p) != null
         && !BedwarsRel.getInstance().getGameManager().getGameOfPlayer(p).isSpectator(p)) {
@@ -1378,8 +1359,6 @@ public class Game {
     if (this.freePlayers.contains(p)) {
       this.freePlayers.remove(p);
     }
-
-    System.out.println("Checkpoint 9");
 
     if (BedwarsRel.getInstance().isBungee()) {
       this.cycle.onPlayerLeave(p);
@@ -1424,15 +1403,12 @@ public class Game {
       }
     }
 
-    System.out.println("Checkpoint 10");
-
     if (!BedwarsRel.getInstance().isBungee()) {
       this.cycle.onPlayerLeave(p);
     }
 
     this.updateSigns();
     this.playerStorages.remove(p);
-    System.out.println("Checkpoint 11");
     return true;
   }
 
@@ -2212,8 +2188,6 @@ public class Game {
     Location location = this.getTopMiddle();
     this.setTeleportingIfWorldChange(player, location);
     player.teleport(this.getTopMiddle());
-
-    System.out.println("player.teleport(this.getTopMiddle())" + this.getTopMiddle());
 
     if (this.getState() == GameState.RUNNING
         && !this.getCycle().isEndGameRunning()

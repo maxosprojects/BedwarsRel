@@ -549,9 +549,6 @@ public class PlayerListener extends BaseListener {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onFly(PlayerToggleFlightEvent tfe) {
-
-    System.out.println("PlayerToggleFlightEvent");
-
     Player p = tfe.getPlayer();
 
     Game g = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(p);
@@ -688,9 +685,6 @@ public class PlayerListener extends BaseListener {
 
   @EventHandler
   public void onInteractEntity(PlayerInteractEntityEvent iee) {
-
-    System.out.println("PlayerInteractEntityEvent");
-
     Player p = iee.getPlayer();
     Game g = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(p);
     if (g == null) {
@@ -709,9 +703,6 @@ public class PlayerListener extends BaseListener {
 
   @EventHandler
   public void onInventoryClick(InventoryClickEvent event) {
-
-    System.out.println("InventoryClickEvent");
-
     Player player = (Player) event.getWhoClicked();
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
 
@@ -734,10 +725,6 @@ public class PlayerListener extends BaseListener {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onJoin(PlayerJoinEvent je) {
-
-    System.out.println("PlayerJoinEvent");
-
-
     final Player player = je.getPlayer();
 
     if (BedwarsRel.getInstance().statisticsEnabled()) {
@@ -757,11 +744,6 @@ public class PlayerListener extends BaseListener {
 
     if (!BedwarsRel.getInstance().isBungee()) {
       Game game = BedwarsRel.getInstance().getGameManager().getGameByLocation(player.getLocation());
-
-
-      System.out.println("Checkpoint 31");
-
-
       if (game != null) {
         if (game.getMainLobby() != null) {
           player.teleport(game.getMainLobby());
@@ -836,9 +818,6 @@ public class PlayerListener extends BaseListener {
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent pie) {
-
-    System.out.println("PlayerInteractEvent");
-
     Player player = pie.getPlayer();
     Game g = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
 
@@ -868,7 +847,6 @@ public class PlayerListener extends BaseListener {
         player.sendMessage(
             ChatWriter.pluginMessage(ChatColor.GREEN + BedwarsRel._l(player, "success.joined")));
       }
-      System.out.println("Checkpoint 12");
       return;
     }
 
@@ -933,9 +911,6 @@ public class PlayerListener extends BaseListener {
               } else {
                 oldLocation.setY(oldLocation.getY() - 2);
               }
-
-              System.out.println("Checkpoint 30");
-
               p.teleport(oldLocation);
             }
           }
@@ -1040,9 +1015,6 @@ public class PlayerListener extends BaseListener {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onPlayerRespawn(PlayerRespawnEvent pre) {
-
-    System.out.println("PlayerRespawnEvent");
-
     Player p = pre.getPlayer();
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(p);
 
@@ -1062,9 +1034,6 @@ public class PlayerListener extends BaseListener {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onQuit(PlayerQuitEvent pqe) {
-
-    System.out.println("PlayerQuitEvent");
-
     Player player = pqe.getPlayer();
 
     if (BedwarsRel.getInstance().isBungee()) {
@@ -1110,14 +1079,8 @@ public class PlayerListener extends BaseListener {
 
   @EventHandler
   public void onSwitchWorld(PlayerChangedWorldEvent change) {
-
-    System.out.println("PlayerChangedWorldEvent");
-
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(change.getPlayer());
     if (game != null) {
-
-      System.out.println("Checkpoint 20");
-
       if (game.getState() == GameState.RUNNING) {
         if (!game.getCycle().isEndGameRunning()) {
           if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
@@ -1126,29 +1089,17 @@ public class PlayerListener extends BaseListener {
         }
       } else if (game.getState() == GameState.WAITING) {
         if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
-
-          System.out.println("Checkpoint 40");
-
           game.playerLeave(change.getPlayer(), false);
         }
       }
     }
-
-
-    System.out.println("Checkpoint 21");
 
     if (!BedwarsRel.getInstance().isHologramsEnabled()
         || BedwarsRel.getInstance().getHolographicInteractor() == null) {
       return;
     }
 
-
-    System.out.println("Checkpoint 22");
-
     BedwarsRel.getInstance().getHolographicInteractor().updateHolograms(change.getPlayer());
-
-    System.out.println("Checkpoint 23");
-
   }
 
   @EventHandler
