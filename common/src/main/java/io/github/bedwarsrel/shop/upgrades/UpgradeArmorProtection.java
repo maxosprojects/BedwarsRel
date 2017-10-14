@@ -10,6 +10,8 @@ import lombok.Setter;
 import org.bukkit.entity.Player;
 
 public class UpgradeArmorProtection implements Upgrade {
+  private static final String TYPE = "ARMOR_PROTECTION";
+
   private Game game;
   private Team team;
   @Getter
@@ -20,6 +22,12 @@ public class UpgradeArmorProtection implements Upgrade {
   @Setter
   @Getter
   private UpgradeCycle cycle = UpgradeCycle.RESPAWN;
+  @Getter
+  @Setter
+  private boolean permanent = false;
+  @Getter
+  @Setter
+  private boolean multiple = false;
 
   public UpgradeArmorProtection(UpgradeArmorProtectionEnum upgrade) {
     this.upgrade = upgrade;
@@ -62,6 +70,11 @@ public class UpgradeArmorProtection implements Upgrade {
     }
 
     return true;
+  }
+
+  @Override
+  public String getType() {
+    return TYPE;
   }
 
   public Game getGame() {

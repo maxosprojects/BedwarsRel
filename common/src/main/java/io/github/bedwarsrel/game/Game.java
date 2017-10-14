@@ -11,6 +11,9 @@ import io.github.bedwarsrel.events.BedwarsSaveGameEvent;
 import io.github.bedwarsrel.events.BedwarsTargetBlockDestroyedEvent;
 import io.github.bedwarsrel.shop.Shop;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
+import io.github.bedwarsrel.shop.upgrades.Upgrade;
+import io.github.bedwarsrel.shop.upgrades.UpgradeItem;
+import io.github.bedwarsrel.shop.upgrades.UpgradeRegistry;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.TitleWriter;
@@ -101,6 +104,7 @@ public class Game {
   private HashMap<String, Team> teams = null;
   private int time = 1000;
   private int timeLeft = 0;
+  private List<Map<String, Object>> defaultUpgrades;
 
   public Game(String name) {
     super();
@@ -313,7 +317,34 @@ public class Game {
   }
 
   private void prepareUsersForBattle() {
-    for (PlayerStorage storage : this.playerStorages.values()) {
+    this.defaultUpgrades = (List<Map<String, Object>>) this.getConfig().getList("default-upgrades");
+    List<Upgrade> upgrades = new ArrayList<>();
+    for (Map<String, Object> item : this.defaultUpgrades) {
+      Map<String, Object> elem = (Map<String, Object>) item.get("upgrade");
+      Upgrade upgrade = UpgradeRegistry.getUpgrade(
+          (String)elem.get("type"), (int)elem.get("level"));
+      if (upgrade instanceof UpgradeItem) {
+        UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);
+        temp.setItem(ItemStack.deserialize((Map<String, Object>) item.get("item")));
+        upgrade = temp;
+      }
+      if (elem.containsKey("permanent")) {
+        boolean permanent = (boolean) elem.get("permanent");
+        upgrade.setPermanent(permanent);
+      }
+      if (elem.containsKey("multiple")) {
+        boolean multiple = (boolean) elem.get("multiple");
+        upgrade.setMultiple(multiple);
+      }
+      upgrades.add(upgrade);
+    }
+
+    for (Player player : this.getPlayers()) {
+      Team team = this.getPlayerTeam(player);
+      PlayerStorage storage = this.getPlayerStorage(player);
+      for (Upgrade upgrade : upgrades) {
+        storage.addUpgrade(upgrade.create(this, team, player));
+      }
       storage.respawn();
     }
   }
@@ -373,6 +404,8 @@ public class Game {
 
     yml.set("spawner", this.resourceSpawners);
     yml.createSection("teams", this.teams);
+
+    yml.set("default-upgrades", this.defaultUpgrades);
 
     try {
       yml.save(config);

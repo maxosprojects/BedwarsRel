@@ -11,6 +11,8 @@ import io.github.bedwarsrel.utils.SoundMachine;
 import io.github.bedwarsrel.utils.Utils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +52,7 @@ public class Shop {
     int cats = this.getAccessibleNumberOfCategories();
     int size = this.calcInventorySizeForItems(cats);
 
-    this.actions = new ArrayList<>(size);
+    this.actions = Arrays.asList(new ShopAction[size]);
     this.nextSlot = 0;
 
     Inventory inventory = Bukkit.createInventory(this.player, size, BedwarsRel
@@ -88,13 +90,14 @@ public class Shop {
 
   public void handleClick(InventoryClickEvent event) {
     int rawSlot = event.getRawSlot();
-
     if (rawSlot < this.actions.size()) {
       event.setCancelled(true);
       Map<String, Object> args = new HashMap<>();
       args.put("InventoryClickEvent", event);
-      this.actions.get(rawSlot).execute(args);
-      return;
+      ShopAction action = this.actions.get(rawSlot);
+      if (action != null) {
+        this.actions.get(rawSlot).execute(args);
+      }
     }
   }
 
@@ -112,8 +115,8 @@ public class Shop {
       if (this.currentCategory.equals(cat.getName())) {
         meta.addEnchant(Enchantment.DAMAGE_ALL, 1, true);
         action.setActive(true);
-        action.setCategory(cat);
       }
+      action.setCategory(cat);
       button.setItemMeta(meta);
       inventory.addItem(button);
       this.actions.set(this.nextSlot, action);

@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class UpgradeForge implements Upgrade {
+  private static final String TYPE = "FORGE";
 
   private Game game;
   private Team team;
@@ -23,6 +24,12 @@ public class UpgradeForge implements Upgrade {
   @Getter
   @Setter
   private UpgradeCycle cycle = UpgradeCycle.ONCE;
+  @Getter
+  @Setter
+  private boolean permanent = false;
+  @Getter
+  @Setter
+  private boolean multiple = false;
 
   public UpgradeForge(UpgradeForgeEnum upgrade) {
     this.upgrade = upgrade;
@@ -42,7 +49,7 @@ public class UpgradeForge implements Upgrade {
   public boolean activate(UpgradeScope scope, UpgradeCycle cycle) {
     UpgradeForge existingUpgrade = this.team.getUpgrade(UpgradeForge.class);
 
-    if (!this.upgrade.isHigherThan(existingUpgrade.upgrade)) {
+    if (existingUpgrade != null && !this.upgrade.isHigherThan(existingUpgrade.upgrade)) {
       return false;
     }
 
@@ -61,6 +68,11 @@ public class UpgradeForge implements Upgrade {
     }
 
     return true;
+  }
+
+  @Override
+  public String getType() {
+    return TYPE;
   }
 
   public Game getGame() {

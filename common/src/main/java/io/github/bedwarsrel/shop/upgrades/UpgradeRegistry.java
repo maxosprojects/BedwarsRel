@@ -16,41 +16,37 @@ public class UpgradeRegistry {
     BedwarsRel.getInstance().getServer().getPluginManager().registerEvents(new UpgradeBaseAlarmListener(),
         BedwarsRel.getInstance());
 
-    List<Upgrade> alarms = new ArrayList<>();
-    upgrades.put("ALARM", alarms);
-    alarms.add(new UpgradeBaseAlarm());
+    addUpgrade(new UpgradeBaseAlarm());
 
-    List<Upgrade> armorItem = new ArrayList<>();
-    upgrades.put("ARMOR_ITEM", armorItem);
-    armorItem.add(new UpgradeArmorItems(UpgradeArmorItemsEnum.LEATHER));
-    armorItem.add(new UpgradeArmorItems(UpgradeArmorItemsEnum.CHAINMAIL));
-    armorItem.add(new UpgradeArmorItems(UpgradeArmorItemsEnum.IRON));
-    armorItem.add(new UpgradeArmorItems(UpgradeArmorItemsEnum.DIAMOND));
+    addUpgrade(new UpgradeArmorItems(UpgradeArmorItemsEnum.LEATHER));
+    addUpgrade(new UpgradeArmorItems(UpgradeArmorItemsEnum.CHAINMAIL));
+    addUpgrade(new UpgradeArmorItems(UpgradeArmorItemsEnum.IRON));
+    addUpgrade(new UpgradeArmorItems(UpgradeArmorItemsEnum.DIAMOND));
 
-    List<Upgrade> armorProtection = new ArrayList<>();
-    upgrades.put("ARMOR_PROTECTION", armorProtection);
-    armorProtection.add(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION1));
-    armorProtection.add(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION2));
-    armorProtection.add(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION3));
-    armorProtection.add(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION4));
+    addUpgrade(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION1));
+    addUpgrade(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION2));
+    addUpgrade(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION3));
+    addUpgrade(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION4));
 
-    List<Upgrade> sword = new ArrayList<>();
-    upgrades.put("SWORD", sword);
-    sword.add(new UpgradeSword(UpgradeSwordEnum.SHARPNESS0));
-    sword.add(new UpgradeSword(UpgradeSwordEnum.SHARPNESS1));
+    addUpgrade(new UpgradeSword(UpgradeSwordEnum.SHARPNESS0));
+    addUpgrade(new UpgradeSword(UpgradeSwordEnum.SHARPNESS1));
 
-    List<Upgrade> permanent = new ArrayList<>();
-    upgrades.put("PERMANENT", sword);
-    permanent.add(new UpgradePermanentItem(UpgradePermanentItemEnum.WOOD_SWORD));
-    permanent.add(new UpgradePermanentItem(UpgradePermanentItemEnum.SHEARS));
+    addUpgrade(new UpgradeForge(UpgradeForgeEnum.FORGE0));
+    addUpgrade(new UpgradeForge(UpgradeForgeEnum.FORGE1));
+    addUpgrade(new UpgradeForge(UpgradeForgeEnum.FORGE2));
+    addUpgrade(new UpgradeForge(UpgradeForgeEnum.FORGE3));
+    addUpgrade(new UpgradeForge(UpgradeForgeEnum.FORGE4));
 
-    List<Upgrade> forge = new ArrayList<>();
-    upgrades.put("FORGE", sword);
-    forge.add(new UpgradeForge(UpgradeForgeEnum.FORGE0));
-    forge.add(new UpgradeForge(UpgradeForgeEnum.FORGE1));
-    forge.add(new UpgradeForge(UpgradeForgeEnum.FORGE2));
-    forge.add(new UpgradeForge(UpgradeForgeEnum.FORGE3));
-    forge.add(new UpgradeForge(UpgradeForgeEnum.FORGE4));
+    addUpgrade(new UpgradeItem());
+  }
+
+  private static void addUpgrade(Upgrade upgrade) {
+    List<Upgrade> list = upgrades.get(upgrade.getType());
+    if (list == null) {
+      list = new ArrayList<>();
+      upgrades.put(upgrade.getType(), list);
+    }
+    list.add(upgrade);
   }
 
   public static Upgrade getUpgrade(String type, int level) {

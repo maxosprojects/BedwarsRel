@@ -25,6 +25,7 @@ import java.util.List;
  * can be placed on top of the trap.
  */
 public class UpgradeBaseAlarm implements Upgrade {
+  private static final String TYPE = "ALARM";
 
   private List<PotionEffect> effects = null;
   private Game game = null;
@@ -42,6 +43,12 @@ public class UpgradeBaseAlarm implements Upgrade {
   @Getter
   private UpgradeCycle cycle = UpgradeCycle.ONCE;
   private boolean expired = false;
+  @Getter
+  @Setter
+  private boolean permanent = false;
+  @Getter
+  @Setter
+  private boolean multiple = false;
 
   public UpgradeBaseAlarm() {
     this.effects = new ArrayList<>();
@@ -153,6 +160,11 @@ public class UpgradeBaseAlarm implements Upgrade {
           BedwarsRel._l(player, "success.basealarmpurchased")));
     }
     return true;
+  }
+
+  @Override
+  public String getType() {
+    return TYPE;
   }
 
   public boolean isLocationIn(Location loc) {

@@ -13,8 +13,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class UpgradeSword implements Upgrade {
+  public static final String TYPE = "SWORD";
 
-  private Game game;
   private Team team;
   private final UpgradeSwordEnum upgrade;
   @Getter
@@ -23,6 +23,12 @@ public class UpgradeSword implements Upgrade {
   @Getter
   @Setter
   private UpgradeScope scope = UpgradeScope.PLAYER;
+  @Getter
+  @Setter
+  private boolean permanent = false;
+  @Getter
+  @Setter
+  private boolean multiple = false;
 
   public UpgradeSword(UpgradeSwordEnum upgrade) {
     this.upgrade = upgrade;
@@ -32,7 +38,6 @@ public class UpgradeSword implements Upgrade {
   public Upgrade create(Game game, Team team, Player player) {
     UpgradeSword item = new UpgradeSword(this.upgrade);
 
-    item.game = game;
     item.team = team;
 
     return item;
@@ -64,8 +69,9 @@ public class UpgradeSword implements Upgrade {
     return true;
   }
 
-  public Game getGame() {
-    return this.game;
+  @Override
+  public String getType() {
+    return TYPE;
   }
 
   @Override

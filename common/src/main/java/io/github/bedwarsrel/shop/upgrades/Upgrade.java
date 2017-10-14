@@ -28,4 +28,12 @@ public interface Upgrade {
    */
   boolean activate(UpgradeScope scope, UpgradeCycle cycle);
 
+  String getType();
+
+  void setPermanent(boolean permanent);
+
+  boolean isPermanent();
+
+  void setMultiple(boolean multiple);
+
 }

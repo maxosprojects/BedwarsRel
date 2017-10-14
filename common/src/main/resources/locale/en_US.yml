@@ -88,7 +88,7 @@ success:
   armorupgraded: "&aArmor upgraded to $upgrade$!"
   swordsupgraded: "&aSwords upgraded to $upgrade$!"
   forgeupgraded: "&aForge upgraded to $upgrade$!"
-  permanentitempurchased: "&aPermanent $type$ applied!"
+  itempurchased: "&aItem $item$ purchased!"
 gamecheck:
   LOC_NOT_SET_ERROR: "Locations for the region were not set properly!"
   LOC_BASE_NOT_SET_ERROR: "Locations for the base regions were not set properly!"
@@ -187,9 +187,6 @@ ingame:
     forge2: "Golden Forge"
     forge3: "Emerald Forge"
     forge4: "Molten Forge"
-  permanentitems:
-    wood-sword: "Wood Sword"
-    shears: "Shears"
 lobby:
   countdown: "Game will start in $sec$ second(s)!"
   countdowncancel: "More players needed. Countdown was cancelled!"

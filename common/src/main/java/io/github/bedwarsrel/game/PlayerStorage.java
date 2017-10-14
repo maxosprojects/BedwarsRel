@@ -6,13 +6,12 @@ import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 
 import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
 import io.github.bedwarsrel.shop.upgrades.UpgradeArmorItems;
-import io.github.bedwarsrel.shop.upgrades.UpgradePermanentItem;
 import io.github.bedwarsrel.shop.upgrades.Upgrade;
 import io.github.bedwarsrel.shop.upgrades.UpgradeCycle;
 import java.util.*;
 
 import io.github.bedwarsrel.shop.upgrades.UpgradeArmorItemsEnum;
-import io.github.bedwarsrel.shop.upgrades.UpgradePermanentItemEnum;
+import java.util.Map.Entry;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,7 +27,6 @@ import org.bukkit.material.Wool;
 import org.bukkit.potion.PotionEffect;
 
 public class PlayerStorage {
-
   private ItemStack[] armor = null;
   private String displayName = null;
   private Map<Class<? extends Upgrade>, List<Upgrade>> upgrades = new HashMap<>();
@@ -71,21 +69,24 @@ public class PlayerStorage {
     inv.setArmorContents(new ItemStack[4]);
     inv.setContents(new ItemStack[]{});
 
-    this.upgrades.clear();
-    List<Upgrade> armor = new ArrayList<>();
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
-    if (game != null) {
-      Team team = game.getPlayerTeam(this.player);
-      if (team != null) {
-        armor.add(
-            new UpgradeArmorItems(UpgradeArmorItemsEnum.LEATHER).create(game, team, this.player));
-        this.upgrades.put(UpgradeArmorItems.class, armor);
-        List<Upgrade> permanent = new ArrayList<>();
-        permanent.add(new UpgradePermanentItem(UpgradePermanentItemEnum.WOOD_SWORD)
-            .create(game, team, this.player));
-        this.upgrades.put(UpgradeArmorItems.class, permanent);
+    // Preserve permanent items
+    Map<Class<? extends Upgrade>, List<Upgrade>> permanent = new HashMap<>();
+    for (Entry<Class<? extends Upgrade>, List<Upgrade>> entry : this.upgrades.entrySet()) {
+      List<Upgrade> permanentList = permanent.get(entry.getKey());
+      if (permanentList == null) {
+        permanentList = new ArrayList<>();
+      }
+      for (Upgrade upgrade : entry.getValue()) {
+        if (upgrade.isPermanent()) {
+          permanentList.add(upgrade);
+          permanent.put(entry.getKey(), permanentList);
+        }
       }
     }
+    this.upgrades = permanent;
+
+    List<Upgrade> armor = new ArrayList<>();
+    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
 
     System.out.println("Checkpoint 13");
 
@@ -315,12 +316,23 @@ public class PlayerStorage {
     return (List<T>) this.upgrades.get(upgradeClass);
   }
 
+  /**
+   * Replaces any existing upgrade of the same java class
+   * @param upgrade
+   * @param <T>
+   */
   public <T extends Upgrade> void setUpgrade(T upgrade) {
     List<Upgrade> list = new ArrayList<>();
     list.add(upgrade);
     this.upgrades.put(upgrade.getClass(), list);
   }
 
+  /**
+   * Adds an upgrade.
+   * Multiple upgrades of the same java class are possible
+   * @param upgrade
+   * @param <T>
+   */
   public <T extends Upgrade> void addUpgrade(T upgrade) {
     List<Upgrade> list = this.upgrades.get(upgrade.getClass());
     if (list == null) {

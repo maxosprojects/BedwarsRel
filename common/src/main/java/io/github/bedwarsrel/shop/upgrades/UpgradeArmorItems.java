@@ -12,6 +12,7 @@ import lombok.Setter;
 import org.bukkit.entity.Player;
 
 public class UpgradeArmorItems implements Upgrade {
+  private static final String TYPE = "ARMOR_ITEM";
 
   private Game game;
   private Player player;
@@ -22,6 +23,12 @@ public class UpgradeArmorItems implements Upgrade {
   @Setter
   @Getter
   private UpgradeCycle cycle = UpgradeCycle.RESPAWN;
+  @Getter
+  @Setter
+  private boolean permanent = false;
+  @Getter
+  @Setter
+  private boolean multiple = false;
 
   public UpgradeArmorItems(UpgradeArmorItemsEnum purchase) {
     this.purchase = purchase;
@@ -67,6 +74,11 @@ public class UpgradeArmorItems implements Upgrade {
             ImmutableMap.of("type", translation))));
 
     return true;
+  }
+
+  @Override
+  public String getType() {
+    return TYPE;
   }
 
   public Game getGame() {

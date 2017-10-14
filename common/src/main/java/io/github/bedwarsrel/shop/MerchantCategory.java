@@ -3,6 +3,7 @@ package io.github.bedwarsrel.shop;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.shop.Specials.SpecialItem;
 import io.github.bedwarsrel.shop.upgrades.Upgrade;
+import io.github.bedwarsrel.shop.upgrades.UpgradeItem;
 import io.github.bedwarsrel.shop.upgrades.UpgradeRegistry;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,6 +56,7 @@ public class MerchantCategory {
       if (meta.hasLore()) {
         meta.setLore(color(meta.getLore()));
       }
+      item.setItemMeta(meta);
     }
     return item;
   }
@@ -69,7 +71,7 @@ public class MerchantCategory {
 
   @SuppressWarnings({"unchecked", "deprecation"})
   public static List<MerchantCategory> loadCategories(FileConfiguration cfg) {
-    if (cfg.getConfigurationSection("shop") == null) {
+    if (!cfg.contains("shop")) {
       return new ArrayList<>();
     }
 
@@ -84,19 +86,20 @@ public class MerchantCategory {
       }
       Map<String, Object> cat = (Map<String, Object>) elem;
 
-      String catName = color((String) cat.get("name"));
+      String catName = (String) cat.get("name");
       ItemStack catButton = color(ItemStack.deserialize((Map<String, Object>) cat.get("button")));
       ItemMeta catMeta = catButton.getItemMeta();
       catMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES,
           ItemFlag.HIDE_POTION_EFFECTS,
           ItemFlag.HIDE_ENCHANTS);
+      catButton.setItemMeta(catMeta);
       String permission = "bw.base";
 
       if (cat.containsKey("permission")) {
         permission = (String) cat.get("permission");
       }
 
-      ArrayList<ShopTrade> offers = new ArrayList<ShopTrade>();
+      ArrayList<ShopTrade> offers = new ArrayList<>();
 
       for (Object offer : (List<Object>)cat.get("offers")) {
         if (offer instanceof String) {
@@ -142,9 +145,20 @@ public class MerchantCategory {
             Map<String, Object> upgradeElem = (Map<String, Object>) rewardElem.get("upgrade");
             upgrade = UpgradeRegistry.getUpgrade(
                 (String)upgradeElem.get("type"), (int)upgradeElem.get("level"));
+            if (upgrade instanceof UpgradeItem) {
+              UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);
+              temp.setItem(rewardButton);
+            }
+            if (upgradeElem.containsKey("permanent")) {
+              boolean permanent = (boolean) upgradeElem.get("permanent");
+              upgrade.setPermanent(permanent);
+            }
+            if (upgradeElem.containsKey("multiple")) {
+              boolean multiple = (boolean) upgradeElem.get("multiple");
+              upgrade.setMultiple(multiple);
+            }
           } else {
-            rewardButton = color(setResourceName(ItemStack.deserialize(
-                (Map<String, Object>) rewardElem.get("reward"))));
+            rewardButton = color(setResourceName(ItemStack.deserialize(rewardElem)));
           }
         } catch (Exception e) {
           logParseError(catName);

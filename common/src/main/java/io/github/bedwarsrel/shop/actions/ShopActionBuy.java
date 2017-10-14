@@ -12,6 +12,7 @@ import io.github.bedwarsrel.shop.upgrades.UpgradeCycle;
 import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
 import io.github.bedwarsrel.shop.upgrades.UpgradeSword;
 import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrel.utils.Utils;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -165,25 +166,28 @@ public class ShopActionBuy extends ShopAction {
       }
     }
 
-    // If the item is an upgrade at this point it was added to the game and paid for.
+    // If item is an upgrade at this point it was added to the game and paid for.
     // Then prevent adding an item to the inventory.
     if (reward.isUpgrade()) {
       return true;
     }
 
     ItemStack addingItem = reward.getItem().clone();
-    ItemMeta meta = addingItem.getItemMeta();
-    List<String> lore = meta.getLore();
-
-    if (lore.size() > 0) {
-      lore.remove(lore.size() - 1);
-      if (this.trade.getItem2() != null) {
-        lore.remove(lore.size() - 1);
-      }
+    if (Utils.isColorable(addingItem)) {
+      addingItem.setDurability(team.getColor().getDyeColor().getWoolData());
     }
-
-    meta.setLore(lore);
-    addingItem.setItemMeta(meta);
+//    ItemMeta meta = addingItem.getItemMeta();
+//    List<String> lore = meta.getLore();
+//
+//    if (lore.size() > 0) {
+//      lore.remove(lore.size() - 1);
+//      if (this.trade.getItem2() != null) {
+//        lore.remove(lore.size() - 1);
+//      }
+//    }
+//
+//    meta.setLore(lore);
+//    addingItem.setItemMeta(meta);
 
     HashMap<Integer, ItemStack> notStored = inventory.addItem(addingItem);
     if (notStored.size() > 0) {

@@ -84,7 +84,7 @@ public class Team implements ConfigurationSerializable {
     this.upgrades = new HashMap<>();
     this.upgrades.put(UpgradeArmorProtection.class, new UpgradeArmorProtection(
         UpgradeArmorProtectionEnum.PROTECTION0));
-    this.upgrades.put(UpgradeSword.class, new UpgradeSword(UpgradeSwordEnum.SHARPNESS0));
+    this.upgrades.put(UpgradeSword.class, new UpgradeSword(UpgradeSwordEnum.SHARPNESS0).create(null, this, null));
   }
 
   public void addChest(Block chestBlock) {
