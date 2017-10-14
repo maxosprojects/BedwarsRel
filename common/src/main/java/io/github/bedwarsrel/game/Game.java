@@ -327,7 +327,8 @@ public class Game {
           (String)elem.get("type"), (int)elem.get("level"));
       if (upgrade instanceof UpgradeItem) {
         UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);
-        temp.setItem(ItemStack.deserialize((Map<String, Object>) item.get("item")));
+        temp.setItem(MerchantCategory.fixMeta(
+            ItemStack.deserialize((Map<String, Object>) item.get("item"))));
         upgrade = temp;
       }
       if (elem.containsKey("permanent")) {

@@ -1,7 +1,6 @@
 package io.github.bedwarsrel.shop;
 
 import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.shop.Specials.SpecialItem;
 import io.github.bedwarsrel.shop.upgrades.Upgrade;
 import io.github.bedwarsrel.shop.upgrades.UpgradeItem;
 import io.github.bedwarsrel.shop.upgrades.UpgradeRegistry;
@@ -23,10 +22,6 @@ public class MerchantCategory {
   private String name = null;
   private ArrayList<ShopTrade> offers = null;
   private String permission = null;
-
-  public MerchantCategory(String name, ItemStack button) {
-    this(name, button, new ArrayList<ShopTrade>(), "bw.base");
-  }
 
   public MerchantCategory(String name, ItemStack button, ArrayList<ShopTrade> offers, String permission) {
     this.name = name;
@@ -61,6 +56,15 @@ public class MerchantCategory {
     return item;
   }
 
+  // Sets unbreakable and color
+  public static ItemStack fixMeta(ItemStack item) {
+    ItemMeta meta = item.getItemMeta();
+    meta.setUnbreakable(true);
+    meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+    item.setItemMeta(meta);
+    return color(item);
+  }
+
   private static void logParseError(String catName) {
     logError("Couldn't parse shop category" + catName);
   }
@@ -87,7 +91,7 @@ public class MerchantCategory {
       Map<String, Object> cat = (Map<String, Object>) elem;
 
       String catName = (String) cat.get("name");
-      ItemStack catButton = color(ItemStack.deserialize((Map<String, Object>) cat.get("button")));
+      ItemStack catButton = fixMeta(ItemStack.deserialize((Map<String, Object>) cat.get("button")));
       ItemMeta catMeta = catButton.getItemMeta();
       catMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES,
           ItemFlag.HIDE_POTION_EFFECTS,
@@ -123,13 +127,13 @@ public class MerchantCategory {
 
         List<Map<String, Object>> price = (List<Map<String, Object>>) offerSection.get("price");
         try {
-          item1 = color(setResourceName(ItemStack.deserialize(price.get(0))));
+          item1 = fixMeta(setResourceName(ItemStack.deserialize(price.get(0))));
         } catch (Exception e) {
           logParseError(catName);
         }
         if (price.size() == 2) {
           try {
-            item2 = color(setResourceName(ItemStack.deserialize(price.get(1))));
+            item2 = fixMeta(setResourceName(ItemStack.deserialize(price.get(1))));
           } catch (Exception e) {
             logParseError(catName);
           }
@@ -140,7 +144,7 @@ public class MerchantCategory {
         try {
           Map<String, Object> rewardElem = (Map<String, Object>) offerSection.get("reward");
           if (rewardElem.containsKey("upgrade")) {
-            rewardButton = color(ItemStack.deserialize(
+            rewardButton = fixMeta(ItemStack.deserialize(
                 (Map<String, Object>) rewardElem.get("button")));
             Map<String, Object> upgradeElem = (Map<String, Object>) rewardElem.get("upgrade");
             upgrade = UpgradeRegistry.getUpgrade(
@@ -159,7 +163,7 @@ public class MerchantCategory {
               upgrade.setMultiple(multiple);
             }
           } else {
-            rewardButton = color(setResourceName(ItemStack.deserialize(rewardElem)));
+            rewardButton = fixMeta(setResourceName(ItemStack.deserialize(rewardElem)));
           }
         } catch (Exception e) {
           logParseError(catName);
@@ -182,7 +186,6 @@ public class MerchantCategory {
 
   @SuppressWarnings("deprecation")
   private static ItemStack setResourceName(ItemStack item) {
-
     ItemMeta im = item.getItemMeta();
     String name = im.getDisplayName();
 
