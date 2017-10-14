@@ -9,6 +9,7 @@ import io.github.bedwarsrel.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class SingleGameCycle extends GameCycle {
@@ -27,17 +28,16 @@ public class SingleGameCycle extends GameCycle {
       return;
     }
 
+    Location lobby = this.getGame().getLobby();
     if (BedwarsRel.getInstance().toMainLobby()) {
       if (BedwarsRel.getInstance().allPlayersBackToMainLobby()) {
         this.getGame().playerLeave(player, false);
         return;
       } else {
-        this.getGame().getPlayerFlags(player).setTeleporting(true);
-        player.teleport(this.getGame().getLobby());
+        player.teleport(lobby);
       }
     } else {
-      this.getGame().getPlayerFlags(player).setTeleporting(true);
-      player.teleport(this.getGame().getLobby());
+      player.teleport(lobby);
     }
 
     if (BedwarsRel.getInstance().isHologramsEnabled()
@@ -214,7 +214,6 @@ public class SingleGameCycle extends GameCycle {
         BedwarsRel.getInstance().getHolographicInteractor().updateHolograms(player);
       }
 
-      this.getGame().getPlayerFlags(player).setTeleporting(true);
       player.teleport(this.getGame().getMainLobby());
     } else {
       if (BedwarsRel.getInstance().isHologramsEnabled()
@@ -223,7 +222,6 @@ public class SingleGameCycle extends GameCycle {
         BedwarsRel.getInstance().getHolographicInteractor().updateHolograms(player);
       }
 
-      this.getGame().getPlayerFlags(player).setTeleporting(true);
       player.teleport(storage.getLeft());
     }
 

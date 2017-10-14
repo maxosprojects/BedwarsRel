@@ -38,7 +38,7 @@ public class PlayerStorage {
   private Player player = null;
   private float xp = 0.0F;
   @Getter
-  private final PlayerFlags flags;
+  private PlayerFlags flags;
 
   public PlayerStorage(Player p) {
     super();
@@ -63,6 +63,8 @@ public class PlayerStorage {
   }
 
   public void clean(boolean deep) {
+    this.flags = new PlayerFlags(this.player);
+
     PlayerInventory inv = this.player.getInventory();
     inv.setArmorContents(new ItemStack[4]);
     inv.setContents(new ItemStack[]{});

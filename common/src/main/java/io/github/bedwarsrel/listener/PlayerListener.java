@@ -524,7 +524,6 @@ public class PlayerListener extends BaseListener {
 
     } else if (g.getState() == GameState.WAITING
         && ede.getCause() == EntityDamageEvent.DamageCause.VOID) {
-      g.getPlayerFlags(p).setTeleporting(true);
       p.teleport(g.getLobby());
     }
   }
@@ -632,7 +631,6 @@ public class PlayerListener extends BaseListener {
             return;
           }
 
-          game.getPlayerFlags(pl).setTeleporting(true);
           player.teleport(pl);
           player.closeInventory();
           return;
@@ -766,7 +764,6 @@ public class PlayerListener extends BaseListener {
 
       if (game != null) {
         if (game.getMainLobby() != null) {
-          game.getPlayerFlags(player).setTeleporting(true);
           player.teleport(game.getMainLobby());
         } else {
           game.playerJoins(player);
@@ -1114,7 +1111,7 @@ public class PlayerListener extends BaseListener {
   @EventHandler
   public void onSwitchWorld(PlayerChangedWorldEvent change) {
 
-    System.out.println("PlayerJoinEvent");
+    System.out.println("PlayerChangedWorldEvent");
 
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(change.getPlayer());
     if (game != null) {
@@ -1125,8 +1122,6 @@ public class PlayerListener extends BaseListener {
         if (!game.getCycle().isEndGameRunning()) {
           if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
             game.playerLeave(change.getPlayer(), false);
-          } else {
-            game.getPlayerFlags(change.getPlayer()).setTeleporting(false);
           }
         }
       } else if (game.getState() == GameState.WAITING) {
@@ -1135,8 +1130,6 @@ public class PlayerListener extends BaseListener {
           System.out.println("Checkpoint 40");
 
           game.playerLeave(change.getPlayer(), false);
-        } else {
-          game.getPlayerFlags(change.getPlayer()).setTeleporting(false);
         }
       }
     }

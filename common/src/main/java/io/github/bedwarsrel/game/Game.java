@@ -1179,13 +1179,14 @@ public class Game {
       if (!BedwarsRel.getInstance().isBungee()) {
         final Location location = this.getPlayerTeleportLocation(p);
         if (!p.getLocation().equals(location)) {
-          this.getPlayerFlags(p).setTeleporting(true);
+          this.setTeleportingIfWorldChange(p, location);
+          // TODO: Figure out what was this insane logic here for (not bungee outer if and
+          // bungee inner if)
           if (BedwarsRel.getInstance().isBungee()) {
             new BukkitRunnable() {
 
               @Override
               public void run() {
-                Game.this.getPlayerFlags(p).setTeleporting(true);
                 p.teleport(location);
               }
 
@@ -1195,7 +1196,6 @@ public class Game {
             System.out.println("LOCATION HERE");
             System.out.println(location);
 
-            Game.this.getPlayerFlags(p).setTeleporting(true);
             p.teleport(location);
           }
         }
@@ -1276,9 +1276,15 @@ public class Game {
 
   }
 
+  protected void setTeleportingIfWorldChange(Player player, Location location) {
+    if (!player.getWorld().getName().equals(location.getWorld().getName())) {
+      this.getPlayerFlags(player).setTeleporting(true);
+    }
+  }
+
   public boolean playerLeave(Player p, boolean kicked) {
     System.out.println("Checkpoint 6");
-//    this.getPlayerFlags(p).setTeleporting(true);
+    this.getPlayerFlags(p).setTeleporting(true);
     Team team = this.getPlayerTeam(p);
 
     BedwarsPlayerLeaveEvent leaveEvent = new BedwarsPlayerLeaveEvent(this, p, team);
@@ -1901,13 +1907,11 @@ public class Game {
   private void teleportPlayersToTeamSpawn(boolean retainPlayerStorage) {
     for (Team team : this.teams.values()) {
       for (Player player : team.getPlayers()) {
-        if (!player.getWorld().equals(team.getSpawnLocation().getWorld())) {
-          this.getPlayerFlags(player).setTeleporting(true);
-        }
         player.setVelocity(new Vector(0, 0, 0));
         player.setFallDistance(0.0F);
-        this.getPlayerFlags(player).setTeleporting(true);
-        player.teleport(team.getSpawnLocation());
+        Location location = team.getSpawnLocation();
+        this.setTeleportingIfWorldChange(player, location);
+        player.teleport(location);
         if (!retainPlayerStorage && this.getPlayerStorage(player) != null) {
           this.getPlayerStorage(player).clean(true);
           this.getPlayerStorage(player).respawn();
@@ -1916,9 +1920,7 @@ public class Game {
     }
   }
 
-  public void toSpectator(Player player) {
-    final Player p = player;
-
+  public void toSpectator(final Player player) {
     if (!this.freePlayers.contains(player)) {
       this.freePlayers.add(player);
     }
@@ -1931,24 +1933,21 @@ public class Game {
     PlayerStorage storage = this.getPlayerStorage(player);
     storage.clean(true);
 
-    final Location location = this.getPlayerTeleportLocation(p);
+    final Location location = this.getPlayerTeleportLocation(player);
 
-    if (!p.getLocation().getWorld().equals(location.getWorld())) {
-      this.getPlayerFlags(p).setTeleporting(true);
+    if (!player.getLocation().getWorld().equals(location.getWorld())) {
+      this.setTeleportingIfWorldChange(player, location);
       if (BedwarsRel.getInstance().isBungee()) {
         new BukkitRunnable() {
 
           @Override
           public void run() {
-            Game.this.getPlayerFlags(p).setTeleporting(true);
-            p.teleport(location);
+            player.teleport(location);
           }
 
         }.runTaskLater(BedwarsRel.getInstance(), 10L);
-
       } else {
-        Game.this.getPlayerFlags(p).setTeleporting(true);
-        p.teleport(location);
+        player.teleport(location);
       }
     }
 
@@ -1956,8 +1955,8 @@ public class Game {
 
       @Override
       public void run() {
-        Game.this.setPlayerGameMode(p);
-        Game.this.setPlayerVisibility(p);
+        Game.this.setPlayerGameMode(player);
+        Game.this.setPlayerVisibility(player);
       }
 
     }.runTaskLater(BedwarsRel.getInstance(), 15L);
@@ -1967,24 +1966,23 @@ public class Game {
     ItemMeta im = leaveGame.getItemMeta();
     im.setDisplayName(BedwarsRel._l(player, "lobby.leavegame"));
     leaveGame.setItemMeta(im);
-    p.getInventory().setItem(8, leaveGame);
+    player.getInventory().setItem(8, leaveGame);
 
     if (this.getCycle() instanceof BungeeGameCycle && this.getCycle().isEndGameRunning()
         && BedwarsRel.getInstance().getBooleanConfig("bungeecord.endgame-in-lobby", true)) {
-      p.updateInventory();
+      player.updateInventory();
       return;
     }
 
     // Teleport to player (Compass)
-    ItemStack teleportPlayer = new ItemStack(Material.COMPASS, 1);
-    im = teleportPlayer.getItemMeta();
-    im.setDisplayName(BedwarsRel._l(p, "ingame.spectate"));
-    teleportPlayer.setItemMeta(im);
-    p.getInventory().setItem(0, teleportPlayer);
+    ItemStack compass = new ItemStack(Material.COMPASS, 1);
+    im = compass.getItemMeta();
+    im.setDisplayName(BedwarsRel._l(player, "ingame.spectate"));
+    compass.setItemMeta(im);
+    player.getInventory().setItem(0, compass);
 
-    p.updateInventory();
+    player.updateInventory();
     this.updateScoreboard();
-
   }
 
   private void updateLobbyScoreboard() {
@@ -2148,7 +2146,8 @@ public class Game {
       @Override
       public void run() {
         if (Game.this.getState() == GameState.RUNNING) {
-          Game.this.getPlayerFlags(player).setTeleporting(true);
+          Location location = Game.this.getPlayerTeam(player).getSpawnLocation();
+          Game.this.setTeleportingIfWorldChange(player, location);
           player.teleport(Game.this.getPlayerTeam(player).getSpawnLocation());
           player.setGameMode(GameMode.SURVIVAL);
           Game.this.setPlayerVirtuallyAlive(player, true);
@@ -2199,8 +2198,11 @@ public class Game {
     }
 
     player.setGameMode(GameMode.SPECTATOR);
-    this.getPlayerFlags(player).setTeleporting(true);
+    Location location = this.getTopMiddle();
+    this.setTeleportingIfWorldChange(player, location);
     player.teleport(this.getTopMiddle());
+
+    System.out.println("player.teleport(this.getTopMiddle())" + this.getTopMiddle());
 
     if (this.getState() == GameState.RUNNING
         && !this.getCycle().isEndGameRunning()
