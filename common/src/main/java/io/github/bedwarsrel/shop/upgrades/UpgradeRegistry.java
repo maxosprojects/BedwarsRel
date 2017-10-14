@@ -1,13 +1,10 @@
 package io.github.bedwarsrel.shop.upgrades;
 
 import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.Team;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.entity.Player;
 
 public class UpgradeRegistry {
   private static Map<String, List<Upgrade>> upgrades = new HashMap<>();
@@ -28,8 +25,8 @@ public class UpgradeRegistry {
     addUpgrade(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION3));
     addUpgrade(new UpgradeArmorProtection(UpgradeArmorProtectionEnum.PROTECTION4));
 
-    addUpgrade(new UpgradeSword(UpgradeSwordEnum.SHARPNESS0));
-    addUpgrade(new UpgradeSword(UpgradeSwordEnum.SHARPNESS1));
+    addUpgrade(new UpgradeSwordSharpness(UpgradeSwordSharpnessEnum.SHARPNESS0));
+    addUpgrade(new UpgradeSwordSharpness(UpgradeSwordSharpnessEnum.SHARPNESS1));
 
     addUpgrade(new UpgradeForge(UpgradeForgeEnum.FORGE0));
     addUpgrade(new UpgradeForge(UpgradeForgeEnum.FORGE1));
@@ -38,6 +35,10 @@ public class UpgradeRegistry {
     addUpgrade(new UpgradeForge(UpgradeForgeEnum.FORGE4));
 
     addUpgrade(new UpgradeItem());
+
+    addUpgrade(new UpgradeSwordItem(1));
+    addUpgrade(new UpgradeSwordItem(2));
+    addUpgrade(new UpgradeSwordItem(3));
   }
 
   private static void addUpgrade(Upgrade upgrade) {

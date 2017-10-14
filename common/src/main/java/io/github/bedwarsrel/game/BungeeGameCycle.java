@@ -134,7 +134,7 @@ public class BungeeGameCycle extends GameCycle {
         if (!player.getWorld().equals(this.getGame().getLobby().getWorld())) {
           game.getPlayerFlags(player).setTeleporting(true);
           player.teleport(this.getGame().getLobby());
-          game.getPlayerStorage(player).clean();
+          game.getPlayerStorage(player).clean(true);
         }
       }
 

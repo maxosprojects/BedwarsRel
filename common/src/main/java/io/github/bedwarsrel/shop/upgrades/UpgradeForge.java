@@ -38,21 +38,22 @@ public class UpgradeForge implements Upgrade {
   @Override
   public Upgrade create(Game game, Team team, Player player) {
     UpgradeForge item = new UpgradeForge(this.upgrade);
-
     item.game = game;
     item.team = team;
-
+    item.permanent = this.permanent;
+    item.multiple = this.multiple;
     return item;
   }
 
   @Override
   public boolean activate(UpgradeScope scope, UpgradeCycle cycle) {
+    if (cycle != UpgradeCycle.ONCE) {
+      return false;
+    }
     UpgradeForge existingUpgrade = this.team.getUpgrade(UpgradeForge.class);
-
     if (existingUpgrade != null && !this.upgrade.isHigherThan(existingUpgrade.upgrade)) {
       return false;
     }
-
     team.setUpgrade(this);
 
     this.upgrade.equipTeam(this.game, this.team);

@@ -148,6 +148,7 @@ public class MerchantCategory {
             if (upgrade instanceof UpgradeItem) {
               UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);
               temp.setItem(rewardButton);
+              upgrade = temp;
             }
             if (upgradeElem.containsKey("permanent")) {
               boolean permanent = (boolean) upgradeElem.get("permanent");

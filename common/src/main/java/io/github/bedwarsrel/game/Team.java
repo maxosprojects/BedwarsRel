@@ -5,8 +5,8 @@ import io.github.bedwarsrel.events.BedwarsPlayerJoinTeamEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 import io.github.bedwarsrel.shop.upgrades.UpgradeArmorProtection;
 import io.github.bedwarsrel.shop.upgrades.UpgradeArmorProtectionEnum;
-import io.github.bedwarsrel.shop.upgrades.UpgradeSword;
-import io.github.bedwarsrel.shop.upgrades.UpgradeSwordEnum;
+import io.github.bedwarsrel.shop.upgrades.UpgradeSwordSharpness;
+import io.github.bedwarsrel.shop.upgrades.UpgradeSwordSharpnessEnum;
 import io.github.bedwarsrel.shop.upgrades.Upgrade;
 import io.github.bedwarsrel.shop.upgrades.UpgradeBaseAlarm;
 import io.github.bedwarsrel.utils.Utils;
@@ -84,7 +84,7 @@ public class Team implements ConfigurationSerializable {
     this.upgrades = new HashMap<>();
     this.upgrades.put(UpgradeArmorProtection.class, new UpgradeArmorProtection(
         UpgradeArmorProtectionEnum.PROTECTION0));
-    this.upgrades.put(UpgradeSword.class, new UpgradeSword(UpgradeSwordEnum.SHARPNESS0).create(null, this, null));
+    this.upgrades.put(UpgradeSwordSharpness.class, new UpgradeSwordSharpness(UpgradeSwordSharpnessEnum.SHARPNESS0).create(null, this, null));
   }
 
   public void addChest(Block chestBlock) {

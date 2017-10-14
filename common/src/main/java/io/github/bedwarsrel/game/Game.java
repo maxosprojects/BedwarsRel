@@ -312,12 +312,12 @@ public class Game {
 
   private void cleanUsersInventory() {
     for (PlayerStorage storage : this.playerStorages.values()) {
-      storage.clean();
+      storage.clean(true);
     }
   }
 
   private void prepareUsersForBattle() {
-    this.defaultUpgrades = (List<Map<String, Object>>) this.getConfig().getList("default-upgrades");
+    this.defaultUpgrades = (List<Map<String, Object>>) this.getConfig().getList("default-player-inventory");
     List<Upgrade> upgrades = new ArrayList<>();
     for (Map<String, Object> item : this.defaultUpgrades) {
       Map<String, Object> elem = (Map<String, Object>) item.get("upgrade");
@@ -345,7 +345,8 @@ public class Game {
       for (Upgrade upgrade : upgrades) {
         storage.addUpgrade(upgrade.create(this, team, player));
       }
-      storage.respawn();
+      // Respawn is executed later when player is added to the team
+      // storage.respawn();
     }
   }
 
@@ -405,7 +406,7 @@ public class Game {
     yml.set("spawner", this.resourceSpawners);
     yml.createSection("teams", this.teams);
 
-    yml.set("default-upgrades", this.defaultUpgrades);
+    yml.set("default-player-inventory", this.defaultUpgrades);
 
     try {
       yml.save(config);
@@ -1173,7 +1174,7 @@ public class Game {
       this.displayMapInfo(p);
     } else {
       storage.store();
-      storage.clean();
+      storage.clean(true);
 
       if (!BedwarsRel.getInstance().isBungee()) {
         final Location location = this.getPlayerTeleportLocation(p);
@@ -1384,7 +1385,7 @@ public class Game {
     }
 
     PlayerStorage storage = this.getPlayerStorage(p);
-    storage.clean();
+    storage.clean(true);
     storage.restore();
 
     this.updateScoreboard();
@@ -1908,7 +1909,7 @@ public class Game {
         this.getPlayerFlags(player).setTeleporting(true);
         player.teleport(team.getSpawnLocation());
         if (!retainPlayerStorage && this.getPlayerStorage(player) != null) {
-          this.getPlayerStorage(player).clean();
+          this.getPlayerStorage(player).clean(true);
           this.getPlayerStorage(player).respawn();
         }
       }
@@ -1928,7 +1929,7 @@ public class Game {
       storage.store();
     }
     PlayerStorage storage = this.getPlayerStorage(player);
-    storage.clean();
+    storage.clean(true);
 
     final Location location = this.getPlayerTeleportLocation(p);
 
@@ -2184,7 +2185,7 @@ public class Game {
     }
 
     PlayerStorage storage = this.getPlayerStorage(player);
-    storage.clean();
+    storage.clean(false);
     storage.respawn();
 
     this.setPlayerVirtuallyAlive(player, false);

@@ -10,12 +10,10 @@ import io.github.bedwarsrel.shop.ShopTrade;
 import io.github.bedwarsrel.shop.upgrades.Upgrade;
 import io.github.bedwarsrel.shop.upgrades.UpgradeCycle;
 import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
-import io.github.bedwarsrel.shop.upgrades.UpgradeSword;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.Utils;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.bukkit.ChatColor;
@@ -23,7 +21,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class ShopActionBuy extends ShopAction {
   private static final String EVENT = "InventoryClickEvent";
@@ -204,9 +201,6 @@ public class ShopActionBuy extends ShopAction {
 
       success = false;
     }
-
-    BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player).getPlayerTeam(player)
-        .getUpgrade(UpgradeSword.class).activate(UpgradeScope.PLAYER, UpgradeCycle.RESPAWN);
 
     player.updateInventory();
     return success;

@@ -19,26 +19,29 @@ public class UpgradeItem implements Upgrade {
 
   @Getter
   @Setter
-  private UpgradeScope scope = UpgradeScope.PLAYER;
+  protected UpgradeScope scope = UpgradeScope.PLAYER;
   @Getter
   @Setter
-  private UpgradeCycle cycle = UpgradeCycle.ONCE;
+  protected UpgradeCycle cycle = UpgradeCycle.ONCE;
   @Setter
-  private ItemStack purchase;
+  protected ItemStack purchase;
   @Getter
   @Setter
-  private boolean permanent = false;
+  protected boolean permanent = false;
   @Getter
   @Setter
-  private boolean multiple = false;
-  private Player player;
-  private Game game;
+  protected boolean multiple = false;
+  protected Player player;
+  protected Game game;
 
   @Override
   public Upgrade create(Game game, Team team, Player player) {
     UpgradeItem item = new UpgradeItem();
     item.game = game;
     item.player = player;
+    item.purchase = this.purchase;
+    item.permanent = this.permanent;
+    item.multiple = this.multiple;
     return item;
   }
 
@@ -61,12 +64,18 @@ public class UpgradeItem implements Upgrade {
       storage.addUpgrade(this);
     }
 
+    installItem(cycle, false);
+
+    return true;
+  }
+
+  protected void installItem(UpgradeCycle cycle, boolean forceChat) {
     Inventory inv = this.player.getInventory();
     ItemStack item = this.purchase.clone();
     inv.addItem(item);
     this.player.updateInventory();
 
-    if (cycle == UpgradeCycle.ONCE) {
+    if (forceChat || cycle == UpgradeCycle.ONCE) {
       String name = item.getType().name();
       if (item.hasItemMeta()) {
         ItemMeta meta = item.getItemMeta();
@@ -78,8 +87,6 @@ public class UpgradeItem implements Upgrade {
           BedwarsRel._l(player, "success.itempurchased",
               ImmutableMap.of("item", name))));
     }
-
-    return true;
   }
 
   @Override

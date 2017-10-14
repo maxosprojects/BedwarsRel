@@ -133,6 +133,8 @@ public class UpgradeBaseAlarm implements Upgrade {
 
     item.game = game;
     item.team = team;
+    item.permanent = this.permanent;
+    item.multiple = this.multiple;
 
     Location loc1 = item.team.getBaseLoc1();
     Location loc2 = item.team.getBaseLoc2();

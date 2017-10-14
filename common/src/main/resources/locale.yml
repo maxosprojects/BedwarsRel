@@ -87,7 +87,7 @@ success:
   armorupgraded: "&aArmor upgraded to $upgrade$!"
   swordsupgraded: "&aSwords upgraded to $upgrade$!"
   forgeupgraded: "&aForge upgraded to $upgrade$!"
-  itempurchased: "&aItem $item$ purchased!"
+  itempurchased: "&aItem $item$ &apurchased!"
 gamecheck:
   LOC_NOT_SET_ERROR: "Locations for the region were not set properly!"
   LOC_BASE_NOT_SET_ERROR: "Locations for the base regions were not set properly!"

@@ -7,19 +7,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public enum UpgradeSwordEnum implements UpgradeEnum {
+public enum UpgradeSwordSharpnessEnum implements UpgradeEnum {
     SHARPNESS0(0, ""),
     SHARPNESS1(1, "sharpness1");
 
     private final int level;
     private final String translationKey;
 
-    UpgradeSwordEnum(int level, String translationKey) {
+    UpgradeSwordSharpnessEnum(int level, String translationKey) {
         this.level = level;
         this.translationKey = translationKey;
     }
 
-    public boolean isHigherThan(UpgradeSwordEnum purchase) {
+    public boolean isHigherThan(UpgradeSwordSharpnessEnum purchase) {
         return this.ordinal() > purchase.ordinal();
     }
 

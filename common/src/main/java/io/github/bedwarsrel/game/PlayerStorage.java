@@ -5,12 +5,10 @@ import io.github.bedwarsrel.events.BedwarsOpenTeamSelectionEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 
 import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
-import io.github.bedwarsrel.shop.upgrades.UpgradeArmorItems;
 import io.github.bedwarsrel.shop.upgrades.Upgrade;
 import io.github.bedwarsrel.shop.upgrades.UpgradeCycle;
 import java.util.*;
 
-import io.github.bedwarsrel.shop.upgrades.UpgradeArmorItemsEnum;
 import java.util.Map.Entry;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -64,28 +62,29 @@ public class PlayerStorage {
     this.player.getInventory().addItem(reduceCountdownItem);
   }
 
-  public void clean() {
+  public void clean(boolean deep) {
     PlayerInventory inv = this.player.getInventory();
     inv.setArmorContents(new ItemStack[4]);
     inv.setContents(new ItemStack[]{});
 
-    // Preserve permanent items
     Map<Class<? extends Upgrade>, List<Upgrade>> permanent = new HashMap<>();
-    for (Entry<Class<? extends Upgrade>, List<Upgrade>> entry : this.upgrades.entrySet()) {
-      List<Upgrade> permanentList = permanent.get(entry.getKey());
-      if (permanentList == null) {
-        permanentList = new ArrayList<>();
-      }
-      for (Upgrade upgrade : entry.getValue()) {
-        if (upgrade.isPermanent()) {
-          permanentList.add(upgrade);
-          permanent.put(entry.getKey(), permanentList);
+    // Preserve permanent items if not deeply cleaned
+    if (!deep) {
+      for (Entry<Class<? extends Upgrade>, List<Upgrade>> entry : this.upgrades.entrySet()) {
+        List<Upgrade> permanentList = permanent.get(entry.getKey());
+        if (permanentList == null) {
+          permanentList = new ArrayList<>();
+        }
+        for (Upgrade upgrade : entry.getValue()) {
+          if (upgrade.isPermanent()) {
+            permanentList.add(upgrade);
+            permanent.put(entry.getKey(), permanentList);
+          }
         }
       }
     }
     this.upgrades = permanent;
 
-    List<Upgrade> armor = new ArrayList<>();
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(this.player);
 
     System.out.println("Checkpoint 13");
