@@ -174,6 +174,13 @@ public class PlayerStorage {
         upgrade.activate(UpgradeScope.PLAYER, UpgradeCycle.RESPAWN);
       }
     }
+    Team team = BedwarsRel.getInstance().getGameManager()
+        .getGameOfPlayer(this.player).getPlayerTeam(this.player);
+    for (Upgrade up : team.getUpgrades().values()) {
+      if (up.getApplyTo() == UpgradeScope.PLAYER) {
+        up.activate(UpgradeScope.PLAYER, UpgradeCycle.RESPAWN);
+      }
+    }
     this.player.getInventory().setHeldItemSlot(0);
     this.player.updateInventory();
   }

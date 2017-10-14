@@ -24,6 +24,9 @@ public class UpgradeItem implements Upgrade {
   @Setter
   protected UpgradeCycle cycle = UpgradeCycle.ONCE;
   @Setter
+  @Getter
+  private UpgradeScope applyTo = UpgradeScope.PLAYER;
+  @Setter
   protected ItemStack purchase;
   @Getter
   @Setter

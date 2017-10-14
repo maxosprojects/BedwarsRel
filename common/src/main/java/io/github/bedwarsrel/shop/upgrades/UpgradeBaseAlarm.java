@@ -42,6 +42,9 @@ public class UpgradeBaseAlarm implements Upgrade {
   @Setter
   @Getter
   private UpgradeCycle cycle = UpgradeCycle.ONCE;
+  @Setter
+  @Getter
+  private UpgradeScope applyTo = UpgradeScope.TEAM;
   private boolean expired = false;
   @Getter
   @Setter

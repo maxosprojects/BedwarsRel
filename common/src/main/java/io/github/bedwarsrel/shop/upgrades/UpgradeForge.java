@@ -24,6 +24,9 @@ public class UpgradeForge implements Upgrade {
   @Getter
   @Setter
   private UpgradeCycle cycle = UpgradeCycle.ONCE;
+  @Setter
+  @Getter
+  private UpgradeScope applyTo = UpgradeScope.TEAM;
   @Getter
   @Setter
   private boolean permanent = false;

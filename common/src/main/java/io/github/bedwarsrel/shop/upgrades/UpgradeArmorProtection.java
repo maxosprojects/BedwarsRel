@@ -22,6 +22,9 @@ public class UpgradeArmorProtection implements Upgrade {
   @Setter
   @Getter
   private UpgradeCycle cycle = UpgradeCycle.RESPAWN;
+  @Setter
+  @Getter
+  private UpgradeScope applyTo = UpgradeScope.PLAYER;
   @Getter
   @Setter
   private boolean permanent = false;
@@ -50,7 +53,7 @@ public class UpgradeArmorProtection implements Upgrade {
       if (existingUpgrade != null && !this.upgrade.isHigherThan(existingUpgrade.upgrade)) {
         return false;
       }
-      team.setUpgrade(this);
+      this.team.setUpgrade(this);
     }
 
     this.upgrade.equipTeam(this.team);

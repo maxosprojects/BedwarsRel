@@ -14,6 +14,7 @@ import io.github.bedwarsrel.shop.Specials.SpecialItem;
 import io.github.bedwarsrel.shop.upgrades.Upgrade;
 import io.github.bedwarsrel.shop.upgrades.UpgradeItem;
 import io.github.bedwarsrel.shop.upgrades.UpgradeRegistry;
+import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.TitleWriter;
@@ -318,7 +319,8 @@ public class Game {
 
   private void prepareUsersForBattle() {
     this.defaultUpgrades = (List<Map<String, Object>>) this.getConfig().getList("default-player-inventory");
-    List<Upgrade> upgrades = new ArrayList<>();
+    List<Upgrade> playerUpgrades = new ArrayList<>();
+    List<Upgrade> teamUpgrades = new ArrayList<>();
     for (Map<String, Object> item : this.defaultUpgrades) {
       Map<String, Object> elem = (Map<String, Object>) item.get("upgrade");
       Upgrade upgrade = UpgradeRegistry.getUpgrade(
@@ -336,17 +338,26 @@ public class Game {
         boolean multiple = (boolean) elem.get("multiple");
         upgrade.setMultiple(multiple);
       }
-      upgrades.add(upgrade);
+      if (upgrade.getScope() == UpgradeScope.PLAYER) {
+        playerUpgrades.add(upgrade);
+      } else {
+        teamUpgrades.add(upgrade);
+      }
     }
 
     for (Player player : this.getPlayers()) {
       Team team = this.getPlayerTeam(player);
       PlayerStorage storage = this.getPlayerStorage(player);
-      for (Upgrade upgrade : upgrades) {
+      for (Upgrade upgrade : playerUpgrades) {
         storage.addUpgrade(upgrade.create(this, team, player));
       }
       // Respawn is executed later when player is added to the team
       // storage.respawn();
+    }
+    for (Team team : this.getTeams().values()) {
+      for (Upgrade upgrade : teamUpgrades) {
+        team.setUpgrade(upgrade.create(this, team, null));
+      }
     }
   }
 

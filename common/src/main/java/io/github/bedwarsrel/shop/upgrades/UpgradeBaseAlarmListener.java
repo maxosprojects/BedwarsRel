@@ -59,7 +59,7 @@ public class UpgradeBaseAlarmListener implements Listener {
       if (otherTeam == team) {
         continue;
       }
-      UpgradeBaseAlarm alarm = team.getUpgrade(UpgradeBaseAlarm.class);
+      UpgradeBaseAlarm alarm = otherTeam.getUpgrade(UpgradeBaseAlarm.class);
       if (alarm != null) {
         if (alarm.isLocationIn(move.getTo())) {
           alarm.trigger(player);

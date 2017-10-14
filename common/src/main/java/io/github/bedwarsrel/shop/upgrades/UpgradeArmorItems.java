@@ -23,6 +23,9 @@ public class UpgradeArmorItems implements Upgrade {
   @Setter
   @Getter
   private UpgradeCycle cycle = UpgradeCycle.RESPAWN;
+  @Setter
+  @Getter
+  private UpgradeScope applyTo = UpgradeScope.PLAYER;
   @Getter
   @Setter
   private boolean permanent = false;

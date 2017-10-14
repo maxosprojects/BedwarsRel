@@ -1,9 +1,7 @@
 package io.github.bedwarsrel.shop.upgrades;
 
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.PlayerStorage;
 import io.github.bedwarsrel.game.Team;
-import java.util.List;
 import org.bukkit.entity.Player;
 
 public class UpgradeSwordItem extends UpgradeItem {

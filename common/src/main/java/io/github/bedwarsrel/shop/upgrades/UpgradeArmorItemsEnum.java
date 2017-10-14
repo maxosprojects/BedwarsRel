@@ -71,6 +71,9 @@ public enum UpgradeArmorItemsEnum {
 
         player.updateInventory();
 
-        team.getUpgrade(UpgradeArmorProtection.class).getUpgrade().equipPlayer(player);
+        UpgradeArmorProtection protection = team.getUpgrade(UpgradeArmorProtection.class);
+        if (protection != null) {
+          protection.getUpgrade().equipPlayer(player);
+        }
     }
 }

@@ -20,7 +20,10 @@ public class UpgradeSwordSharpness implements Upgrade {
   private UpgradeCycle cycle = UpgradeCycle.RESPAWN;
   @Getter
   @Setter
-  private UpgradeScope scope = UpgradeScope.PLAYER;
+  private UpgradeScope scope = UpgradeScope.TEAM;
+  @Setter
+  @Getter
+  private UpgradeScope applyTo = UpgradeScope.PLAYER;
   @Getter
   @Setter
   private boolean permanent = false;
@@ -45,7 +48,7 @@ public class UpgradeSwordSharpness implements Upgrade {
   public boolean activate(UpgradeScope scope, UpgradeCycle cycle) {
     if (cycle == UpgradeCycle.ONCE) {
       UpgradeSwordSharpness existingUpgrade = this.team.getUpgrade(UpgradeSwordSharpness.class);
-      if (!this.upgrade.isHigherThan(existingUpgrade.upgrade)) {
+      if (existingUpgrade != null && !this.upgrade.isHigherThan(existingUpgrade.upgrade)) {
         return false;
       }
       team.setUpgrade(this);

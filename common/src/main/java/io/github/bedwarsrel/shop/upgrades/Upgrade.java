@@ -9,6 +9,8 @@ public interface Upgrade {
 
   UpgradeCycle getCycle();
 
+  UpgradeScope getApplyTo();
+
   boolean isLevel(int level);
 
   /**
