@@ -1,16 +1,11 @@
 package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.shop.ShopReward;
-import io.github.bedwarsrel.shop.upgrades.TntListener;
-import io.github.bedwarsrel.shop.upgrades.Upgrade;
+import io.github.bedwarsrel.listener.TntListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.Team;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 
 public abstract class SpecialItem {
 
