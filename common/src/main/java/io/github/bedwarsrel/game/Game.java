@@ -885,18 +885,18 @@ public class Game {
         ChatColor chatColor = ChatColor.GOLD;
         if (bedDestroyTeam.isInTeam(aPlayer)) {
           String titleMsg = TitleWriter.pluginMessage(ChatColor.RED
-                  + BedwarsRel._l(aPlayer, "ingame.blocks.beddestroyedtitle"));
+              + BedwarsRel._l(aPlayer, "ingame.blocks.beddestroyedtitle"));
           aPlayer.sendTitle(titleMsg, null, 10, 70, 20);
           chatColor = ChatColor.RED;
         }
         String chatMsg = ChatWriter.pluginMessage(chatColor.toString() + ChatColor.BOLD
-                + BedwarsRel._l(aPlayer, "ingame.blocks.beddestroyed",
-                        ImmutableMap.of("team",
-                                bedDestroyTeam.getChatColor() + ChatColor.BOLD.toString()
-                                        + bedDestroyTeam.getName() + chatColor.toString(),
-                                "player",
-                                ChatColor.BOLD.toString()
-                                        + Game.getPlayerWithTeamString(p, team, bedDestroyTeam.getChatColor()))));
+            + BedwarsRel._l(aPlayer, "ingame.blocks.beddestroyed",
+            ImmutableMap.of("team",
+                bedDestroyTeam.getChatColor() + ChatColor.BOLD.toString()
+                    + bedDestroyTeam.getName() + chatColor.toString(),
+                "player",
+                ChatColor.BOLD.toString()
+                    + Game.getPlayerWithTeamString(p, team, bedDestroyTeam.getChatColor()))));
         aPlayer.sendMessage(chatMsg);
       }
     }
@@ -1303,12 +1303,12 @@ public class Game {
         }
       }
     } else if (this.state == GameState.RUNNING
-          && !this.getCycle().isEndGameRunning()
-          && !team.isBedDestroyed(this)
-          && this.isPlayerVirtuallyAlive(p)
-          && BedwarsRel.getInstance().statisticsEnabled()
-          && BedwarsRel.getInstance().getBooleanConfig("statistics.player-leave-kills",
-              false)) {
+        && !this.getCycle().isEndGameRunning()
+        && !team.isBedDestroyed(this)
+        && this.isPlayerVirtuallyAlive(p)
+        && BedwarsRel.getInstance().statisticsEnabled()
+        && BedwarsRel.getInstance().getBooleanConfig("statistics.player-leave-kills",
+        false)) {
       statistic.setCurrentDeaths(statistic.getCurrentDeaths() + 1);
       statistic.setCurrentScore(statistic.getCurrentScore() + BedwarsRel.getInstance()
           .getIntConfig("statistics.scores.die", 0));
@@ -2118,10 +2118,10 @@ public class Game {
       public void run() {
         if (Game.this.getState() == GameState.RUNNING && !Game.this.isStopping()) {
           String title = ChatColor.translateAlternateColorCodes('&',
-                  BedwarsRel._l(player, "ingame.title.youdied"));
+              BedwarsRel._l(player, "ingame.title.youdied"));
           String subtitle = ChatColor.translateAlternateColorCodes('&',
-                  BedwarsRel._l(player, "ingame.title.respawninseconds",
-                    ImmutableMap.of("time", Integer.toString(this.respawnIn))));
+              BedwarsRel._l(player, "ingame.title.respawninseconds",
+                  ImmutableMap.of("time", Integer.toString(this.respawnIn))));
           player.sendTitle(title, subtitle, 0, 20, 10);
         }
         this.respawnIn--;

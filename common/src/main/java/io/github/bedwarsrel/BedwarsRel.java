@@ -703,92 +703,92 @@ public class BedwarsRel extends JavaPlugin {
 
   @Override
   public void onDisable() {
-    this.stopTimeListener();
-    this.gameManager.unloadGames();
-
-    if (this.isHologramsEnabled() && this.holographicInteraction != null) {
-      this.holographicInteraction.unloadHolograms();
-    }
+//    this.stopTimeListener();
+//    this.gameManager.stopGames();
+//
+//    if (this.isHologramsEnabled() && this.holographicInteraction != null) {
+//      this.holographicInteraction.unloadHolograms();
+//    }
   }
 
   @Override
   public void onEnable() {
-    BedwarsRel.instance = this;
-
-    if (this.getDescription().getVersion().contains("-SNAPSHOT")
-        && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
-      this.getServer().getConsoleSender().sendMessage(ChatWriter
-          .pluginMessage(ChatColor.RED + "*** Warning, you are using a development build ***"));
-      this.getServer().getConsoleSender().sendMessage(ChatWriter
-          .pluginMessage(ChatColor.RED + "*** You will get NO support regarding this build ***"));
-      this.getServer().getConsoleSender().sendMessage(ChatWriter.pluginMessage(ChatColor.RED
-          + "*** Please download a stable build from https://github.com/BedwarsRel/BedwarsRel/releases ***"));
-    }
-
-//    this.registerBugsnag();
-
-    this.protocolManager = ProtocolLibrary.getProtocolManager();
-
-    // register classes
-    this.registerConfigurationClasses();
-
-    // save default config
-    this.saveDefaultConfig();
-    this.loadConfigInUTF();
-
-    this.getConfig().options().copyDefaults(true);
-    this.getConfig().options().copyHeader(true);
-
-    this.craftbukkit = this.getCraftBukkit();
-    this.minecraft = this.getMinecraftPackage();
-    this.version = this.loadVersion();
-
-    ConfigUpdater configUpdater = new ConfigUpdater();
-    configUpdater.addConfigs();
-    this.saveConfiguration();
-    this.loadConfigInUTF();
-
-//    if (this.getBooleanConfig("send-error-data", true) && this.bugsnag != null) {
-//      this.enableBugsnag();
-//    } else {
-//      this.disableBugsnag();
+//    BedwarsRel.instance = this;
+//
+//    if (this.getDescription().getVersion().contains("-SNAPSHOT")
+//        && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
+//      this.getServer().getConsoleSender().sendMessage(ChatWriter
+//          .pluginMessage(ChatColor.RED + "*** Warning, you are using a development build ***"));
+//      this.getServer().getConsoleSender().sendMessage(ChatWriter
+//          .pluginMessage(ChatColor.RED + "*** You will get NO support regarding this build ***"));
+//      this.getServer().getConsoleSender().sendMessage(ChatWriter.pluginMessage(ChatColor.RED
+//          + "*** Please download a stable build from https://github.com/BedwarsRel/BedwarsRel/releases ***"));
 //    }
-
-    this.loadShop();
-
-    this.isSpigot = this.getIsSpigot();
-    this.loadDatabase();
-
-    this.registerCommands();
-    this.registerListener();
-
-    this.gameManager = new GameManager();
-
-    // bungeecord
-    if (BedwarsRel.getInstance().isBungee()) {
-      this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-    }
-
-    this.loadStatistics();
-    this.loadLocalization(this.getConfig().getString("locale"));
-
-    this.checkUpdates();
-
-    // Loading
-    this.scoreboardManager = Bukkit.getScoreboardManager();
-    this.gameManager.loadGames();
-    this.startTimeListener();
-    this.startMetricsIfEnabled();
-
-    // holograms
-    if (this.isHologramsEnabled()) {
-      if (this.getServer().getPluginManager().isPluginEnabled("HologramAPI")) {
-        this.holographicInteraction = new HologramAPIInteraction();
-      } else if (this.getServer().getPluginManager().isPluginEnabled("HolographicDisplays")) {
-        this.holographicInteraction = new HolographicDisplaysInteraction();
-      }
-      this.holographicInteraction.loadHolograms();
-    }
+//
+////    this.registerBugsnag();
+//
+//    this.protocolManager = ProtocolLibrary.getProtocolManager();
+//
+//    // register classes
+//    this.registerConfigurationClasses();
+//
+//    // save default config
+//    this.saveDefaultConfig();
+//    this.loadConfigInUTF();
+//
+//    this.getConfig().options().copyDefaults(true);
+//    this.getConfig().options().copyHeader(true);
+//
+//    this.craftbukkit = this.getCraftBukkit();
+//    this.minecraft = this.getMinecraftPackage();
+//    this.version = this.loadVersion();
+//
+//    ConfigUpdater configUpdater = new ConfigUpdater();
+//    configUpdater.addConfigs();
+//    this.saveConfiguration();
+//    this.loadConfigInUTF();
+//
+////    if (this.getBooleanConfig("send-error-data", true) && this.bugsnag != null) {
+////      this.enableBugsnag();
+////    } else {
+////      this.disableBugsnag();
+////    }
+//
+//    this.loadShop();
+//
+//    this.isSpigot = this.getIsSpigot();
+//    this.loadDatabase();
+//
+//    this.registerCommands();
+//    this.registerListener();
+//
+//    this.gameManager = new GameManager();
+//
+//    // bungeecord
+//    if (BedwarsRel.getInstance().isBungee()) {
+//      this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+//    }
+//
+//    this.loadStatistics();
+//    this.loadLocalization(this.getConfig().getString("locale"));
+//
+//    this.checkUpdates();
+//
+//    // Loading
+//    this.scoreboardManager = Bukkit.getScoreboardManager();
+//    this.gameManager.loadGames();
+//    this.startTimeListener();
+//    this.startMetricsIfEnabled();
+//
+//    // holograms
+//    if (this.isHologramsEnabled()) {
+//      if (this.getServer().getPluginManager().isPluginEnabled("HologramAPI")) {
+//        this.holographicInteraction = new HologramAPIInteraction();
+//      } else if (this.getServer().getPluginManager().isPluginEnabled("HolographicDisplays")) {
+//        this.holographicInteraction = new HolographicDisplaysInteraction();
+//      }
+//      this.holographicInteraction.loadHolograms();
+//    }
   }
 
   private void registerBugsnag() {

@@ -20,6 +20,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -756,6 +757,27 @@ public final class Utils {
       }
     }
     return sb.toString();
+  }
+
+  public static String getPlayerWithTeamString(Player player, Team team, ChatColor before) {
+    if (BedwarsRel.getInstance().getBooleanConfig("teamname-in-chat", true)) {
+      return player.getDisplayName() + before + " (" + team.getChatColor() + team.getDisplayName()
+          + before + ")";
+    }
+    return player.getDisplayName() + before;
+  }
+
+  public static String getPlayerWithTeamString(Player player, Team team, ChatColor before,
+      String playerAdding) {
+    if (BedwarsRel.getInstance().getBooleanConfig("teamname-in-chat", true)) {
+      return player.getDisplayName() + before + playerAdding + before + " (" + team.getChatColor()
+          + team.getDisplayName() + before + ")";
+    }
+    return player.getDisplayName() + before + playerAdding + before;
+  }
+
+  public static String truncate(String text, int length) {
+    return text.substring(0, length);
   }
 
 }

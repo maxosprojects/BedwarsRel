@@ -135,7 +135,7 @@
                 <configuration>
                   <includeDependencySources>true</includeDependencySources>
                   <dependencySourceIncludes>
-                    <dependencySourceInclude>io.github.bedwarsrel:*</dependencySourceInclude>
+                    <dependencySourceInclude>io.github.bedwarsrevolution:*</dependencySourceInclude>
                   </dependencySourceIncludes>
                 </configuration>
               </execution>
