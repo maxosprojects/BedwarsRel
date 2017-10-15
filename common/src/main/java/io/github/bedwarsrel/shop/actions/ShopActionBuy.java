@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -41,6 +42,7 @@ public class ShopActionBuy extends ShopAction {
     if (args == null || args.get(EVENT) == null) {
       BedwarsRel.getInstance().getServer().getConsoleSender().sendMessage(ChatWriter.pluginMessage(
           ChatColor.RED + "ShopActionCategory received no InventoryClickEvent!"));
+      return;
     }
 
     InventoryClickEvent event = (InventoryClickEvent) args.get(EVENT);
@@ -49,6 +51,11 @@ public class ShopActionBuy extends ShopAction {
       this.player.sendMessage(
           ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
               ._l(this.player, "errors.notenoughress")));
+      return;
+    }
+
+    // Ignore double click that follows two single clicks when they made quickly
+    if (event.getClick() == ClickType.DOUBLE_CLICK) {
       return;
     }
 
