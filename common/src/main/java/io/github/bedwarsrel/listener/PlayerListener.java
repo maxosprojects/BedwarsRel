@@ -12,10 +12,8 @@ import io.github.bedwarsrel.shop.Shop;
 import io.github.bedwarsrel.utils.ChatWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -46,7 +44,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -54,17 +51,10 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.Wool;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 public class PlayerListener extends BaseListener {
-
-  private Map<Player, BukkitTask> invisibilityTasks = new HashMap<>();
 
   private String getChatFormat(String format, Team team, boolean isSpectator, boolean all) {
     String form = format;
@@ -312,64 +302,6 @@ public class PlayerListener extends BaseListener {
         Player recipient = recipiens.next();
         if (!game.isInGame(recipient) || !team.isInTeam(recipient)) {
           recipiens.remove();
-        }
-      }
-    }
-  }
-
-  @EventHandler(priority = EventPriority.HIGHEST)
-  public void onConsumeEvent(PlayerItemConsumeEvent event) {
-    final Player player = event.getPlayer();
-    ItemStack item = event.getItem();
-    if (item.getType() == Material.POTION) {
-      PotionMeta meta = (PotionMeta) item.getItemMeta();
-      if (meta.hasCustomEffect(PotionEffectType.INVISIBILITY)) {
-        // Default 30 sec
-        int duration = 600;
-        for (PotionEffect effect : meta.getCustomEffects()) {
-          if (PotionEffectType.INVISIBILITY.equals(effect.getType())) {
-            duration = effect.getDuration();
-          }
-        }
-        this.makePlayerInvisible(player, true);
-        if (invisibilityTasks.containsKey(player)) {
-          invisibilityTasks.get(player).cancel();
-        }
-        invisibilityTasks.put(player, new BukkitRunnable() {
-          @Override
-          public void run() {
-            invisibilityTasks.remove(player);
-            PlayerListener.this.makePlayerInvisible(player, false);
-          }
-        }.runTaskLater(BedwarsRel.getInstance(), duration));
-      }
-      new BukkitRunnable() {
-        public void run() {
-          player.getInventory().remove(Material.GLASS_BOTTLE);
-        }
-      }.runTaskLater(BedwarsRel.getInstance(), 1L);
-    }
-  }
-
-  /**
-   * Makes given player entirely invisible (including gear, bubbles etc.) to
-   * enemy teams.
-   * @param player player to hide
-   * @param hide   true to hide, false to show again
-   */
-  private void makePlayerInvisible(Player player, boolean hide) {
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
-    if (game != null && !game.isSpectator(player)) {
-      Team playerTeam = game.getPlayerTeam(player);
-      for (Team team : game.getTeams().values()) {
-        if (team != playerTeam) {
-          for (Player playerInTeam : team.getPlayers()) {
-            if (hide) {
-              playerInTeam.hidePlayer(player);
-            } else {
-              playerInTeam.showPlayer(player);
-            }
-          }
         }
       }
     }
