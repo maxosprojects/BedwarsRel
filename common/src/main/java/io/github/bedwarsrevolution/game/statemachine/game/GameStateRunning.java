@@ -342,7 +342,18 @@ public class GameStateRunning implements GameState {
 //    } else {
       player.sendMessage(ChatWriter.pluginMessage(ChatColor.RED + BedwarsRevol
           ._l(player, "errors.cantjoingame")));
+      return;
 //    }
+    }
+
+    this.toSpectator(p);
+    this.displayMapInfo(p);
+  }
+
+  @Override
+  public void playerLeaves(GameContext ctx, PlayerContext playerCtx, boolean kicked) {
+    if (playerCtx.getState().isSpectator()) {
+      this.checkGameOver();
     }
   }
 

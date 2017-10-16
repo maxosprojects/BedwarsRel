@@ -79,7 +79,7 @@ public class PlayerStateWaitingGame implements PlayerState {
 //    player.closeInventory();
   }
 
-  //  private void playerJoinsTeam(PlayerContext playerCtx, Team team) {
+//  private void playerJoinsTeam(PlayerContext playerCtx, Team team) {
 //    Player player = playerCtx.getPlayer();
 //    if (team.getPlayers().size() >= team.getMaxPlayers()) {
 //      player.sendMessage(ChatWriter.pluginMessage(

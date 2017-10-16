@@ -15,7 +15,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 /**
  * Created by {maxos} 2017
  */
-public class PlayerStateSpectator implements PlayerState {
+public class PlayerStateSpectator extends PlayerState {
 
   @Override
   public void onDeath(PlayerContext playerCtx) {
@@ -82,6 +82,16 @@ public class PlayerStateSpectator implements PlayerState {
         // TODO: implement what was in game.openSpectatorCompass();
         // playerCtx.openSpectatorCompass(false);
     }
+  }
+
+  @Override
+  public void leave(PlayerContext playerCtx, boolean kicked) {
+    // Override default behavior to not let anyone know
+  }
+
+  @Override
+  public boolean isSpectator() {
+    return true;
   }
 
 }

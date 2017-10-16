@@ -29,7 +29,7 @@ import org.bukkit.inventory.ItemStack;
 /**
  * Created by {maxos} 2017
  */
-public class PlayerStatePlaying implements PlayerState {
+public class PlayerStatePlaying extends PlayerState {
 
   @Override
   public void onDeath(PlayerContext playerCtx) {

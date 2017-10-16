@@ -10,6 +10,7 @@ import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.Utils;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -26,12 +27,12 @@ import org.bukkit.entity.Player;
 
 public class GameManagerReworked {
   public static String gamesPath = "gamesContexts";
-  private Map<Player, GameContext> gameToPlayer = null;
+  private Map<Player, GameContext> playerToGame = null;
   private List<GameContext> gamesContexts = null;
 
   public GameManagerReworked() {
     this.gamesContexts = new ArrayList<>();
-    this.gameToPlayer = new HashMap<>();
+    this.playerToGame = new HashMap<>();
   }
 
   public GameContext addGame(String name) {
@@ -46,11 +47,11 @@ public class GameManagerReworked {
   }
 
   public void addGamePlayer(Player player, Game game) {
-    if (this.gameToPlayer.containsKey(player)) {
-      this.gameToPlayer.remove(player);
+    if (this.playerToGame.containsKey(player)) {
+      this.playerToGame.remove(player);
     }
 
-    this.gameToPlayer.put(player, game);
+    this.playerToGame.put(player, game);
   }
 
   public GameContext getGameContext(String name) {
@@ -101,11 +102,11 @@ public class GameManagerReworked {
   }
 
   public GameContext getGameOfPlayer(Player player) {
-    return this.gameToPlayer.get(player);
+    return this.playerToGame.get(player);
   }
 
   public int getGamePlayerAmount() {
-    return this.gameToPlayer.size();
+    return this.playerToGame.size();
   }
 
   public ArrayList<Game> getGamesContexts() {
@@ -338,7 +339,7 @@ public class GameManagerReworked {
   public void reloadGames() {
     this.unloadGames();
 
-    this.gameToPlayer.clear();
+    this.playerToGame.clear();
     this.loadGames();
   }
 
@@ -357,8 +358,9 @@ public class GameManagerReworked {
     this.gamesContexts.remove(game);
   }
 
-  public void removeGamePlayer(Player player) {
-    this.gameToPlayer.remove(player);
+  public void removePlayer(PlayerContext playerCtx) {
+    GameContext ctx = this.playerToGame.remove(playerCtx.getPlayer());
+    ctx.removePlayer(playerCtx);
   }
 
   public void unloadGame(Game game) {

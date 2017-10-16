@@ -59,12 +59,10 @@ public class GameJoinSign {
 
   public Sign getSign() {
     BlockState state = this.signLocation.getBlock().getState();
-
-    if (!(state instanceof Sign)) {
-      return null;
+    if (state instanceof Sign) {
+      return (Sign) state;
     }
-
-    return (Sign) state;
+    return null;
   }
 
   private String[] getSignLines() {

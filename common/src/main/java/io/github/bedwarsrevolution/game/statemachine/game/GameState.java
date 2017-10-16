@@ -1,5 +1,6 @@
 package io.github.bedwarsrevolution.game.statemachine.game;
 
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -46,6 +47,7 @@ public interface GameState {
 
   void onEventInventoryOpen(GameContext ctx, InventoryOpenEvent event);
 
-  void playerJoins(GameContext ctx,
-      Player player);
+  void playerJoins(GameContext ctx, Player player);
+
+  void playerLeaves(GameContext ctx, PlayerContext playerCtx, boolean kicked);
 }
