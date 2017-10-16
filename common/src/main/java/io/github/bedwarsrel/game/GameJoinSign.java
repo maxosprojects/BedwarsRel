@@ -19,9 +19,9 @@ public class GameJoinSign {
   private String getCurrentPlayersString() {
     int maxPlayers = this.game.getMaxPlayers();
     int currentPlayers = 0;
-    if (this.game.getState() == GameState.RUNNING) {
+    if (this.game.getState() == GameStateOld.RUNNING) {
       currentPlayers = this.game.getTeamPlayers().size();
-    } else if (this.game.getState() == GameState.WAITING) {
+    } else if (this.game.getState() == GameStateOld.WAITING) {
       currentPlayers = this.game.getPlayers().size();
     } else {
       currentPlayers = 0;
@@ -40,9 +40,9 @@ public class GameJoinSign {
   private String getMaxPlayersString() {
     int maxPlayers = this.game.getMaxPlayers();
     int currentPlayers = 0;
-    if (this.game.getState() == GameState.RUNNING) {
+    if (this.game.getState() == GameStateOld.RUNNING) {
       currentPlayers = this.game.getTeamPlayers().size();
-    } else if (this.game.getState() == GameState.WAITING) {
+    } else if (this.game.getState() == GameStateOld.WAITING) {
       currentPlayers = this.game.getPlayers().size();
     } else {
       currentPlayers = 0;
@@ -83,7 +83,7 @@ public class GameJoinSign {
 
   private String getStatus() {
     String status = null;
-    if (this.game.getState() == GameState.WAITING && this.game.isFull()) {
+    if (this.game.getState() == GameStateOld.WAITING && this.game.isFull()) {
       status = ChatColor.RED + BedwarsRel._l("sign.gamestate.full");
     } else {
       status = BedwarsRel._l("sign.gamestate." + this.game.getState().toString().toLowerCase());

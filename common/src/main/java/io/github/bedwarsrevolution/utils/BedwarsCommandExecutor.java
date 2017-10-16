@@ -1,9 +1,9 @@
-package io.github.bedwarsrel.utils;
+package io.github.bedwarsrevolution.utils;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.commands.BaseCommand;
 import io.github.bedwarsrel.events.BedwarsCommandExecutedEvent;
 import io.github.bedwarsrel.events.BedwarsExecuteCommandEvent;
+import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.commands.BaseCommand;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.bukkit.ChatColor;
@@ -13,9 +13,9 @@ import org.bukkit.command.CommandSender;
 
 public class BedwarsCommandExecutor implements CommandExecutor {
 
-  private BedwarsRel plugin = null;
+  private BedwarsRevol plugin = null;
 
-  public BedwarsCommandExecutor(BedwarsRel plugin) {
+  public BedwarsCommandExecutor(BedwarsRevol plugin) {
     super();
 
     this.plugin = plugin;
@@ -39,14 +39,14 @@ public class BedwarsCommandExecutor implements CommandExecutor {
       if (bCommand.getCommand().equalsIgnoreCase(command)) {
         if (bCommand.getArguments().length > arguments.size()) {
           sender.sendMessage(
-              ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
+              ChatWriter.pluginMessage(ChatColor.RED + BedwarsRevol
                   ._l(sender, "errors.argumentslength")));
           return false;
         }
 
         BedwarsExecuteCommandEvent commandEvent =
             new BedwarsExecuteCommandEvent(sender, bCommand, arguments);
-        BedwarsRel.getInstance().getServer().getPluginManager().callEvent(commandEvent);
+        BedwarsRevol.getInstance().getServer().getPluginManager().callEvent(commandEvent);
 
         if (commandEvent.isCancelled()) {
           return true;
@@ -56,7 +56,7 @@ public class BedwarsCommandExecutor implements CommandExecutor {
 
         BedwarsCommandExecutedEvent executedEvent =
             new BedwarsCommandExecutedEvent(sender, bCommand, arguments, result);
-        BedwarsRel.getInstance().getServer().getPluginManager().callEvent(executedEvent);
+        BedwarsRevol.getInstance().getServer().getPluginManager().callEvent(executedEvent);
 
         return result;
       }

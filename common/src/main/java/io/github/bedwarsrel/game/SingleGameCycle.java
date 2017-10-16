@@ -101,7 +101,7 @@ public class SingleGameCycle extends GameCycle {
     }
 
     // set state and with that, the sign
-    this.getGame().setState(GameState.WAITING);
+    this.getGame().setState(GameStateOld.WAITING);
     this.getGame().updateScoreboard();
   }
 
@@ -159,14 +159,14 @@ public class SingleGameCycle extends GameCycle {
   @Override
   public boolean onPlayerJoins(Player player) {
     if (this.getGame().isFull() && !player.hasPermission("bw.vip.joinfull")) {
-      if (this.getGame().getState() != GameState.RUNNING
+      if (this.getGame().getState() != GameStateOld.RUNNING
           || !BedwarsRel.getInstance().spectationEnabled()) {
         player.sendMessage(
             ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel._l(player, "lobby.gamefull")));
         return false;
       }
     } else if (this.getGame().isFull() && player.hasPermission("bw.vip.joinfull")) {
-      if (this.getGame().getState() == GameState.WAITING) {
+      if (this.getGame().getState() == GameStateOld.WAITING) {
         List<Player> players = this.getGame().getNonVipPlayers();
 
         if (players.size() == 0) {
@@ -189,7 +189,7 @@ public class SingleGameCycle extends GameCycle {
                     ._l(kickPlayer, "lobby.kickedbyvip")));
         this.getGame().playerLeave(kickPlayer, false);
       } else {
-        if (this.getGame().getState() == GameState.RUNNING
+        if (this.getGame().getState() == GameStateOld.RUNNING
             && !BedwarsRel.getInstance().spectationEnabled()) {
           player.sendMessage(
               ChatWriter
@@ -225,7 +225,7 @@ public class SingleGameCycle extends GameCycle {
       player.teleport(storage.getLeft());
     }
 
-    if (this.getGame().getState() == GameState.RUNNING && !this.getGame().isStopping()
+    if (this.getGame().getState() == GameStateOld.RUNNING && !this.getGame().isStopping()
         && !this.getGame().isSpectator(player)) {
       this.checkGameOver();
     }

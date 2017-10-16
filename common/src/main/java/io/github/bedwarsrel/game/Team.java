@@ -11,6 +11,7 @@ import io.github.bedwarsrel.shop.upgrades.Upgrade;
 import io.github.bedwarsrel.shop.upgrades.UpgradeBaseAlarm;
 import io.github.bedwarsrel.utils.Utils;
 
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ public class Team implements ConfigurationSerializable {
   private Location baseLoc2;
   private Location chestLoc;
   private Map<Class<? extends Upgrade>, Upgrade> upgrades = new HashMap<>();
+  private GameContext gameCtx;
 
   public Team(Map<String, Object> deserialize) {
     this.reset();
@@ -201,8 +203,8 @@ public class Team implements ConfigurationSerializable {
     return players;
   }
 
-  public boolean isBedDestroyed(Game game) {
-    Material targetMaterial = game.getTargetMaterial();
+  public boolean isBedDestroyed() {
+    Material targetMaterial = this.gameCtx.getTargetMaterial();
 
     this.getTargetHeadBlock().getBlock().getChunk().load(true);
     if (this.getTargetFeetBlock() == null) {

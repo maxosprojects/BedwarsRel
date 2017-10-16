@@ -2,7 +2,7 @@ package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -46,7 +46,7 @@ public class ArrowBlockerListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameState.RUNNING) {
+    if (game.getState() != GameStateOld.RUNNING) {
       return;
     }
 
@@ -71,7 +71,7 @@ public class ArrowBlockerListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameState.RUNNING) {
+    if (game.getState() != GameStateOld.RUNNING) {
       return;
     }
 

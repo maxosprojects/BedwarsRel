@@ -2,7 +2,7 @@ package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,7 +25,7 @@ public class RescuePlatformListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameState.RUNNING) {
+    if (game.getState() != GameStateOld.RUNNING) {
       return;
     }
 

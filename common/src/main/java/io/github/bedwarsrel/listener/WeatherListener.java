@@ -2,7 +2,7 @@ package io.github.bedwarsrel.listener;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import java.util.List;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.weather.WeatherChangeEvent;
@@ -22,7 +22,7 @@ public class WeatherListener extends BaseListener {
     }
 
     for (Game game : games) {
-      if (game.getState() != GameState.STOPPED) {
+      if (game.getState() != GameStateOld.STOPPED) {
         we.setCancelled(true);
         break;
       }

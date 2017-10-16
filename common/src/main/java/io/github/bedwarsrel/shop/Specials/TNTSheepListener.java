@@ -2,7 +2,7 @@ package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.utils.Utils;
 import org.bukkit.Location;
@@ -69,7 +69,7 @@ public class TNTSheepListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameState.RUNNING) {
+    if (game.getState() != GameStateOld.RUNNING) {
       return;
     }
 
@@ -106,7 +106,7 @@ public class TNTSheepListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameState.RUNNING && !game.isStopping()) {
+    if (game.getState() != GameStateOld.RUNNING && !game.isStopping()) {
       return;
     }
 
@@ -148,7 +148,7 @@ public class TNTSheepListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameState.RUNNING) {
+    if (game.getState() != GameStateOld.RUNNING) {
       return;
     }
 

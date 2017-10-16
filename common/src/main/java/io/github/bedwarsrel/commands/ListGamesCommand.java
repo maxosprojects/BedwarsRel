@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.GameCheckCode;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import io.github.bedwarsrel.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +59,7 @@ public class ListGamesCommand extends BaseCommand {
 
       showedGames.add(game);
       int players = 0;
-      if (game.getState() == GameState.RUNNING) {
+      if (game.getState() == GameStateOld.RUNNING) {
         players = game.getCurrentPlayerAmount();
       } else {
         players = game.getPlayers().size();

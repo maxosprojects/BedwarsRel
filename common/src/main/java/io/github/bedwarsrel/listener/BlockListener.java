@@ -2,7 +2,7 @@ package io.github.bedwarsrel.listener;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.utils.ChatWriter;
 import java.util.List;
@@ -57,7 +57,7 @@ public class BlockListener extends BaseListener {
         return;
       }
 
-      if (game.getState() != GameState.RUNNING) {
+      if (game.getState() != GameStateOld.RUNNING) {
         return;
       }
 
@@ -86,11 +86,11 @@ public class BlockListener extends BaseListener {
       return;
     }
 
-    if (g.getState() != GameState.RUNNING && g.getState() != GameState.WAITING) {
+    if (g.getState() != GameStateOld.RUNNING && g.getState() != GameStateOld.WAITING) {
       return;
     }
 
-    if (g.getState() == GameState.WAITING) {
+    if (g.getState() == GameStateOld.WAITING) {
       e.setCancelled(true);
       return;
     }
@@ -192,7 +192,7 @@ public class BlockListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.STOPPED) {
+    if (game.getState() == GameStateOld.STOPPED) {
       return;
     }
 
@@ -208,7 +208,7 @@ public class BlockListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.STOPPED) {
+    if (game.getState() == GameStateOld.STOPPED) {
       return;
     }
 
@@ -230,7 +230,7 @@ public class BlockListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.STOPPED) {
+    if (game.getState() == GameStateOld.STOPPED) {
       return;
     }
 
@@ -262,7 +262,7 @@ public class BlockListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.STOPPED) {
+    if (game.getState() == GameStateOld.STOPPED) {
       return;
     }
 
@@ -277,7 +277,7 @@ public class BlockListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.WAITING) {
+    if (game.getState() == GameStateOld.WAITING) {
       return;
     }
 
@@ -297,17 +297,17 @@ public class BlockListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.STOPPED) {
+    if (game.getState() == GameStateOld.STOPPED) {
       return;
     }
 
-    if (game.getState() == GameState.WAITING) {
+    if (game.getState() == GameStateOld.WAITING) {
       bpe.setCancelled(true);
       bpe.setBuild(false);
       return;
     }
 
-    if (game.getState() == GameState.RUNNING) {
+    if (game.getState() == GameStateOld.RUNNING) {
       if (game.isSpectator(player)) {
         bpe.setCancelled(true);
         bpe.setBuild(false);
@@ -380,7 +380,7 @@ public class BlockListener extends BaseListener {
       return;
     }
 
-    if (game.getState() != GameState.RUNNING) {
+    if (game.getState() != GameStateOld.RUNNING) {
       return;
     }
 

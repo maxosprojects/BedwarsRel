@@ -6,7 +6,7 @@ import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
 import io.github.bedwarsrel.game.BungeeGameCycle;
 import io.github.bedwarsrel.game.DamageHolder;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.shop.Shop;
 import io.github.bedwarsrel.utils.ChatWriter;
@@ -161,7 +161,7 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.STOPPED) {
+    if (game.getState() == GameStateOld.STOPPED) {
       return;
     }
 
@@ -202,7 +202,7 @@ public class PlayerListener extends BaseListener {
       player.setPlayerListName(playerSetNameEvent.getPlayerListName());
     }
 
-    if (game.getState() != GameState.RUNNING && game.getState() == GameState.WAITING) {
+    if (game.getState() != GameStateOld.RUNNING && game.getState() == GameStateOld.WAITING) {
       String format = null;
       if (team == null) {
         format = this.getChatFormat(
@@ -316,7 +316,7 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.STOPPED) {
+    if (game.getState() == GameStateOld.STOPPED) {
       return;
     }
 
@@ -351,7 +351,7 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.STOPPED) {
+    if (game.getState() == GameStateOld.STOPPED) {
       return;
     }
 
@@ -381,7 +381,7 @@ public class PlayerListener extends BaseListener {
         return;
       }
 
-      if (game.getState() == GameState.WAITING) {
+      if (game.getState() == GameStateOld.WAITING) {
         ede.setCancelled(true);
       }
 
@@ -394,11 +394,11 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (g.getState() == GameState.STOPPED) {
+    if (g.getState() == GameStateOld.STOPPED) {
       return;
     }
 
-    if (g.getState() == GameState.RUNNING) {
+    if (g.getState() == GameStateOld.RUNNING) {
       if (g.isSpectator(p)) {
         ede.setCancelled(true);
         return;
@@ -454,7 +454,7 @@ public class PlayerListener extends BaseListener {
         return;
       }
 
-    } else if (g.getState() == GameState.WAITING
+    } else if (g.getState() == GameStateOld.WAITING
         && ede.getCause() == EntityDamageEvent.DamageCause.VOID) {
       p.teleport(g.getLobby());
     }
@@ -468,7 +468,7 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (g.getState() != GameState.WAITING) {
+    if (g.getState() != GameStateOld.WAITING) {
       if (g.isSpectator(p)) {
         die.setCancelled(true);
       }
@@ -488,11 +488,11 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (g.getState() == GameState.STOPPED) {
+    if (g.getState() == GameStateOld.STOPPED) {
       return;
     }
 
-    if (g.getState() == GameState.RUNNING && g.isSpectator(p)) {
+    if (g.getState() == GameStateOld.RUNNING && g.isSpectator(p)) {
       tfe.setCancelled(false);
       return;
     }
@@ -513,7 +513,7 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.RUNNING) {
+    if (game.getState() == GameStateOld.RUNNING) {
       if (game.isSpectator(player) || game.getCycle().isEndGameRunning() || !game.isHungerEnabled()) {
         flce.setCancelled(true);
         return;
@@ -596,7 +596,7 @@ public class PlayerListener extends BaseListener {
     Player player = (Player) evt.getEntity();
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
 
-    if (game == null || game.getState() != GameState.RUNNING) {
+    if (game == null || game.getState() != GameStateOld.RUNNING) {
       return;
     }
 
@@ -623,12 +623,12 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (g.getState() == GameState.WAITING) {
+    if (g.getState() == GameStateOld.WAITING) {
       iee.setCancelled(true);
       return;
     }
 
-    if (g.getState() == GameState.RUNNING) {
+    if (g.getState() == GameStateOld.RUNNING) {
       this.inGameInteractEntity(iee, g, p);
     }
   }
@@ -642,11 +642,11 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.WAITING) {
+    if (game.getState() == GameStateOld.WAITING) {
       this.onLobbyInventoryClick(event, player, game);
     }
 
-    if (game.getState() == GameState.RUNNING) {
+    if (game.getState() == GameStateOld.RUNNING) {
       this.onIngameInventoryClick(event, player, game);
     }
   }
@@ -690,7 +690,7 @@ public class PlayerListener extends BaseListener {
       je.setJoinMessage(null);
       final Game firstGame = games.get(0);
 
-      if (firstGame.getState() == GameState.STOPPED && player.hasPermission("bw.setup")) {
+      if (firstGame.getState() == GameStateOld.STOPPED && player.hasPermission("bw.setup")) {
         return;
       }
 
@@ -782,14 +782,14 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (g.getState() == GameState.STOPPED) {
+    if (g.getState() == GameStateOld.STOPPED) {
       return;
     }
 
     Material interactingMaterial = pie.getMaterial();
     Block clickedBlock = pie.getClickedBlock();
 
-    if (g.getState() == GameState.RUNNING) {
+    if (g.getState() == GameStateOld.RUNNING) {
       if (pie.getAction() == Action.PHYSICAL && clickedBlock != null
           && (clickedBlock.getType() == Material.WHEAT
           || clickedBlock.getType() == Material.SOIL)) {
@@ -875,7 +875,7 @@ public class PlayerListener extends BaseListener {
       }
 
       return;
-    } else if (g.getState() == GameState.WAITING) {
+    } else if (g.getState() == GameStateOld.WAITING) {
       if (interactingMaterial == null) {
         pie.setCancelled(true);
         return;
@@ -954,12 +954,12 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.RUNNING) {
+    if (game.getState() == GameStateOld.RUNNING) {
       game.getCycle().onPlayerRespawn(pre, p);
       return;
     }
 
-    if (game.getState() == GameState.WAITING) {
+    if (game.getState() == GameStateOld.WAITING) {
       pre.setRespawnLocation(game.getLobby());
     }
   }
@@ -1002,7 +1002,7 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (g.getState() == GameState.STOPPED) {
+    if (g.getState() == GameStateOld.STOPPED) {
       return;
     }
 
@@ -1013,13 +1013,13 @@ public class PlayerListener extends BaseListener {
   public void onSwitchWorld(PlayerChangedWorldEvent change) {
     Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(change.getPlayer());
     if (game != null) {
-      if (game.getState() == GameState.RUNNING) {
+      if (game.getState() == GameStateOld.RUNNING) {
         if (!game.getCycle().isEndGameRunning()) {
           if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
             game.playerLeave(change.getPlayer(), false);
           }
         }
-      } else if (game.getState() == GameState.WAITING) {
+      } else if (game.getState() == GameStateOld.WAITING) {
         if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
           game.playerLeave(change.getPlayer(), false);
         }
@@ -1047,7 +1047,7 @@ public class PlayerListener extends BaseListener {
       return;
     }
 
-    if (game.getState() != GameState.RUNNING) {
+    if (game.getState() != GameStateOld.RUNNING) {
       return;
     }
 

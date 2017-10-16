@@ -1,5 +1,5 @@
 package io.github.bedwarsrel.game;
 
-public enum GameState {
+public enum GameStateOld {
   RUNNING, WAITING, STOPPED
 }

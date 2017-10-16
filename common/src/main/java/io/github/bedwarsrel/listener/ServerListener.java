@@ -2,7 +2,7 @@ package io.github.bedwarsrel.listener;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -11,9 +11,9 @@ public class ServerListener extends BaseListener {
 
   private String getCurrentPlayersString(Game game) {
     int currentPlayers = 0;
-    if (game.getState() == GameState.RUNNING) {
+    if (game.getState() == GameStateOld.RUNNING) {
       currentPlayers = game.getTeamPlayers().size();
-    } else if (game.getState() == GameState.WAITING) {
+    } else if (game.getState() == GameStateOld.WAITING) {
       currentPlayers = game.getPlayers().size();
     } else {
       currentPlayers = 0;
@@ -29,7 +29,7 @@ public class ServerListener extends BaseListener {
 
   private String getStatus(Game game) {
     String status = null;
-    if (game.getState() == GameState.WAITING && game.isFull()) {
+    if (game.getState() == GameStateOld.WAITING && game.isFull()) {
       status = ChatColor.RED + BedwarsRel._l("sign.gamestate.full");
     } else {
       status = BedwarsRel._l("sign.gamestate." + game.getState().toString().toLowerCase());

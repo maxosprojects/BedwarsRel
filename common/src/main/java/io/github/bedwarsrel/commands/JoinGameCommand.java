@@ -3,7 +3,7 @@ package io.github.bedwarsrel.commands;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.Utils;
 import java.util.ArrayList;
@@ -28,14 +28,14 @@ public class JoinGameCommand extends BaseCommand {
     Game gameOfPlayer = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
 
     if (gameOfPlayer != null) {
-      if (gameOfPlayer.getState() == GameState.RUNNING) {
+      if (gameOfPlayer.getState() == GameStateOld.RUNNING) {
         sender.sendMessage(
             ChatWriter
                 .pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.notwhileingame")));
         return false;
       }
 
-      if (gameOfPlayer.getState() == GameState.WAITING) {
+      if (gameOfPlayer.getState() == GameStateOld.WAITING) {
         gameOfPlayer.playerLeave(player, false);
       }
     }
@@ -50,7 +50,7 @@ public class JoinGameCommand extends BaseCommand {
 
       ArrayList<Game> games = new ArrayList<>();
       for (Game g : this.getPlugin().getGameManager().getGames()) {
-        if (g.getState() == GameState.WAITING) {
+        if (g.getState() == GameStateOld.WAITING) {
           games.add(g);
         }
       }

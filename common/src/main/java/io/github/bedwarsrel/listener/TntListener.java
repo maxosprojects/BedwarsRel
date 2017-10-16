@@ -2,7 +2,7 @@ package io.github.bedwarsrel.listener;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import io.github.bedwarsrel.game.Team;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,7 +33,7 @@ public class TntListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameState.RUNNING) {
+    if (game.getState() != GameStateOld.RUNNING) {
       return;
     }
 

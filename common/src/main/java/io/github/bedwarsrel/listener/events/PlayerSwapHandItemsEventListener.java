@@ -3,7 +3,7 @@ package io.github.bedwarsrel.listener.events;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.BungeeGameCycle;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import io.github.bedwarsrel.listener.BaseListener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,7 +20,7 @@ public class PlayerSwapHandItemsEventListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameState.WAITING
+    if (game.getState() == GameStateOld.WAITING
         || (game.getCycle() instanceof BungeeGameCycle && game.getCycle().isEndGameRunning()
         && BedwarsRel.getInstance().getBooleanConfig("bungeecord.endgame-in-lobby", true))) {
       event.setCancelled(true);

@@ -100,7 +100,7 @@ public class Game {
   private List<BukkitTask> runningTasks = null;
   private Scoreboard scoreboard = null;
   private List<SpecialItem> specialItems = null;
-  private GameState state = null;
+  private GameStateOld state = null;
   private Material targetMaterial = null;
   private HashMap<String, Team> teams = null;
   private int time = 1000;
@@ -118,7 +118,7 @@ public class Game {
     this.teams = new HashMap<String, Team>();
     this.playingTeams = new ArrayList<Team>();
 
-    this.state = GameState.STOPPED;
+    this.state = GameStateOld.STOPPED;
     this.scoreboard = BedwarsRel.getInstance().getScoreboardManager().getNewScoreboard();
 
     this.gameLobbyCountdown = null;
@@ -260,7 +260,7 @@ public class Game {
       return teamCheck;
     }
 
-    if (this.getRessourceSpawner().size() == 0) {
+    if (this.getResourceSpawner().size() == 0) {
       return GameCheckCode.NO_RES_SPAWNER_ERROR;
     }
 
@@ -733,7 +733,7 @@ public class Game {
     return players;
   }
 
-  public List<ResourceSpawner> getRessourceSpawner() {
+  public List<ResourceSpawner> getResourceSpawner() {
     return this.resourceSpawners;
   }
 
@@ -953,7 +953,7 @@ public class Game {
   }
 
   public Team isOver() {
-    if (this.isOver || this.state != GameState.RUNNING) {
+    if (this.isOver || this.state != GameStateOld.RUNNING) {
       return null;
     }
 
@@ -989,11 +989,11 @@ public class Game {
   }
 
   public boolean isProtected(Player player) {
-    return (this.respawnProtections.containsKey(player) && this.getState() == GameState.RUNNING);
+    return (this.respawnProtections.containsKey(player) && this.getState() == GameStateOld.RUNNING);
   }
 
   public boolean isSpectator(Player player) {
-    return (this.getState() == GameState.RUNNING && this.freePlayers.contains(player));
+    return (this.getState() == GameStateOld.RUNNING && this.freePlayers.contains(player));
   }
 
   public boolean isStartable() {
@@ -1123,8 +1123,8 @@ public class Game {
   public boolean playerJoins(final Player p) {
     // Add storage if doesn't exist
     PlayerStorage storage = this.getPlayerStorage(p);
-    if (this.state == GameState.STOPPED
-        || (this.state == GameState.RUNNING && !BedwarsRel.getInstance().spectationEnabled())) {
+    if (this.state == GameStateOld.STOPPED
+        || (this.state == GameStateOld.RUNNING && !BedwarsRel.getInstance().spectationEnabled())) {
       if (this.cycle instanceof BungeeGameCycle) {
         ((BungeeGameCycle) this.cycle).sendBungeeMessage(p,
             ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel._l(p, "errors.cantjoingame")));
@@ -1178,7 +1178,7 @@ public class Game {
 
     }.runTaskLater(BedwarsRel.getInstance(), 5L);
 
-    if (this.state == GameState.RUNNING) {
+    if (this.state == GameStateOld.RUNNING) {
       this.toSpectator(p);
       this.displayMapInfo(p);
     } else {
@@ -1302,7 +1302,7 @@ public class Game {
           p.showPlayer(player);
         }
       }
-    } else if (this.state == GameState.RUNNING
+    } else if (this.state == GameStateOld.RUNNING
           && !this.getCycle().isEndGameRunning()
           && !team.isBedDestroyed(this)
           && this.isPlayerVirtuallyAlive(p)
@@ -1474,7 +1474,7 @@ public class Game {
   }
 
   public boolean run(CommandSender sender) {
-    if (this.state != GameState.STOPPED) {
+    if (this.state != GameStateOld.STOPPED) {
       sender
           .sendMessage(
               ChatWriter
@@ -1494,7 +1494,7 @@ public class Game {
     }
 
     this.isStopping = false;
-    this.state = GameState.WAITING;
+    this.state = GameStateOld.WAITING;
     this.updateSigns();
     return true;
   }
@@ -1636,9 +1636,9 @@ public class Game {
       player.setGameMode(GameMode.SPECTATOR);
 
     } else {
-      if (this.getState().equals(GameState.RUNNING)) {
+      if (this.getState().equals(GameStateOld.RUNNING)) {
         player.setGameMode(GameMode.SURVIVAL);
-      } else if (this.getState().equals(GameState.WAITING)) {
+      } else if (this.getState().equals(GameStateOld.WAITING)) {
         Integer gameMode = BedwarsRel.getInstance().getIntConfig("lobby-gamemode", 0);
         if (gameMode == 0) {
           player.setGameMode(GameMode.SURVIVAL);
@@ -1657,7 +1657,7 @@ public class Game {
     ArrayList<Player> players = new ArrayList<Player>();
     players.addAll(this.getPlayers());
 
-    if (this.state == GameState.RUNNING
+    if (this.state == GameStateOld.RUNNING
         && !(this.getCycle() instanceof BungeeGameCycle && this.getCycle().isEndGameRunning()
         && BedwarsRel.getInstance().getBooleanConfig("bungeecord.endgame-in-lobby", true))) {
       if (this.isSpectator(player)) {
@@ -1697,13 +1697,13 @@ public class Game {
     this.scoreboard = sb;
   }
 
-  public void setState(GameState state) {
+  public void setState(GameStateOld state) {
     this.state = state;
     this.updateSigns();
   }
 
   public boolean start(CommandSender sender) {
-    if (this.state != GameState.WAITING) {
+    if (this.state != GameStateOld.WAITING) {
       sender.sendMessage(
           ChatWriter
               .pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.startoutofwaiting")));
@@ -1744,7 +1744,7 @@ public class Game {
 
     this.teleportPlayersToTeamSpawn(true);
 
-    this.state = GameState.RUNNING;
+    this.state = GameStateOld.RUNNING;
 
     for (Player player : this.getPlayers()) {
       this.setPlayerGameMode(player);
@@ -1821,7 +1821,7 @@ public class Game {
   }
 
   private void startResourceSpawners() {
-    for (ResourceSpawner rs : this.getRessourceSpawner()) {
+    for (ResourceSpawner rs : this.getResourceSpawner()) {
       rs.setGame(this);
       this.runningTasks.add(BedwarsRel.getInstance().getServer().getScheduler().runTaskTimer(
           BedwarsRel.getInstance(), rs, Math.round((((double) rs.getInterval()) / 1000.0) * 20.0),
@@ -1852,7 +1852,7 @@ public class Game {
   }
 
   public boolean stop() {
-    if (this.state == GameState.STOPPED) {
+    if (this.state == GameStateOld.STOPPED) {
       return false;
     }
 
@@ -1868,7 +1868,7 @@ public class Game {
       e.printStackTrace();
     }
     this.resetRegion();
-    this.state = GameState.STOPPED;
+    this.state = GameStateOld.STOPPED;
     this.updateSigns();
 
     this.isStopping = false;
@@ -2011,7 +2011,7 @@ public class Game {
   }
 
   public void updateScoreboard() {
-    if (this.state == GameState.WAITING
+    if (this.state == GameStateOld.WAITING
         && BedwarsRel.getInstance().getBooleanConfig("lobby-scoreboard.enabled", true)) {
       this.updateLobbyScoreboard();
       return;
@@ -2029,7 +2029,7 @@ public class Game {
       this.scoreboard.resetScores(this.formatScoreboardTeam(t, false));
       this.scoreboard.resetScores(this.formatScoreboardTeam(t, true));
 
-      boolean teamDead = (t.isBedDestroyed(this) && this.getState() == GameState.RUNNING) ? true : false;
+      boolean teamDead = (t.isBedDestroyed(this) && this.getState() == GameStateOld.RUNNING) ? true : false;
       Score score = obj.getScore(this.formatScoreboardTeam(t, teamDead));
       score.setScore(t.getPlayers().size());
     }
@@ -2116,7 +2116,7 @@ public class Game {
       private int respawnIn = 5;
       @Override
       public void run() {
-        if (Game.this.getState() == GameState.RUNNING && !Game.this.isStopping()) {
+        if (Game.this.getState() == GameStateOld.RUNNING && !Game.this.isStopping()) {
           String title = ChatColor.translateAlternateColorCodes('&',
                   BedwarsRel._l(player, "ingame.title.youdied"));
           String subtitle = ChatColor.translateAlternateColorCodes('&',
@@ -2133,7 +2133,7 @@ public class Game {
     task = new BukkitRunnable() {
       @Override
       public void run() {
-        if (Game.this.getState() == GameState.RUNNING) {
+        if (Game.this.getState() == GameStateOld.RUNNING) {
           Location location = Game.this.getPlayerTeam(player).getSpawnLocation();
           Game.this.setTeleportingIfWorldChange(player, location);
           player.teleport(Game.this.getPlayerTeam(player).getSpawnLocation());
@@ -2179,7 +2179,7 @@ public class Game {
 
     this.getCycle().checkGameOver();
 
-    if (this.getState() == GameState.RUNNING && this.isStopping()) {
+    if (this.getState() == GameStateOld.RUNNING && this.isStopping()) {
       String title = ChatColor.translateAlternateColorCodes('&',
           BedwarsRel._l(player, "ingame.title.youdied"));
       player.sendTitle(title, "", 0, 40, 10);
@@ -2190,7 +2190,7 @@ public class Game {
     this.setTeleportingIfWorldChange(player, location);
     player.teleport(this.getTopMiddle());
 
-    if (this.getState() == GameState.RUNNING
+    if (this.getState() == GameStateOld.RUNNING
         && !this.getCycle().isEndGameRunning()
         && !this.isStopping()) {
       this.addWaitingRespawn(player);

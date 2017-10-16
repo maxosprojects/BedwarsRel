@@ -12,7 +12,7 @@ import io.github.bedwarsrel.database.MysqlDatabaseManager;
 import io.github.bedwarsrel.database.YamlDatabaseManager;
 import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.game.GameManager;
-import io.github.bedwarsrel.game.GameState;
+import io.github.bedwarsrel.game.GameStateOld;
 import io.github.bedwarsrel.game.ResourceSpawner;
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.listener.BlockListener;
@@ -39,7 +39,7 @@ import io.github.bedwarsrel.updater.PluginUpdater;
 import io.github.bedwarsrel.updater.PluginUpdater.UpdateCallback;
 import io.github.bedwarsrel.updater.PluginUpdater.UpdateResult;
 import io.github.bedwarsrel.utils.BStatsMetrics;
-import io.github.bedwarsrel.utils.BedwarsCommandExecutor;
+import io.github.bedwarsrevolution.utils.BedwarsCommandExecutor;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.McStatsMetrics;
 import io.github.bedwarsrel.utils.SupportData;
@@ -936,7 +936,7 @@ public class BedwarsRel extends JavaPlugin {
       @Override
       public void run() {
         for (Game g : BedwarsRel.getInstance().getGameManager().getGames()) {
-          if (g.getState() == GameState.RUNNING) {
+          if (g.getState() == GameStateOld.RUNNING) {
             g.getRegion().getWorld().setTime(g.getTime());
           }
         }

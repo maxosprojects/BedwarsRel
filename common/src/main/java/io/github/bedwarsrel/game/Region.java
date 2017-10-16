@@ -320,7 +320,7 @@ public class Region {
       }
     }
 
-    for (ResourceSpawner spawner : game.getRessourceSpawner()) {
+    for (ResourceSpawner spawner : game.getResourceSpawner()) {
       spawner.getLocation().getChunk().load();
     }
 
