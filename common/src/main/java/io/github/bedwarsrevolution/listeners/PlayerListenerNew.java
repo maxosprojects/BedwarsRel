@@ -1,8 +1,7 @@
 package io.github.bedwarsrevolution.listeners;
 
-import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.listener.BaseListener;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -28,9 +27,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 
-public class PlayerListenerNew extends BaseListener {
+public class PlayerListenerNew extends BaseListenerNew {
 
-  private String getChatFormat(String format, Team team, boolean isSpectator, boolean all) {
+  private String getChatFormat(String format, TeamNew team, boolean isSpectator, boolean all) {
     String form = format;
 
     if (all) {
@@ -258,7 +257,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventCraft(ctx, event);
+    ctx.getState().onEventCraft(event);
   }
 
   @EventHandler
@@ -274,7 +273,7 @@ public class PlayerListenerNew extends BaseListener {
       player = (Player) eventByEntity.getDamager();
     }
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
-    ctx.getState().onEventDamage(ctx, event);
+    ctx.getState().onEventDamage(event);
   }
 
   @EventHandler
@@ -284,7 +283,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventDrop(ctx, event);
+    ctx.getState().onEventDrop(event);
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
@@ -294,7 +293,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventFly(ctx, event);
+    ctx.getState().onEventFly(event);
   }
 
   @EventHandler(priority = EventPriority.HIGH)
@@ -320,7 +319,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventBowShot(ctx, event);
+    ctx.getState().onEventBowShot(event);
   }
 
   @EventHandler
@@ -330,7 +329,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventInteractEntity(ctx, event);
+    ctx.getState().onEventInteractEntity(event);
   }
 
   @EventHandler
@@ -343,7 +342,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventInventoryClick(ctx, event);
+    ctx.getState().onEventInventoryClick(event);
   }
 
   /*
@@ -409,7 +408,7 @@ public class PlayerListenerNew extends BaseListener {
     Player player = event.getPlayer();
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
     if (ctx != null) {
-      ctx.getState().onEventPlayerInteract(ctx, event);
+      ctx.getState().onEventPlayerInteract(event);
       return;
     }
 
@@ -429,7 +428,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().playerJoins(ctx, player);
+    ctx.getState().playerJoins(player);
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
@@ -439,7 +438,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventPlayerRespawn(ctx, event);
+    ctx.getState().onEventPlayerRespawn(event);
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
@@ -449,7 +448,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventPlayerQuit(ctx, event);
+    ctx.getState().onEventPlayerQuit(event);
   }
 
   @EventHandler
@@ -459,7 +458,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventPlayerBedEnter(ctx, event);
+    ctx.getState().onEventPlayerBedEnter(event);
   }
 
   @EventHandler
@@ -469,13 +468,13 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventPlayerChangeWorld(ctx, event);
+    ctx.getState().onEventPlayerChangeWorld(event);
 
-    if (!BedwarsRevol.getInstance().isHologramsEnabled()
-        || BedwarsRevol.getInstance().getHolographicInteractor() == null) {
-      return;
-    }
-    BedwarsRevol.getInstance().getHolographicInteractor().updateHolograms(event.getPlayer());
+//    if (!BedwarsRevol.getInstance().isHologramsEnabled()
+//        || BedwarsRevol.getInstance().getHolographicInteractor() == null) {
+//      return;
+//    }
+//    BedwarsRevol.getInstance().getHolographicInteractor().updateHolograms(event.getPlayer());
   }
 
   @EventHandler
@@ -488,7 +487,7 @@ public class PlayerListenerNew extends BaseListener {
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventInventoryOpen(ctx, event);
+    ctx.getState().onEventInventoryOpen(event);
   }
 
 }

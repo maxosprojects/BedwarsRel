@@ -1,16 +1,9 @@
 package io.github.bedwarsrevolution;
 
 import com.bugsnag.Bugsnag;
-import com.bugsnag.Report;
-import com.bugsnag.callbacks.Callback;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.HologramAPIInteraction;
-import io.github.bedwarsrel.HolographicDisplaysInteraction;
-import io.github.bedwarsrel.IHologramInteraction;
-import io.github.bedwarsrel.database.DatabaseManager;
-import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrevolution.commands.AddGameCommand;
 import io.github.bedwarsrevolution.commands.AddHoloCommand;
 import io.github.bedwarsrevolution.commands.AddTeamCommand;
@@ -47,41 +40,30 @@ import io.github.bedwarsrevolution.commands.SetTeamChestCommand;
 import io.github.bedwarsrevolution.commands.StartGameCommand;
 import io.github.bedwarsrevolution.commands.StatsCommand;
 import io.github.bedwarsrevolution.commands.StopGameCommand;
-import io.github.bedwarsrel.database.MysqlDatabaseManager;
-import io.github.bedwarsrel.database.YamlDatabaseManager;
-import io.github.bedwarsrel.listener.BlockListener;
-import io.github.bedwarsrel.listener.ChunkListener;
-import io.github.bedwarsrel.listener.EntityListener;
-import io.github.bedwarsrel.listener.HangingListener;
-import io.github.bedwarsrel.listener.InvisibilityPotionListener;
-import io.github.bedwarsrel.listener.PlayerSpigotListener;
-import io.github.bedwarsrel.listener.ServerListener;
-import io.github.bedwarsrel.listener.SignListener;
-import io.github.bedwarsrel.listener.WeatherListener;
-import io.github.bedwarsrel.listener.events.EntityPickupItemEventListener;
-import io.github.bedwarsrel.listener.events.PlayerPickUpItemEventListener;
-import io.github.bedwarsrel.listener.events.PlayerSwapHandItemsEventListener;
-import io.github.bedwarsrel.localization.LocalizationConfig;
-import io.github.bedwarsrel.shop.Specials.SpecialItem;
-import io.github.bedwarsrel.shop.upgrades.UpgradeRegistry;
-import io.github.bedwarsrel.statistics.PlayerStatistic;
-import io.github.bedwarsrel.statistics.PlayerStatisticManager;
-import io.github.bedwarsrel.statistics.StorageType;
-import io.github.bedwarsrel.updater.ConfigUpdater;
-import io.github.bedwarsrel.updater.PluginUpdater;
-import io.github.bedwarsrel.updater.PluginUpdater.UpdateCallback;
-import io.github.bedwarsrel.updater.PluginUpdater.UpdateResult;
-import io.github.bedwarsrel.utils.BStatsMetrics;
 import io.github.bedwarsrevolution.game.GameManagerNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.game.GameStateRunning;
+import io.github.bedwarsrevolution.listeners.BlockListenerNew;
+import io.github.bedwarsrevolution.listeners.ChunkListenerNew;
+import io.github.bedwarsrevolution.listeners.EntityListenerNew;
+import io.github.bedwarsrevolution.listeners.HangingListenerNew;
+import io.github.bedwarsrevolution.listeners.InvisibilityPotionListenerNew;
 import io.github.bedwarsrevolution.listeners.PlayerListenerNew;
+import io.github.bedwarsrevolution.listeners.PlayerSpigotListenerNew;
+import io.github.bedwarsrevolution.listeners.ServerListenerNew;
+import io.github.bedwarsrevolution.listeners.SignListenerNew;
+import io.github.bedwarsrevolution.listeners.WeatherListenerNew;
+import io.github.bedwarsrevolution.listeners.events.EntityPickupItemEventListenerNew;
+import io.github.bedwarsrevolution.listeners.events.PlayerPickUpItemEventListenerNew;
+import io.github.bedwarsrevolution.listeners.events.PlayerSwapHandItemsEventListenerNew;
+import io.github.bedwarsrevolution.localization.LocalizationConfigNew;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeRegistry;
+import io.github.bedwarsrevolution.updater.ConfigUpdaterNew;
 import io.github.bedwarsrevolution.utils.BedwarsCommandExecutorNew;
-import io.github.bedwarsrel.utils.McStatsMetrics;
-import io.github.bedwarsrel.utils.SupportData;
-import io.github.bedwarsrel.utils.Utils;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -93,10 +75,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -107,7 +87,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.ScoreboardManager;
 
@@ -117,23 +96,23 @@ public class BedwarsRevol extends JavaPlugin {
   private static BedwarsRevol instance = null;
   private static Boolean locationSerializable = null;
   private List<Material> breakableTypes = null;
-  @Getter
-  private Bugsnag bugsnag;
+//  @Getter
+//  private Bugsnag bugsnag;
   private ArrayList<BaseCommand> commands = new ArrayList<>();
   private Package craftbukkit = null;
-  @Getter
-  @Setter
-  private DatabaseManager databaseManager = null;
+//  @Getter
+//  @Setter
+//  private DatabaseManager databaseManager = null;
   @Getter
   private GameManagerNew gameManager = null;
-  private IHologramInteraction holographicInteraction = null;
+//  private IHologramInteraction holographicInteraction = null;
   private boolean isSpigot = false;
   @Getter
-  private HashMap<String, LocalizationConfig> localization = new HashMap<>();
+  private HashMap<String, LocalizationConfigNew> localization = new HashMap<>();
   private Package minecraft = null;
   @Getter
   private HashMap<UUID, String> playerLocales = new HashMap<>();
-  private PlayerStatisticManager playerStatisticManager = null;
+//  private PlayerStatisticManager playerStatisticManager = null;
   private ScoreboardManager scoreboardManager = null;
   private YamlConfiguration shopConfig = null;
   private BukkitTask timeTask = null;
@@ -196,101 +175,101 @@ public class BedwarsRevol extends JavaPlugin {
 
   }
 
-  private void checkUpdates() {
-    try {
-      if (this.getBooleanConfig("check-updates", true)) {
-        this.updateChecker = new BukkitRunnable() {
-
-          @Override
-          public void run() {
-            final BukkitRunnable task = this;
-            UpdateCallback callback = new UpdateCallback() {
-
-              @Override
-              public void onFinish(PluginUpdater updater) {
-                if (updater.getResult() == UpdateResult.SUCCESS) {
-                  task.cancel();
-                }
-              }
-            };
-
-            new PluginUpdater(
-                BedwarsRevol.getInstance(), BedwarsRevol.PROJECT_ID, BedwarsRevol.getInstance().getFile(),
-                PluginUpdater.UpdateType.DEFAULT, callback,
-                BedwarsRevol.getInstance().getBooleanConfig("update-infos", true));
-          }
-
-        }.runTaskTimerAsynchronously(BedwarsRevol.getInstance(), 40L, 36000L);
-      }
-    } catch (Exception ex) {
-      BedwarsRevol.getInstance().getBugsnag().notify(ex);
-      this.getServer().getConsoleSender().sendMessage(
-          ChatWriter.pluginMessage(ChatColor.RED + "Check for updates not successful: Error!"));
-    }
-  }
-
-
-  private void disableBugsnag() {
-    this.bugsnag.addCallback(new Callback() {
-      @Override
-      public void beforeNotify(Report report) {
-        report.cancel();
-      }
-    });
-  }
-
-  public void dispatchRewardCommands(List<String> commands, Map<String, String> replacements) {
-    for (String command : commands) {
-      command = command.trim();
-      if ("".equals(command)) {
-        continue;
-      }
-
-      if ("none".equalsIgnoreCase(command)) {
-        break;
-      }
-
-      if (command.startsWith("/")) {
-        command = command.substring(1);
-      }
-
-      for (Entry<String, String> entry : replacements.entrySet()) {
-        command = command.replace(entry.getKey(), entry.getValue());
-      }
-
-      BedwarsRevol.getInstance().getServer()
-          .dispatchCommand(BedwarsRevol.getInstance().getServer().getConsoleSender(), command);
-    }
-  }
-
-  private void enableBugsnag() {
-    this.bugsnag.addCallback(new Callback() {
-      @Override
-      public void beforeNotify(Report report) {
-        Boolean shouldBeSent = false;
-        for (StackTraceElement stackTraceElement : report.getException().getStackTrace()) {
-          if (stackTraceElement.toString().contains("io.github.bedwarsrel.BedwarsRel")) {
-            shouldBeSent = true;
-            break;
-          }
-        }
-        if (!shouldBeSent) {
-          report.cancel();
-        }
-
-        report.setUserId(SupportData.getIdentifier());
-        if (!SupportData.getPluginVersionBuild().equalsIgnoreCase("unknown")) {
-          report.addToTab("Server", "Version Build",
-              BedwarsRevol.getInstance().getDescription().getVersion() + " "
-                  + SupportData.getPluginVersionBuild());
-        }
-        report.addToTab("Server", "Version", SupportData.getServerVersion());
-        report.addToTab("Server", "Version Bukkit", SupportData.getBukkitVersion());
-        report.addToTab("Server", "Server Mode", SupportData.getServerMode());
-        report.addToTab("Server", "Plugins", SupportData.getPlugins());
-      }
-    });
-  }
+//  private void checkUpdates() {
+//    try {
+//      if (this.getBooleanConfig("check-updates", true)) {
+//        this.updateChecker = new BukkitRunnable() {
+//
+//          @Override
+//          public void run() {
+//            final BukkitRunnable task = this;
+//            UpdateCallback callback = new UpdateCallback() {
+//
+//              @Override
+//              public void onFinish(PluginUpdater updater) {
+//                if (updater.getResult() == UpdateResult.SUCCESS) {
+//                  task.cancel();
+//                }
+//              }
+//            };
+//
+//            new PluginUpdater(
+//                BedwarsRevol.getInstance(), BedwarsRevol.PROJECT_ID, BedwarsRevol.getInstance().getFile(),
+//                PluginUpdater.UpdateType.DEFAULT, callback,
+//                BedwarsRevol.getInstance().getBooleanConfig("update-infos", true));
+//          }
+//
+//        }.runTaskTimerAsynchronously(BedwarsRevol.getInstance(), 40L, 36000L);
+//      }
+//    } catch (Exception ex) {
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+//      this.getServer().getConsoleSender().sendMessage(
+//          ChatWriterNew.pluginMessage(ChatColor.RED + "Check for updates not successful: Error!"));
+//    }
+//  }
+//
+//
+//  private void disableBugsnag() {
+//    this.bugsnag.addCallback(new Callback() {
+//      @Override
+//      public void beforeNotify(Report report) {
+//        report.cancel();
+//      }
+//    });
+//  }
+//
+//  public void dispatchRewardCommands(List<String> commands, Map<String, String> replacements) {
+//    for (String command : commands) {
+//      command = command.trim();
+//      if ("".equals(command)) {
+//        continue;
+//      }
+//
+//      if ("none".equalsIgnoreCase(command)) {
+//        break;
+//      }
+//
+//      if (command.startsWith("/")) {
+//        command = command.substring(1);
+//      }
+//
+//      for (Entry<String, String> entry : replacements.entrySet()) {
+//        command = command.replace(entry.getKey(), entry.getValue());
+//      }
+//
+//      BedwarsRevol.getInstance().getServer()
+//          .dispatchCommand(BedwarsRevol.getInstance().getServer().getConsoleSender(), command);
+//    }
+//  }
+//
+//  private void enableBugsnag() {
+//    this.bugsnag.addCallback(new Callback() {
+//      @Override
+//      public void beforeNotify(Report report) {
+//        Boolean shouldBeSent = false;
+//        for (StackTraceElement stackTraceElement : report.getException().getStackTrace()) {
+//          if (stackTraceElement.toString().contains("io.github.bedwarsrel.BedwarsRel")) {
+//            shouldBeSent = true;
+//            break;
+//          }
+//        }
+//        if (!shouldBeSent) {
+//          report.cancel();
+//        }
+//
+//        report.setUserId(SupportData.getIdentifier());
+//        if (!SupportData.getPluginVersionBuild().equalsIgnoreCase("unknown")) {
+//          report.addToTab("Server", "Version Build",
+//              BedwarsRevol.getInstance().getDescription().getVersion() + " "
+//                  + SupportData.getPluginVersionBuild());
+//        }
+//        report.addToTab("Server", "Version", SupportData.getServerVersion());
+//        report.addToTab("Server", "Version Bukkit", SupportData.getBukkitVersion());
+//        report.addToTab("Server", "Server Mode", SupportData.getServerMode());
+//        report.addToTab("Server", "Plugins", SupportData.getPlugins());
+//      }
+//    });
+//  }
 
   private ArrayList<BaseCommand> filterCommandsByPermission(ArrayList<BaseCommand> commands,
       String permission) {
@@ -360,8 +339,8 @@ public class BedwarsRevol extends JavaPlugin {
         return this.craftbukkit;
       }
     } catch (Exception ex) {
-      BedwarsRevol.getInstance().getBugsnag().notify(ex);
-      this.getServer().getConsoleSender().sendMessage(ChatWriter.pluginMessage(ChatColor.RED
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+      this.getServer().getConsoleSender().sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED
           + BedwarsRevol._l(this.getServer().getConsoleSender(), "errors.packagenotfound",
           ImmutableMap.of("package", "craftbukkit"))));
       return null;
@@ -377,9 +356,9 @@ public class BedwarsRevol extends JavaPlugin {
 
       return Class.forName(this.craftbukkit.getName() + "." + classname);
     } catch (Exception ex) {
-      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       this.getServer().getConsoleSender()
-          .sendMessage(ChatWriter.pluginMessage(
+          .sendMessage(ChatWriterNew.pluginMessage(
               ChatColor.RED + BedwarsRevol
                   ._l(this.getServer().getConsoleSender(), "errors.classnotfound",
                       ImmutableMap.of("package", "craftbukkit", "class", classname))));
@@ -395,9 +374,9 @@ public class BedwarsRevol extends JavaPlugin {
     return "en_US";
   }
 
-  public IHologramInteraction getHolographicInteractor() {
-    return this.holographicInteraction;
-  }
+//  public IHologramInteraction getHolographicInteractor() {
+//    return this.holographicInteraction;
+//  }
 
   public int getIntConfig(String key, int defaultInt) {
     FileConfiguration config = this.getConfig();
@@ -412,7 +391,8 @@ public class BedwarsRevol extends JavaPlugin {
       Package spigotPackage = Package.getPackage("org.spigotmc");
       return (spigotPackage != null);
     } catch (Exception e) {
-      BedwarsRevol.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
+      e.printStackTrace();
     }
 
     return false;
@@ -441,8 +421,8 @@ public class BedwarsRevol extends JavaPlugin {
         return this.minecraft;
       }
     } catch (Exception ex) {
-      BedwarsRevol.getInstance().getBugsnag().notify(ex);
-      this.getServer().getConsoleSender().sendMessage(ChatWriter.pluginMessage(ChatColor.RED
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+      this.getServer().getConsoleSender().sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED
           + BedwarsRevol._l(this.getServer().getConsoleSender(), "errors.packagenotfound",
           ImmutableMap.of("package", "minecraft server"))));
       return null;
@@ -458,9 +438,9 @@ public class BedwarsRevol extends JavaPlugin {
 
       return Class.forName(this.minecraft.getName() + "." + classname);
     } catch (Exception ex) {
-      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       this.getServer().getConsoleSender()
-          .sendMessage(ChatWriter.pluginMessage(
+          .sendMessage(ChatWriterNew.pluginMessage(
               ChatColor.RED + BedwarsRevol
                   ._l(this.getServer().getConsoleSender(), "errors.classnotfound",
                       ImmutableMap.of("package", "minecraft server", "class", classname))));
@@ -489,9 +469,9 @@ public class BedwarsRevol extends JavaPlugin {
     return null;
   }
 
-  public PlayerStatisticManager getPlayerStatisticManager() {
-    return this.playerStatisticManager;
-  }
+//  public PlayerStatisticManager getPlayerStatisticManager() {
+//    return this.playerStatisticManager;
+//  }
 
   public Integer getRespawnProtectionTime() {
     FileConfiguration config = this.getConfig();
@@ -528,10 +508,10 @@ public class BedwarsRevol extends JavaPlugin {
     return this.shopConfig;
   }
 
-  public StorageType getStatisticStorageType() {
-    String storage = this.getStringConfig("statistics.storage", "yaml");
-    return StorageType.getByName(storage);
-  }
+//  public StorageType getStatisticStorageType() {
+//    String storage = this.getStringConfig("statistics.storage", "yaml");
+//    return StorageType.getByName(storage);
+//  }
 
   public String getStringConfig(String key, String defaultString) {
     FileConfiguration config = this.getConfig();
@@ -547,9 +527,9 @@ public class BedwarsRevol extends JavaPlugin {
           "io.github.bedwarsrel.com." + this.getCurrentVersion().toLowerCase() + "." + className);
       return clazz;
     } catch (Exception ex) {
-      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       this.getServer().getConsoleSender()
-          .sendMessage(ChatWriter.pluginMessage(ChatColor.RED
+          .sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED
               + "Couldn't find version related class io.github.bedwarsrel.com."
               + this.getCurrentVersion() + "." + className));
     }
@@ -561,11 +541,11 @@ public class BedwarsRevol extends JavaPlugin {
     try {
       String fullstring = config.saveToString();
       String endstring = fullstring;
-      endstring = Utils.unescape_perl_string(fullstring);
+      endstring = UtilsNew.unescape_perl_string(fullstring);
 
       return endstring;
     } catch (Exception ex) {
-      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       ex.printStackTrace();
     }
 
@@ -596,7 +576,7 @@ public class BedwarsRevol extends JavaPlugin {
         Location.class.getMethod("serialize");
         BedwarsRevol.locationSerializable = true;
       } catch (Exception ex) {
-        BedwarsRevol.getInstance().getBugsnag().notify(ex);
+//        BedwarsRevol.getInstance().getBugsnag().notify(ex);
         BedwarsRevol.locationSerializable = false;
       }
     }
@@ -629,7 +609,7 @@ public class BedwarsRevol extends JavaPlugin {
           new BufferedReader(new InputStreamReader(new FileInputStream(configFile), "UTF-8"));
       this.getConfig().load(reader);
     } catch (Exception e) {
-      BedwarsRevol.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
       e.printStackTrace();
     }
 
@@ -644,7 +624,7 @@ public class BedwarsRevol extends JavaPlugin {
         continue;
       }
 
-      Material mat = Utils.parseMaterial(material);
+      Material mat = UtilsNew.parseMaterial(material);
       if (mat == null) {
         continue;
       }
@@ -657,38 +637,38 @@ public class BedwarsRevol extends JavaPlugin {
     }
   }
 
-  private void loadDatabase() {
-    if (!this.getBooleanConfig("statistics.enabled", false)) {
-      return;
-    }
-
-    String host = this.getStringConfig("database.host", null);
-    int port = this.getIntConfig("database.port", 3306);
-    String user = this.getStringConfig("database.user", null);
-    String password = this.getStringConfig("database.password", null);
-    String db = this.getStringConfig("database.db", null);
-    String tablePrefix = this.getStringConfig("database.table-prefix", "bw_");
-
-    if (BedwarsRevol.getInstance().getStatisticStorageType() == StorageType.YAML) {
-      this.databaseManager = new YamlDatabaseManager();
-    } else if (BedwarsRevol.getInstance().getStatisticStorageType() == StorageType.DATABASE) {
-      this.databaseManager = new MysqlDatabaseManager(host, port, user, password, db, tablePrefix);
-    }
-
-    if (BedwarsRevol.getInstance().getStatisticStorageType() != StorageType.YAML
-        && BedwarsRevol.getInstance().getStatisticStorageType() != StorageType.DATABASE) {
-      return;
-    }
-
-    this.getServer().getConsoleSender()
-        .sendMessage(ChatWriter.pluginMessage(ChatColor.GREEN + "Initialize database ..."));
-
-    this.databaseManager.initialize();
-  }
+//  private void loadStatisticsDatabase() {
+//    if (!this.getBooleanConfig("statistics.enabled", false)) {
+//      return;
+//    }
+//
+//    String host = this.getStringConfig("database.host", null);
+//    int port = this.getIntConfig("database.port", 3306);
+//    String user = this.getStringConfig("database.user", null);
+//    String password = this.getStringConfig("database.password", null);
+//    String db = this.getStringConfig("database.db", null);
+//    String tablePrefix = this.getStringConfig("database.table-prefix", "bw_");
+//
+//    if (BedwarsRevol.getInstance().getStatisticStorageType() == StorageType.YAML) {
+//      this.databaseManager = new YamlDatabaseManager();
+//    } else if (BedwarsRevol.getInstance().getStatisticStorageType() == StorageType.DATABASE) {
+//      this.databaseManager = new MysqlDatabaseManager(host, port, user, password, db, tablePrefix);
+//    }
+//
+//    if (BedwarsRevol.getInstance().getStatisticStorageType() != StorageType.YAML
+//        && BedwarsRevol.getInstance().getStatisticStorageType() != StorageType.DATABASE) {
+//      return;
+//    }
+//
+//    this.getServer().getConsoleSender()
+//        .sendMessage(ChatWriterNew.pluginMessage(ChatColor.GREEN + "Initialize database ..."));
+//
+//    this.databaseManager.initialize();
+//  }
 
   private void loadLocalization(String locale) {
     if (!this.localization.containsKey(locale)) {
-      this.localization.put(locale, new LocalizationConfig(locale));
+      this.localization.put(locale, new LocalizationConfigNew(locale));
     }
   }
 
@@ -702,7 +682,7 @@ public class BedwarsRevol extends JavaPlugin {
       try {
         Thread.sleep(100);
       } catch (InterruptedException e) {
-        BedwarsRevol.getInstance().getBugsnag().notify(e);
+//        BedwarsRevol.getInstance().getBugsnag().notify(e);
         e.printStackTrace();
       }
     }
@@ -714,16 +694,16 @@ public class BedwarsRevol extends JavaPlugin {
           new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
       this.shopConfig.load(reader);
     } catch (Exception e) {
-      BedwarsRevol.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
       this.getServer().getConsoleSender().sendMessage(
-          ChatWriter.pluginMessage(ChatColor.RED + "Couldn't load shop! Error in parsing shop!"));
+          ChatWriterNew.pluginMessage(ChatColor.RED + "Couldn't load shop! Error in parsing shop!"));
       e.printStackTrace();
     }
   }
 
-  private void loadStatistics() {
-    this.playerStatisticManager = new PlayerStatisticManager();
-  }
+//  private void loadStatistics() {
+//    this.playerStatisticManager = new PlayerStatisticManager();
+//  }
 
   private String loadVersion() {
     String packName = Bukkit.getServer().getClass().getPackage().getName();
@@ -744,9 +724,9 @@ public class BedwarsRevol extends JavaPlugin {
     this.stopTimeListener();
     this.gameManager.stopGames();
 
-    if (this.isHologramsEnabled() && this.holographicInteraction != null) {
-      this.holographicInteraction.unloadHolograms();
-    }
+//    if (this.isHologramsEnabled() && this.holographicInteraction != null) {
+//      this.holographicInteraction.unloadHolograms();
+//    }
   }
 
   @Override
@@ -755,11 +735,11 @@ public class BedwarsRevol extends JavaPlugin {
 
     if (this.getDescription().getVersion().contains("-SNAPSHOT")
         && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
-      this.getServer().getConsoleSender().sendMessage(ChatWriter
+      this.getServer().getConsoleSender().sendMessage(ChatWriterNew
           .pluginMessage(ChatColor.RED + "*** Warning, you are using a development build ***"));
-      this.getServer().getConsoleSender().sendMessage(ChatWriter
+      this.getServer().getConsoleSender().sendMessage(ChatWriterNew
           .pluginMessage(ChatColor.RED + "*** You will get NO support regarding this build ***"));
-      this.getServer().getConsoleSender().sendMessage(ChatWriter.pluginMessage(ChatColor.RED
+      this.getServer().getConsoleSender().sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED
           + "*** Please download a stable build from https://github.com/BedwarsRel/BedwarsRel/releases ***"));
     }
 
@@ -781,7 +761,7 @@ public class BedwarsRevol extends JavaPlugin {
     this.minecraft = this.getMinecraftPackage();
     this.version = this.loadVersion();
 
-    ConfigUpdater configUpdater = new ConfigUpdater();
+    ConfigUpdaterNew configUpdater = new ConfigUpdaterNew();
     configUpdater.addConfigs();
     this.saveConfiguration();
     this.loadConfigInUTF();
@@ -795,7 +775,7 @@ public class BedwarsRevol extends JavaPlugin {
     this.loadShop();
 
     this.isSpigot = this.getIsSpigot();
-    this.loadDatabase();
+//    this.loadStatisticsDatabase();
 
     this.registerCommands();
     this.registerListeners();
@@ -807,7 +787,7 @@ public class BedwarsRevol extends JavaPlugin {
       this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
     }
 
-    this.loadStatistics();
+//    this.loadStatistics();
     this.loadLocalization(this.getConfig().getString("locale"));
 
 //    this.checkUpdates();
@@ -816,30 +796,30 @@ public class BedwarsRevol extends JavaPlugin {
     this.scoreboardManager = Bukkit.getScoreboardManager();
     this.gameManager.loadGames();
     this.startTimeListener();
-    this.startMetricsIfEnabled();
+//    this.startMetricsIfEnabled();
 
-    // holograms
-    if (this.isHologramsEnabled()) {
-      if (this.getServer().getPluginManager().isPluginEnabled("HologramAPI")) {
-        this.holographicInteraction = new HologramAPIInteraction();
-      } else if (this.getServer().getPluginManager().isPluginEnabled("HolographicDisplays")) {
-        this.holographicInteraction = new HolographicDisplaysInteraction();
-      }
-      this.holographicInteraction.loadHolograms();
-    }
+//    // holograms
+//    if (this.isHologramsEnabled()) {
+//      if (this.getServer().getPluginManager().isPluginEnabled("HologramAPI")) {
+//        this.holographicInteraction = new HologramAPIInteraction();
+//      } else if (this.getServer().getPluginManager().isPluginEnabled("HolographicDisplays")) {
+//        this.holographicInteraction = new HolographicDisplaysInteraction();
+//      }
+//      this.holographicInteraction.loadHolograms();
+//    }
   }
 
-  private void registerBugsnag() {
-    try {
-      this.bugsnag = new Bugsnag("c23593c1e2f40fc0da36564af1bd00c6");
-      this.bugsnag.setAppVersion(SupportData.getPluginVersion());
-      this.bugsnag.setProjectPackages("io.github.bedwarsrel");
-      this.bugsnag.setReleaseStage(SupportData.getPluginVersionType());
-    } catch (Exception e) {
-      this.getServer().getConsoleSender().sendMessage(
-          ChatWriter.pluginMessage(ChatColor.GOLD + "Couldn't register Bugsnag."));
-    }
-  }
+//  private void registerBugsnag() {
+//    try {
+//      this.bugsnag = new Bugsnag("c23593c1e2f40fc0da36564af1bd00c6");
+//      this.bugsnag.setAppVersion(SupportData.getPluginVersion());
+//      this.bugsnag.setProjectPackages("io.github.bedwarsrel");
+//      this.bugsnag.setReleaseStage(SupportData.getPluginVersionType());
+//    } catch (Exception e) {
+//      this.getServer().getConsoleSender().sendMessage(
+//          ChatWriterNew.pluginMessage(ChatColor.GOLD + "Couldn't register Bugsnag."));
+//    }
+//  }
 
   private void registerCommands() {
     BedwarsCommandExecutorNew executor = new BedwarsCommandExecutorNew(this);
@@ -886,36 +866,36 @@ public class BedwarsRevol extends JavaPlugin {
   private void registerConfigurationClasses() {
     ConfigurationSerialization.registerClass(ResourceSpawnerNew.class, "ResourceSpawner");
     ConfigurationSerialization.registerClass(TeamNew.class, "Team");
-    ConfigurationSerialization.registerClass(PlayerStatistic.class, "PlayerStatistic");
+//    ConfigurationSerialization.registerClass(PlayerStatistic.class, "PlayerStatistic");
   }
 
   private void registerListeners() {
-    new WeatherListener();
-    new BlockListener();
+    new WeatherListenerNew();
+    new BlockListenerNew();
     new PlayerListenerNew();
     if (!BedwarsRevol.getInstance().getCurrentVersion().startsWith("v1_8")) {
-      new PlayerSwapHandItemsEventListener();
+      new PlayerSwapHandItemsEventListenerNew();
     }
     if (BedwarsRevol.getInstance().getCurrentVersion().startsWith("v1_8")
         || BedwarsRevol.getInstance().getCurrentVersion().startsWith("v1_9") | BedwarsRevol
         .getInstance().getCurrentVersion().startsWith("v1_10") || BedwarsRevol.getInstance()
         .getCurrentVersion().startsWith("v1_11")) {
-      new PlayerPickUpItemEventListener();
+      new PlayerPickUpItemEventListenerNew();
     } else {
-      new EntityPickupItemEventListener();
+      new EntityPickupItemEventListenerNew();
     }
-    new HangingListener();
-    new EntityListener();
-    new ServerListener();
-    new SignListener();
-    new ChunkListener();
-    new InvisibilityPotionListener().registerInterceptor();
+    new HangingListenerNew();
+    new EntityListenerNew();
+    new ServerListenerNew();
+    new SignListenerNew();
+    new ChunkListenerNew();
+    new InvisibilityPotionListenerNew().registerInterceptor();
 
     if (this.isSpigot()) {
-      new PlayerSpigotListener();
+      new PlayerSpigotListenerNew();
     }
 
-    SpecialItem.loadSpecials();
+//    SpecialItem.loadSpecials();
     UpgradeRegistry.loadUpgrades();
   }
 
@@ -941,7 +921,7 @@ public class BedwarsRevol extends JavaPlugin {
         stream.close();
       }
     } catch (Exception ex) {
-      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       ex.printStackTrace();
     }
   }
@@ -954,19 +934,19 @@ public class BedwarsRevol extends JavaPlugin {
     return true;
   }
 
-  public void startMetricsIfEnabled() {
-    if (this.metricsEnabled()) {
-      new BStatsMetrics(this);
-      try {
-        McStatsMetrics mcStatsMetrics = new McStatsMetrics(this);
-        mcStatsMetrics.start();
-      } catch (Exception ex) {
-        BedwarsRevol.getInstance().getBugsnag().notify(ex);
-        this.getServer().getConsoleSender().sendMessage(ChatWriter
-            .pluginMessage(ChatColor.RED + "Metrics are enabled, but couldn't send data!"));
-      }
-    }
-  }
+//  public void startMetricsIfEnabled() {
+//    if (this.metricsEnabled()) {
+//      new BStatsMetrics(this);
+//      try {
+//        McStatsMetrics mcStatsMetrics = new McStatsMetrics(this);
+//        mcStatsMetrics.start();
+//      } catch (Exception ex) {
+//        BedwarsRevol.getInstance().getBugsnag().notify(ex);
+//        this.getServer().getConsoleSender().sendMessage(ChatWriterNew
+//            .pluginMessage(ChatColor.RED + "Metrics are enabled, but couldn't send data!"));
+//      }
+//    }
+//  }
 
   private void startTimeListener() {
     this.timeTask = this.getServer().getScheduler().runTaskTimer(this, new Runnable() {

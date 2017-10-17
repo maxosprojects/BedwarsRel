@@ -1,13 +1,12 @@
 package io.github.bedwarsrevolution.game.statemachine.game;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.utils.Utils;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.GameLobbyCountdownNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
@@ -16,6 +15,11 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -40,12 +44,15 @@ import org.bukkit.scoreboard.Scoreboard;
 /**
  * Created by {maxos} 2017
  */
-public class GameStateWaiting implements GameState {
-
+public class GameStateWaiting extends GameState {
   private GameLobbyCountdownNew lobbyCountdown;
 
+  public GameStateWaiting(GameContext ctx) {
+    super(ctx);
+  }
+
   @Override
-  public void onEventCraft(GameContext ctx, CraftItemEvent event) {
+  public void onEventCraft(CraftItemEvent event) {
     if (BedwarsRevol.getInstance().getBooleanConfig("allow-crafting", false)) {
       return;
     }
@@ -53,42 +60,42 @@ public class GameStateWaiting implements GameState {
   }
 
   @Override
-  public void onEventDamage(GameContext ctx, EntityDamageEvent event) {
+  public void onEventDamage(EntityDamageEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventDrop(GameContext ctx, PlayerDropItemEvent event) {
+  public void onEventDrop(PlayerDropItemEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventFly(GameContext ctx, PlayerToggleFlightEvent event) {
+  public void onEventFly(PlayerToggleFlightEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventBowShot(GameContext ctx, EntityShootBowEvent event) {
+  public void onEventBowShot(EntityShootBowEvent event) {
   }
 
   @Override
-  public void onEventInteractEntity(GameContext ctx, PlayerInteractEntityEvent event) {
+  public void onEventInteractEntity(PlayerInteractEntityEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventInventoryClick(GameContext ctx, InventoryClickEvent event) {
+  public void onEventInventoryClick(InventoryClickEvent event) {
     // Prevent armor changes
     if (event.getSlotType() == InventoryType.SlotType.ARMOR) {
       event.setCancelled(true);
       return;
     }
-    PlayerContext playerCtx = ctx.getPlayerContext((Player) event.getWhoClicked());
+    PlayerContext playerCtx = this.ctx.getPlayerContext((Player) event.getWhoClicked());
     playerCtx.getState().onInventoryClick(playerCtx, event);
   }
 
   @Override
-  public void onEventPlayerInteract(GameContext ctx, PlayerInteractEvent event) {
+  public void onEventPlayerInteract(PlayerInteractEvent event) {
     Material interactingMaterial = event.getMaterial();
     Block clickedBlock = event.getClickedBlock();
     if (interactingMaterial == null) {
@@ -119,7 +126,7 @@ public class GameStateWaiting implements GameState {
 //        break;
       case DIAMOND:
         event.setCancelled(true);
-        this.forceStart(ctx, player);
+        this.forceStart(player);
         break;
 //      case EMERALD:
 //        pie.setCancelled(true);
@@ -132,7 +139,7 @@ public class GameStateWaiting implements GameState {
 //        break;
       case SLIME_BALL:
         event.setCancelled(true);
-        this.playerLeaves(ctx, ctx.getPlayerContext(player), false);
+        this.playerLeaves(this.ctx.getPlayerContext(player), false);
         break;
 //      case LEATHER_CHESTPLATE:
 //        event.setCancelled(true);
@@ -143,13 +150,13 @@ public class GameStateWaiting implements GameState {
     }
   }
 
-  private void forceStart(GameContext ctx, Player player) {
-    boolean enoughPlayers = this.isEnoughPlayers(ctx);
+  private void forceStart(Player player) {
+    boolean enoughPlayers = this.isEnoughPlayers();
     if (player.isOp() || player.hasPermission("bw.setup")) {
-      ctx.setState(new GameStateRunning());
+      this.ctx.setState(new GameStateRunning(this.ctx));
     } else if (player.hasPermission("bw.vip.forcestart")) {
-      if (enoughPlayers && this.isEnoughTeams(ctx)) {
-        ctx.setState(new GameStateRunning());
+      if (enoughPlayers && this.isEnoughTeams()) {
+        this.ctx.setState(new GameStateRunning(this.ctx));
       } else if (!enoughPlayers) {
           player.sendMessage(ChatWriterNew.pluginMessage(
               ChatColor.RED + BedwarsRevol._l(player, "lobby.cancelstart.not_enough_players")));
@@ -163,38 +170,38 @@ public class GameStateWaiting implements GameState {
   }
 
   @Override
-  public void onEventPlayerRespawn(GameContext ctx, PlayerRespawnEvent event) {
-    event.setRespawnLocation(ctx.getLobby());
+  public void onEventPlayerRespawn(PlayerRespawnEvent event) {
+    event.setRespawnLocation(this.ctx.getLobby());
   }
 
   @Override
-  public void onEventPlayerQuit(GameContext ctx, PlayerQuitEvent event) {
-
-  }
-
-  @Override
-  public void onEventPlayerBedEnter(GameContext ctx, PlayerBedEnterEvent event) {
+  public void onEventPlayerQuit(PlayerQuitEvent event) {
 
   }
 
   @Override
-  public void onEventPlayerChangeWorld(GameContext ctx, PlayerChangedWorldEvent event) {
-    PlayerContext playerCtx = ctx.getPlayerContext(event.getPlayer());
+  public void onEventPlayerBedEnter(PlayerBedEnterEvent event) {
+
+  }
+
+  @Override
+  public void onEventPlayerChangeWorld(PlayerChangedWorldEvent event) {
+    PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
     if (!playerCtx.isTeleporting()) {
-      this.playerLeaves(ctx, playerCtx, false);
+      this.playerLeaves(playerCtx, false);
     }
   }
 
   @Override
-  public void onEventInventoryOpen(GameContext ctx, InventoryOpenEvent event) {
+  public void onEventInventoryOpen(InventoryOpenEvent event) {
 
   }
 
   @Override
-  public void playerJoins(GameContext ctx, Player player) {
-    if (ctx.isFull()) {
+  public void playerJoins(Player player) {
+    if (this.ctx.isFull()) {
       if (player.hasPermission("bw.vip.joinfull")) {
-        List<PlayerContext> nonVip = ctx.getNonVipPlayers();
+        List<PlayerContext> nonVip = this.ctx.getNonVipPlayers();
         if (nonVip.size() == 0) {
           player.sendMessage(ChatWriterNew.pluginMessage(
               ChatColor.RED + BedwarsRevol._l(player, "lobby.gamefullpremium")));
@@ -204,12 +211,12 @@ public class GameStateWaiting implements GameState {
         if (nonVip.size() == 1) {
           kickNonVip = nonVip.get(0);
         } else {
-          kickNonVip = nonVip.get(Utils.randInt(0, nonVip.size() - 1));
+          kickNonVip = nonVip.get(UtilsNew.randInt(0, nonVip.size() - 1));
         }
         Player kickedPlayer = kickNonVip.getPlayer();
         kickedPlayer.sendMessage(ChatWriterNew.pluginMessage(
             ChatColor.RED + BedwarsRevol._l(kickedPlayer, "lobby.kickedbyvip")));
-        this.playerLeaves(ctx, kickNonVip, false);
+        this.playerLeaves(kickNonVip, false);
       } else {
         player.sendMessage(ChatWriterNew.pluginMessage(
             ChatColor.RED + BedwarsRevol._l(player, "lobby.gamefull")));
@@ -217,8 +224,8 @@ public class GameStateWaiting implements GameState {
       }
     }
 
-    BedwarsRevol.getInstance().getGameManager().playerJoined(player, ctx);
-    PlayerContext playerCtx = ctx.addPlayer(player);
+    BedwarsRevol.getInstance().getGameManager().playerJoined(player, this.ctx);
+    PlayerContext playerCtx = this.ctx.addPlayer(player);
 
 //    BedwarsPlayerJoinEvent joiningEvent = new BedwarsPlayerJoinEvent(this, p);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(joiningEvent);
@@ -278,7 +285,7 @@ public class GameStateWaiting implements GameState {
 //        }
 //      }
 
-    this.setLobbyInventory(ctx, playerCtx);
+    this.setLobbyInventory(playerCtx);
 
 //      new BukkitRunnable() {
 //
@@ -290,7 +297,7 @@ public class GameStateWaiting implements GameState {
 //
 //      }.runTaskLater(BedwarsRel.getInstance(), 15L);
 
-    for (PlayerContext aPlayerCtx : ctx.getPlayers()) {
+    for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
       Player aPlayer = aPlayerCtx.getPlayer();
       if (aPlayer.isOnline()) {
         aPlayer.sendMessage(
@@ -300,7 +307,7 @@ public class GameStateWaiting implements GameState {
       }
     }
 
-    TeamNew team = this.getLowestTeam(ctx);
+    TeamNew team = this.getLowestTeam();
     if (team == null) {
       throw new IllegalStateException("No teams defined or no players joined");
     }
@@ -319,21 +326,21 @@ public class GameStateWaiting implements GameState {
 //    BedwarsPlayerJoinedEvent joinEvent = new BedwarsPlayerJoinedEvent(this, null, p);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(joinEvent);
 
-    this.updateScoreboard(ctx);
-    ctx.updateSigns();
+    this.updateScoreboard();
+    this.ctx.updateSigns();
 
     player.sendMessage(ChatWriterNew.pluginMessage(
         ChatColor.GREEN + BedwarsRevol._l(player, "success.joined")));
 
-    boolean enoughPlayers = this.isEnoughPlayers(ctx);
-    if (enoughPlayers && this.isEnoughTeams(ctx)) {
+    boolean enoughPlayers = this.isEnoughPlayers();
+    if (enoughPlayers && this.isEnoughTeams()) {
       if (this.lobbyCountdown == null) {
-        this.lobbyCountdown = new GameLobbyCountdownNew(ctx, this);
+        this.lobbyCountdown = new GameLobbyCountdownNew(this.ctx, this);
         this.lobbyCountdown.runTaskTimer(BedwarsRevol.getInstance(), 20L, 20L);
       }
     } else if (!enoughPlayers) {
-      Collection<PlayerContext> players = ctx.getPlayers();
-      int playersNeeded = ctx.getMinPlayers() - players.size();
+      Collection<PlayerContext> players = this.ctx.getPlayers();
+      int playersNeeded = this.ctx.getMinPlayers() - players.size();
       for (PlayerContext aPlayerCtx : players) {
         Player aPlayer = aPlayerCtx.getPlayer();
         if (aPlayer.isOnline()) {
@@ -343,7 +350,7 @@ public class GameStateWaiting implements GameState {
         }
       }
     } else {
-      for (PlayerContext aPlayerCtx : ctx.getPlayers()) {
+      for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
         Player aPlayer = aPlayerCtx.getPlayer();
         if (aPlayer.isOnline()) {
           aPlayer.sendMessage(ChatWriterNew.pluginMessage(
@@ -353,8 +360,8 @@ public class GameStateWaiting implements GameState {
     }
   }
 
-  private boolean isEnoughTeams(GameContext ctx) {
-    for (Collection<PlayerContext> players : ctx.getTeamsToPlayers().values()) {
+  private boolean isEnoughTeams() {
+    for (Collection<PlayerContext> players : this.ctx.getTeamsToPlayers().values()) {
       if (players.isEmpty()) {
         return false;
       }
@@ -362,14 +369,14 @@ public class GameStateWaiting implements GameState {
     return true;
   }
 
-  private boolean isEnoughPlayers(GameContext ctx) {
-    return ctx.getPlayers().size() >= ctx.getMinPlayers();
+  private boolean isEnoughPlayers() {
+    return this.ctx.getPlayers().size() >= this.ctx.getMinPlayers();
   }
 
-  private TeamNew getLowestTeam(GameContext ctx) {
+  private TeamNew getLowestTeam() {
     int lowestNum = Integer.MAX_VALUE;
     TeamNew lowestTeam = null;
-    for (Entry<TeamNew, Collection<PlayerContext>> entry : ctx.getTeamsToPlayers().entrySet()) {
+    for (Entry<TeamNew, Collection<PlayerContext>> entry : this.ctx.getTeamsToPlayers().entrySet()) {
       int size = entry.getValue().size();
       if (size < lowestNum) {
         lowestNum = size;
@@ -379,7 +386,7 @@ public class GameStateWaiting implements GameState {
     return lowestTeam;
   }
 
-  private void setLobbyInventory(GameContext ctx, PlayerContext playerCtx) {
+  private void setLobbyInventory(PlayerContext playerCtx) {
     Player player = playerCtx.getPlayer();
     ItemMeta im = null;
 //    // choose team only when autobalance is disabled
@@ -402,7 +409,7 @@ public class GameStateWaiting implements GameState {
     if ((player.hasPermission("bw.setup")
         || player.isOp()
         || player.hasPermission("bw.vip.forcestart"))) {
-      this.addGameStartItem(ctx, playerCtx);
+      this.addGameStartItem(playerCtx);
     }
 
 //    if (game.getGameLobbyCountdown() != null
@@ -416,7 +423,7 @@ public class GameStateWaiting implements GameState {
     player.updateInventory();
   }
 
-  private void addGameStartItem(GameContext ctx, PlayerContext playerCtx) {
+  private void addGameStartItem(PlayerContext playerCtx) {
     Player player = playerCtx.getPlayer();
     ItemStack startGame = new ItemStack(Material.DIAMOND, 1);
     ItemMeta im = startGame.getItemMeta();
@@ -426,7 +433,7 @@ public class GameStateWaiting implements GameState {
   }
 
   @Override
-  public void playerLeaves(GameContext ctx, PlayerContext playerCtx, boolean kicked) {
+  public void playerLeaves(PlayerContext playerCtx, boolean kicked) {
 //    Team team = this.getPlayerTeam(p);
 
 //    BedwarsPlayerLeaveEvent leaveEvent = new BedwarsPlayerLeaveEvent(this, p, team);
@@ -506,7 +513,7 @@ public class GameStateWaiting implements GameState {
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
 
-    this.updateScoreboard(ctx);
+    this.updateScoreboard();
 
 //    try {
 //      p.setScoreboard(BedwarsRel.getInstance().getScoreboardManager().getMainScoreboard());
@@ -548,11 +555,36 @@ public class GameStateWaiting implements GameState {
 //      player.teleport(storage.getLeft());
 //    }
 
-    ctx.updateSigns();
+    this.ctx.updateSigns();
   }
 
-  private void updateScoreboard(GameContext ctx) {
-    Scoreboard scoreboard = ctx.getScoreboard();
+  @Override
+  public void onEventBlockBreak(BlockBreakEvent event) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventBlockIgnite(BlockIgniteEvent event) {
+    if (event.getCause() == IgniteCause.ENDER_CRYSTAL || event.getCause() == IgniteCause.LIGHTNING
+        || event.getCause() == IgniteCause.SPREAD) {
+      event.setCancelled(true);
+      return;
+    }
+
+    if (event.getIgnitingEntity() == null) {
+      event.setCancelled(true);
+      return;
+    }
+  }
+
+  @Override
+  public void onEventBlockPlace(BlockPlaceEvent event) {
+    event.setCancelled(true);
+    event.setBuild(false);
+  }
+
+  private void updateScoreboard() {
+    Scoreboard scoreboard = this.ctx.getScoreboard();
     scoreboard.clearSlot(DisplaySlot.SIDEBAR);
     Objective obj = scoreboard.getObjective("lobby");
     if (obj != null) {
@@ -560,7 +592,7 @@ public class GameStateWaiting implements GameState {
     }
     obj = scoreboard.registerNewObjective("lobby", "dummy");
     obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-    obj.setDisplayName(this.formatScoreboard(ctx,
+    obj.setDisplayName(this.formatScoreboard(
         BedwarsRevol.getInstance().getStringConfig("lobby-scoreboard.title", "&eBEDWARS")));
 
     List<String> rows = BedwarsRevol.getInstance().getConfig()
@@ -577,24 +609,24 @@ public class GameStateWaiting implements GameState {
         }
       }
 
-      Score score = obj.getScore(this.formatScoreboard(ctx, row));
+      Score score = obj.getScore(this.formatScoreboard(row));
       score.setScore(rowMax);
       rowMax--;
     }
 
-    for (PlayerContext playerCtx : ctx.getPlayers()) {
+    for (PlayerContext playerCtx : this.ctx.getPlayers()) {
       playerCtx.getPlayer().setScoreboard(scoreboard);
     }
   }
 
-  private String formatScoreboard(GameContext ctx, String str) {
+  private String formatScoreboard(String str) {
     String finalStr = str;
-    finalStr = finalStr.replace("$regionname$", ctx.getRegion().getName());
-    finalStr = finalStr.replace("$gamename$", ctx.getName());
-    finalStr = finalStr.replace("$players$", String.valueOf(ctx.getPlayers().size()));
-    finalStr = finalStr.replace("$maxplayers$", String.valueOf(ctx.getMaxPlayers()));
+    finalStr = finalStr.replace("$regionname$", this.ctx.getRegion().getName());
+    finalStr = finalStr.replace("$gamename$", this.ctx.getName());
+    finalStr = finalStr.replace("$players$", String.valueOf(this.ctx.getPlayers().size()));
+    finalStr = finalStr.replace("$maxplayers$", String.valueOf(this.ctx.getMaxPlayers()));
     finalStr = ChatColor.translateAlternateColorCodes('&', finalStr);
-    return Utils.truncate(finalStr, GameContext.MAX_OBJECTIVE_DISPLAY_LENGTH);
+    return UtilsNew.truncate(finalStr, GameContext.MAX_OBJECTIVE_DISPLAY_LENGTH);
   }
 
 }

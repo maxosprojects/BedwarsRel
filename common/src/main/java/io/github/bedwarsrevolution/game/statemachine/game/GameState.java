@@ -2,6 +2,13 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -19,36 +26,64 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 /**
  * Created by {maxos} 2017
  */
-public interface GameState {
+public abstract class GameState {
+  protected GameContext ctx;
 
-  void onEventCraft(GameContext ctx, CraftItemEvent event);
+  public GameState(GameContext ctx) {
+    this.ctx = ctx;
+  }
 
-  void onEventDamage(GameContext ctx, EntityDamageEvent event);
+  public abstract void onEventCraft(CraftItemEvent event);
 
-  void onEventDrop(GameContext ctx, PlayerDropItemEvent event);
+  public abstract void onEventDamage(EntityDamageEvent event);
 
-  void onEventFly(GameContext ctx, PlayerToggleFlightEvent event);
+  public abstract void onEventDrop(PlayerDropItemEvent event);
 
-  void onEventBowShot(GameContext ctx, EntityShootBowEvent event);
+  public abstract void onEventFly(PlayerToggleFlightEvent event);
 
-  void onEventInteractEntity(GameContext ctx, PlayerInteractEntityEvent event);
+  public abstract void onEventBowShot(EntityShootBowEvent event);
 
-  void onEventInventoryClick(GameContext ctx, InventoryClickEvent event);
+  public abstract void onEventInteractEntity(PlayerInteractEntityEvent event);
 
-  void onEventPlayerInteract(GameContext ctx, PlayerInteractEvent event);
+  public abstract void onEventInventoryClick(InventoryClickEvent event);
 
-  void onEventPlayerRespawn(GameContext ctx, PlayerRespawnEvent event);
+  public abstract void onEventPlayerInteract(PlayerInteractEvent event);
 
-  void onEventPlayerQuit(GameContext ctx, PlayerQuitEvent event);
+  public abstract void onEventPlayerRespawn(PlayerRespawnEvent event);
 
-  void onEventPlayerBedEnter(GameContext ctx, PlayerBedEnterEvent event);
+  public abstract void onEventPlayerQuit(PlayerQuitEvent event);
 
-  void onEventPlayerChangeWorld(GameContext ctx, PlayerChangedWorldEvent event);
+  public abstract void onEventPlayerBedEnter(PlayerBedEnterEvent event);
 
-  void onEventInventoryOpen(GameContext ctx, InventoryOpenEvent event);
+  public abstract void onEventPlayerChangeWorld(PlayerChangedWorldEvent event);
 
-  void playerJoins(GameContext ctx, Player player);
+  public abstract void onEventInventoryOpen(InventoryOpenEvent event);
 
-  void playerLeaves(GameContext ctx, PlayerContext playerCtx, boolean kicked);
+  public abstract void playerJoins(Player player);
+
+  public abstract void playerLeaves(PlayerContext playerCtx, boolean kicked);
+
+  public void onEventBlockBreak(BlockBreakEvent event) {};
+
+  public void onEventBlockBurn(BlockBurnEvent event) {
+    event.setCancelled(true);
+  }
+
+  public void onEventBlockFade(BlockFadeEvent event) {
+    if (!this.ctx.getRegion().isPlacedBlock(event.getBlock())) {
+      event.setCancelled(true);
+    }
+  }
+
+  public void onEventBlockForm(BlockFormEvent event) {
+    event.setCancelled(true);
+  }
+
+  public abstract void onEventBlockIgnite(BlockIgniteEvent event);
+
+  public abstract void onEventBlockPlace(BlockPlaceEvent event);
+
+  public void onEventBlockSpread(BlockSpreadEvent event) {
+  }
 
 }

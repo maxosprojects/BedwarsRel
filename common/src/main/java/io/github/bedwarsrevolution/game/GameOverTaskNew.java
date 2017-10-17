@@ -68,7 +68,7 @@ public class GameOverTaskNew extends BukkitRunnable {
 
   public void onGameEnds() {
     for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
-      this.ctx.getState().playerLeaves(this.ctx, aPlayerCtx, false);
+      this.ctx.getState().playerLeaves(aPlayerCtx, false);
     }
     this.ctx.reset();
 

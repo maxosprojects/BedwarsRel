@@ -5,6 +5,12 @@ import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -22,74 +28,78 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 /**
  * Created by {maxos} 2017
  */
-public class GameStateStopped implements GameState {
+public class GameStateStopped extends GameState {
+
+  public GameStateStopped(GameContext ctx) {
+    super(ctx);
+  }
 
   @Override
-  public void onEventCraft(GameContext ctx, CraftItemEvent event) {
+  public void onEventCraft(CraftItemEvent event) {
 
   }
 
   @Override
-  public void onEventDamage(GameContext ctx, EntityDamageEvent event) {
+  public void onEventDamage(EntityDamageEvent event) {
 
   }
 
   @Override
-  public void onEventDrop(GameContext ctx, PlayerDropItemEvent event) {
+  public void onEventDrop(PlayerDropItemEvent event) {
 
   }
 
   @Override
-  public void onEventFly(GameContext ctx, PlayerToggleFlightEvent event) {
+  public void onEventFly(PlayerToggleFlightEvent event) {
 
   }
 
   @Override
-  public void onEventBowShot(GameContext ctx, EntityShootBowEvent event) {
+  public void onEventBowShot(EntityShootBowEvent event) {
 
   }
 
   @Override
-  public void onEventInteractEntity(GameContext ctx, PlayerInteractEntityEvent event) {
+  public void onEventInteractEntity(PlayerInteractEntityEvent event) {
 
   }
 
   @Override
-  public void onEventInventoryClick(GameContext ctx, InventoryClickEvent event) {
+  public void onEventInventoryClick(InventoryClickEvent event) {
 
   }
 
   @Override
-  public void onEventPlayerInteract(GameContext ctx, PlayerInteractEvent event) {
+  public void onEventPlayerInteract(PlayerInteractEvent event) {
   }
 
   @Override
-  public void onEventPlayerRespawn(GameContext ctx, PlayerRespawnEvent event) {
-
-  }
-
-  @Override
-  public void onEventPlayerQuit(GameContext ctx, PlayerQuitEvent event) {
+  public void onEventPlayerRespawn(PlayerRespawnEvent event) {
 
   }
 
   @Override
-  public void onEventPlayerBedEnter(GameContext ctx, PlayerBedEnterEvent event) {
+  public void onEventPlayerQuit(PlayerQuitEvent event) {
 
   }
 
   @Override
-  public void onEventPlayerChangeWorld(GameContext ctx, PlayerChangedWorldEvent event) {
+  public void onEventPlayerBedEnter(PlayerBedEnterEvent event) {
 
   }
 
   @Override
-  public void onEventInventoryOpen(GameContext ctx, InventoryOpenEvent event) {
+  public void onEventPlayerChangeWorld(PlayerChangedWorldEvent event) {
 
   }
 
   @Override
-  public void playerJoins(GameContext ctx, Player player) {
+  public void onEventInventoryOpen(InventoryOpenEvent event) {
+
+  }
+
+  @Override
+  public void playerJoins(Player player) {
 //    if (this.cycle instanceof BungeeGameCycle) {
 //      ((BungeeGameCycle) this.cycle).sendBungeeMessage(p,
 //          ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel._l(p, "errors.cantjoingame")));
@@ -100,7 +110,27 @@ public class GameStateStopped implements GameState {
   }
 
   @Override
-  public void playerLeaves(GameContext ctx, PlayerContext playerCtx, boolean kicked) {
+  public void playerLeaves(PlayerContext playerCtx, boolean kicked) {
+  }
+
+  @Override
+  public void onEventBlockBurn(BlockBurnEvent event) {
+  }
+
+  @Override
+  public void onEventBlockFade(BlockFadeEvent event) {
+  }
+
+  @Override
+  public void onEventBlockForm(BlockFormEvent event) {
+  }
+
+  @Override
+  public void onEventBlockIgnite(BlockIgniteEvent event) {
+  }
+
+  @Override
+  public void onEventBlockPlace(BlockPlaceEvent event) {
   }
 
 }

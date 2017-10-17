@@ -5,6 +5,9 @@ import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -22,88 +25,107 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 /**
  * Created by {maxos} 2017
  */
-public class GameStateEnding implements GameState {
+public class GameStateEnding extends GameState {
+
+  public GameStateEnding(GameContext ctx) {
+    super(ctx);
+  }
 
   @Override
-  public void onEventCraft(GameContext ctx, CraftItemEvent event) {
+  public void onEventCraft(CraftItemEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventDamage(GameContext ctx, EntityDamageEvent event) {
+  public void onEventDamage(EntityDamageEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventDrop(GameContext ctx, PlayerDropItemEvent event) {
+  public void onEventDrop(PlayerDropItemEvent event) {
   }
 
   @Override
-  public void onEventFly(GameContext ctx, PlayerToggleFlightEvent event) {
-    PlayerContext playerCtx = ctx.getPlayerContext(event.getPlayer());
+  public void onEventFly(PlayerToggleFlightEvent event) {
+    PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
     playerCtx.getState().onFly(playerCtx, event);
   }
 
   @Override
-  public void onEventBowShot(GameContext ctx, EntityShootBowEvent event) {
-    PlayerContext playerCtx = ctx.getPlayerContext((Player) event.getEntity());
+  public void onEventBowShot(EntityShootBowEvent event) {
+    PlayerContext playerCtx = this.ctx.getPlayerContext((Player) event.getEntity());
     playerCtx.getState().onBowShot(playerCtx, event);
   }
 
   @Override
-  public void onEventInteractEntity(GameContext ctx, PlayerInteractEntityEvent event) {
+  public void onEventInteractEntity(PlayerInteractEntityEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventInventoryClick(GameContext ctx, InventoryClickEvent event) {
+  public void onEventInventoryClick(InventoryClickEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventPlayerInteract(GameContext ctx, PlayerInteractEvent event) {
+  public void onEventPlayerInteract(PlayerInteractEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventPlayerRespawn(GameContext ctx, PlayerRespawnEvent event) {
+  public void onEventPlayerRespawn(PlayerRespawnEvent event) {
   }
 
   @Override
-  public void onEventPlayerQuit(GameContext ctx, PlayerQuitEvent event) {
-    this.playerLeaves(ctx, ctx.getPlayerContext(event.getPlayer()), false);
+  public void onEventPlayerQuit(PlayerQuitEvent event) {
+    this.playerLeaves(this.ctx.getPlayerContext(event.getPlayer()), false);
   }
 
   @Override
-  public void onEventPlayerBedEnter(GameContext ctx, PlayerBedEnterEvent event) {
+  public void onEventPlayerBedEnter(PlayerBedEnterEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onEventPlayerChangeWorld(GameContext ctx, PlayerChangedWorldEvent event) {
-    PlayerContext playerCtx = ctx.getPlayerContext(event.getPlayer());
+  public void onEventPlayerChangeWorld(PlayerChangedWorldEvent event) {
+    PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
     if (!playerCtx.isTeleporting()) {
-      this.playerLeaves(ctx, playerCtx, false);
+      this.playerLeaves(playerCtx, false);
     }
   }
 
   @Override
-  public void onEventInventoryOpen(GameContext ctx, InventoryOpenEvent event) {
+  public void onEventInventoryOpen(InventoryOpenEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void playerJoins(GameContext ctx, Player player) {
+  public void playerJoins(Player player) {
     player.sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
         ._l(player, "errors.cantjoingame")));
   }
 
   @Override
-  public void playerLeaves(GameContext ctx, PlayerContext playerCtx, boolean kicked) {
+  public void playerLeaves(PlayerContext playerCtx, boolean kicked) {
     playerCtx.getState().leave(playerCtx, kicked);
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
-    ctx.removePlayer(playerCtx);
+    this.ctx.removePlayer(playerCtx);
+  }
+
+  @Override
+  public void onEventBlockBreak(BlockBreakEvent event) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventBlockIgnite(BlockIgniteEvent event) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventBlockPlace(BlockPlaceEvent event) {
+    event.setCancelled(true);
   }
 
 }

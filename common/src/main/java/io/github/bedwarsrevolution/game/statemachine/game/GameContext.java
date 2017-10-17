@@ -2,19 +2,19 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.GameLobbyCountdown;
-import io.github.bedwarsrel.game.RespawnProtectionRunnable;
-import io.github.bedwarsrel.shop.MerchantCategory;
-import io.github.bedwarsrel.utils.Utils;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.GameCheckResult;
 import io.github.bedwarsrevolution.game.GameJoinSignNew;
+import io.github.bedwarsrevolution.game.GameLobbyCountdownNew;
 import io.github.bedwarsrevolution.game.GameManagerNew;
 import io.github.bedwarsrevolution.game.RegionNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
+import io.github.bedwarsrevolution.game.RespawnProtectionRunnableNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.shop.MerchantCategory;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,11 +29,13 @@ import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -44,10 +46,12 @@ public class GameContext {
 
   public static final int MAX_OBJECTIVE_DISPLAY_LENGTH = 32;
   public static final int MAX_SCORE_LENGTH = 40;
+  public static final String BED_EXISTS = "\u2714";
+  public static final String BED_DESTROYED= "\u2718";
 
   @Getter
   @Setter
-  private GameState state = new GameStateWaiting();
+  private GameState state = new GameStateWaiting(this);
   @Setter
   private boolean autobalance = false;
   @Setter
@@ -56,7 +60,7 @@ public class GameContext {
   private String builder = null;
   @Setter
   private YamlConfiguration config = null;
-  private GameLobbyCountdown gameLobbyCountdown = null;
+  private GameLobbyCountdownNew gameLobbyCountdown = null;
   private Location hologramLocation = null;
   @Getter
   private Map<Location, GameJoinSignNew> joinSigns = new HashMap<>();
@@ -84,7 +88,7 @@ public class GameContext {
   private RegionNew region = null;
   @Getter
   private List<ResourceSpawnerNew> resourceSpawners = new ArrayList<>();
-  private Map<Player, RespawnProtectionRunnable> respawnProtections = new HashMap<>();
+  private Map<Player, RespawnProtectionRunnableNew> respawnProtections = new HashMap<>();
   private List<BukkitTask> runningTasks = new ArrayList<>();
   @Getter
   private Scoreboard scoreboard = null;
@@ -100,13 +104,13 @@ public class GameContext {
 
   public GameContext(String name) {
     this.name = name;
-    this.scoreboard = BedwarsRel.getInstance().getScoreboardManager().getNewScoreboard();
-    this.timeLeft = BedwarsRel.getInstance().getMaxLength();
-    this.record = BedwarsRel.getInstance().getMaxLength();
-    this.length = BedwarsRel.getInstance().getMaxLength();
-    this.autobalance = BedwarsRel.getInstance().getBooleanConfig("global-autobalance", false);
+    this.scoreboard = BedwarsRevol.getInstance().getScoreboardManager().getNewScoreboard();
+    this.timeLeft = BedwarsRevol.getInstance().getMaxLength();
+    this.record = BedwarsRevol.getInstance().getMaxLength();
+    this.length = BedwarsRevol.getInstance().getMaxLength();
+    this.autobalance = BedwarsRevol.getInstance().getBooleanConfig("global-autobalance", false);
 
-    if (BedwarsRel.getInstance().isBungee()) {
+    if (BedwarsRevol.getInstance().isBungee()) {
 //      this.cycle = new BungeeGameCycle(this);
     } else {
 //      this.cycle = new SingleGameCycle(this);
@@ -135,7 +139,7 @@ public class GameContext {
 
   public Material getTargetMaterial() {
     if (this.targetMaterial == null) {
-      return Utils.getMaterialByConfig("game-block", Material.BED_BLOCK);
+      return UtilsNew.getMaterialByConfig("game-block", Material.BED_BLOCK);
     }
     return this.targetMaterial;
   }
@@ -213,7 +217,7 @@ public class GameContext {
   private void updateSignConfig() {
     try {
       File config = new File(
-          BedwarsRel.getInstance().getDataFolder() + "/"
+          BedwarsRevol.getInstance().getDataFolder() + "/"
               + GameManagerNew.gamesPath + "/" + this.name + "/sign.yml");
 
       YamlConfiguration cfg = new YamlConfiguration();
@@ -223,16 +227,16 @@ public class GameContext {
 
       List<Map<String, Object>> locList = new ArrayList<>();
       for (Location loc : this.joinSigns.keySet()) {
-        locList.add(Utils.locationSerialize(loc));
+        locList.add(UtilsNew.locationSerialize(loc));
       }
 
       cfg.set("signs", locList);
       cfg.save(config);
     } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
-      BedwarsRel.getInstance().getServer().getConsoleSender()
-          .sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRel
-              ._l(BedwarsRel.getInstance().getServer().getConsoleSender(), "errors.savesign")));
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+      BedwarsRevol.getInstance().getServer().getConsoleSender()
+          .sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
+              ._l(BedwarsRevol.getInstance().getServer().getConsoleSender(), "errors.savesign")));
     }
   }
 
@@ -274,7 +278,8 @@ public class GameContext {
       try {
         task.cancel();
       } catch (Exception ex) {
-        BedwarsRel.getInstance().getBugsnag().notify(ex);
+//        BedwarsRevol.getInstance().getBugsnag().notify(ex);
+        ex.printStackTrace();
         // already cancelled
       }
     }
@@ -288,7 +293,7 @@ public class GameContext {
 //        if (aPlayer.isOnline()) {
 //          aPlayer.sendMessage(
 //              ChatWriter.pluginMessage(
-//                  BedwarsRel._l(aPlayer, "ingame.team-dead", ImmutableMap.of("team",
+//                  BedwarsRevol._l(aPlayer, "ingame.team-dead", ImmutableMap.of("team",
 //                      deathTeam.getChatColor() + deathTeam.getDisplayName()))));
 //        }
 //      }
@@ -309,14 +314,14 @@ public class GameContext {
 
 //    try {
     for (PlayerContext playerCtx : this.getPlayers()) {
-      this.state.playerLeaves(this, playerCtx, false);
+      this.state.playerLeaves(playerCtx, false);
     }
 //    } catch (Exception e) {
-//      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
 //      e.printStackTrace();
 //    }
     this.resetRegion();
-    this.state = new GameStateStopped();
+    this.state = new GameStateStopped(this);
     this.updateSigns();
   }
 
@@ -351,9 +356,9 @@ public class GameContext {
   public void setLobby(Location lobby) {
     if (this.region != null) {
       if (this.region.getWorld().equals(lobby.getWorld())) {
-        BedwarsRel.getInstance().getServer().getConsoleSender().sendMessage(
-            ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRel
-                ._l(BedwarsRel.getInstance().getServer().getConsoleSender(),
+        BedwarsRevol.getInstance().getServer().getConsoleSender().sendMessage(
+            ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
+                ._l(BedwarsRevol.getInstance().getServer().getConsoleSender(),
                     "errors.lobbyongameworld")));
         return;
       }
@@ -384,7 +389,7 @@ public class GameContext {
       return GameCheckResult.NO_LOBBY_SET;
     }
 
-    if (BedwarsRel.getInstance().toMainLobby() && this.mainLobby == null) {
+    if (BedwarsRevol.getInstance().toMainLobby() && this.mainLobby == null) {
       return GameCheckResult.NO_MAIN_LOBBY_SET;
     }
 
@@ -401,7 +406,7 @@ public class GameContext {
 
       if (targetMaterial.equals(Material.BED_BLOCK)) {
         if ((t.getHeadTarget() == null || t.getFeetTarget() == null)
-            || (!Utils.isBedBlock(t.getHeadTarget()) || !Utils.isBedBlock(t.getFeetTarget()))) {
+            || (!UtilsNew.isBedBlock(t.getHeadTarget()) || !UtilsNew.isBedBlock(t.getFeetTarget()))) {
           return GameCheckResult.TEAM_NO_WRONG_BED;
         }
       } else {
@@ -431,7 +436,7 @@ public class GameContext {
 //      sender
 //          .sendMessage(
 //              ChatWriter
-//                  .pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.cantstartagain")));
+//                  .pluginMessage(ChatColor.RED + BedwarsRevol._l(sender, "errors.cantstartagain")));
 //      return false;
 //    }
 
@@ -443,12 +448,62 @@ public class GameContext {
 
     if (sender instanceof Player) {
       sender.sendMessage(
-          ChatWriterNew.pluginMessage(ChatColor.GREEN + BedwarsRel._l(sender, "success.gamerun")));
+          ChatWriterNew.pluginMessage(ChatColor.GREEN + BedwarsRevol._l(sender, "success.gamerun")));
     }
 
-    this.state = new GameStateWaiting();
+    this.state = new GameStateWaiting(this);
     this.updateSigns();
     return true;
+  }
+
+  public void addRunningTask(BukkitTask task) {
+    this.runningTasks.add(task);
+  }
+
+  public void removeRunningTask(BukkitTask task) {
+    this.runningTasks.remove(task);
+  }
+
+  public void removeRunningTask(BukkitRunnable bukkitRunnable) {
+    this.runningTasks.remove(bukkitRunnable);
+  }
+
+  public void broadcastSound(Sound sound, float volume, float pitch) {
+    for (PlayerContext p : this.getPlayers()) {
+      Player player = p.getPlayer();
+      if (player.isOnline()) {
+        player.playSound(player.getLocation(), sound, volume, pitch);
+      }
+    }
+  }
+
+  public void broadcastSound(Sound sound, float volume, float pitch, List<PlayerContext> playerContexts) {
+    for (PlayerContext p : playerContexts) {
+      Player player = p.getPlayer();
+      if (player.isOnline()) {
+        player.playSound(player.getLocation(), sound, volume, pitch);
+      }
+    }
+  }
+
+  public void removeJoinSign(Location location) {
+    this.joinSigns.remove(location);
+    this.updateSignConfig();
+  }
+
+  public TeamNew getTeamOfBed(Block bed) {
+    for (TeamNew team : this.getTeams().values()) {
+      if (team.getFeetTarget() == null) {
+        if (team.getHeadTarget().equals(bed)) {
+          return team;
+        }
+      } else {
+        if (team.getHeadTarget().equals(bed) || team.getFeetTarget().equals(bed)) {
+          return team;
+        }
+      }
+    }
+    return null;
   }
 
 }

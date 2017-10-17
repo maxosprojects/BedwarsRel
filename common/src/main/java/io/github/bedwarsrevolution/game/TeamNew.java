@@ -1,13 +1,11 @@
 package io.github.bedwarsrevolution.game;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.events.BedwarsPlayerJoinTeamEvent;
-import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
-import io.github.bedwarsrel.game.TeamColor;
-import io.github.bedwarsrel.shop.upgrades.Upgrade;
-import io.github.bedwarsrel.shop.upgrades.UpgradeBaseAlarm;
-import io.github.bedwarsrel.utils.Utils;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.shop.upgrades.Upgrade;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeBaseAlarm;
+import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +15,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -29,7 +26,7 @@ import org.bukkit.inventory.Inventory;
 @SerializableAs("Team")
 public class TeamNew implements ConfigurationSerializable {
   private List<Block> chests = null;
-  private TeamColor color = null;
+  private TeamColorNew color = null;
   private Inventory inventory = null;
   private int maxPlayers = 0;
   private String name = null;
@@ -47,24 +44,24 @@ public class TeamNew implements ConfigurationSerializable {
     this.reset();
     this.setName(deserialize.get("name").toString());
     this.setMaxPlayers(Integer.parseInt(deserialize.get("maxplayers").toString()));
-    this.setColor(TeamColor.valueOf(deserialize.get("color").toString().toUpperCase()));
-    this.setSpawnLocation(Utils.locationDeserialize(deserialize.get("spawn")));
+    this.setColor(TeamColorNew.AQUA.valueOf(deserialize.get("color").toString().toUpperCase()));
+    this.setSpawnLocation(UtilsNew.locationDeserialize(deserialize.get("spawn")));
     this.setChests(new ArrayList<Block>());
-    this.setBaseLoc1(Utils.locationDeserialize(deserialize.get("baseloc1")));
-    this.setBaseLoc2(Utils.locationDeserialize(deserialize.get("baseloc2")));
-    this.setChestLoc(Utils.locationDeserialize(deserialize.get("chestloc")));
+    this.setBaseLoc1(UtilsNew.locationDeserialize(deserialize.get("baseloc1")));
+    this.setBaseLoc2(UtilsNew.locationDeserialize(deserialize.get("baseloc2")));
+    this.setChestLoc(UtilsNew.locationDeserialize(deserialize.get("chestloc")));
 
     if (deserialize.containsKey("bedhead")) {
-      this.setTargetHeadBlock(Utils.locationDeserialize(deserialize.get("bedhead")));
+      this.setTargetHeadBlock(UtilsNew.locationDeserialize(deserialize.get("bedhead")));
 
       if (this.getTargetHeadBlock() != null && deserialize.containsKey("bedfeed")
           && this.getTargetHeadBlock().getBlock().getType().equals(Material.BED_BLOCK)) {
-        this.setTargetFeetBlock(Utils.locationDeserialize(deserialize.get("bedfeed")));
+        this.setTargetFeetBlock(UtilsNew.locationDeserialize(deserialize.get("bedfeed")));
       }
     }
   }
 
-  public TeamNew(String name, TeamColor color, int maxPlayers,
+  public TeamNew(String name, TeamColorNew color, int maxPlayers,
       org.bukkit.scoreboard.Team scoreboardTeam) {
     this.reset();
     this.setName(name);
@@ -94,7 +91,7 @@ public class TeamNew implements ConfigurationSerializable {
 //      return false;
 //    }
 
-    if (BedwarsRel.getInstance().isSpigot()) {
+    if (BedwarsRevol.getInstance().isSpigot()) {
       if (this.getScoreboardTeam().getEntries().size() >= this.getMaxPlayers()) {
         return false;
       }
@@ -107,12 +104,12 @@ public class TeamNew implements ConfigurationSerializable {
     String displayName = player.getDisplayName();
     String playerListName = player.getPlayerListName();
 
-    if (BedwarsRel.getInstance().getBooleanConfig("overwrite-names", false)) {
+    if (BedwarsRevol.getInstance().getBooleanConfig("overwrite-names", false)) {
       displayName = this.getChatColor() + ChatColor.stripColor(player.getName());
       playerListName = this.getChatColor() + ChatColor.stripColor(player.getName());
     }
 
-    if (BedwarsRel.getInstance().getBooleanConfig("teamname-on-tab", true)) {
+    if (BedwarsRevol.getInstance().getBooleanConfig("teamname-on-tab", true)) {
       playerListName = this.getChatColor() + this.getName() + ChatColor.WHITE + " | "
           + this.getChatColor() + ChatColor.stripColor(player.getDisplayName());
     }
@@ -126,12 +123,12 @@ public class TeamNew implements ConfigurationSerializable {
 //      player.setPlayerListName(playerSetNameEvent.getPlayerListName());
 //    }
 
-    if (BedwarsRel.getInstance().isSpigot()) {
+    if (BedwarsRevol.getInstance().isSpigot()) {
       this.getScoreboardTeam().addEntry(player.getName());
     } else {
       this.getScoreboardTeam().addPlayer(player);
     }
-    BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player).getPlayerStorage(player)
+    BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player).getPlayerContext(player)
         .respawn();
 
     return true;
@@ -139,7 +136,7 @@ public class TeamNew implements ConfigurationSerializable {
 
   public void createTeamInventory() {
     Inventory inventory =
-        Bukkit.createInventory(null, InventoryType.ENDER_CHEST, BedwarsRel._l("ingame.teamchest"));
+        Bukkit.createInventory(null, InventoryType.ENDER_CHEST, BedwarsRevol._l("ingame.teamchest"));
     this.setInventory(inventory);
   }
 
@@ -169,32 +166,14 @@ public class TeamNew implements ConfigurationSerializable {
     return this.getTargetHeadBlock().getBlock();
   }
 
-  @SuppressWarnings("deprecation")
-  public List<Player> getPlayers() {
-    List<Player> players = new ArrayList<>();
-    if (BedwarsRel.getInstance().isSpigot()) {
-      for (String aPlayer : this.getScoreboardTeam().getEntries()) {
-        Player player = BedwarsRel.getInstance().getServer().getPlayer(aPlayer);
-        if (player != null
-            && BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player) != null
-            && !BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player)
-            .isSpectator(player)) {
-          players.add(player);
-        }
-      }
-    } else {
-      for (OfflinePlayer offlinePlayer : this.getScoreboardTeam().getPlayers()) {
-        Player player = BedwarsRel.getInstance().getServer().getPlayer(offlinePlayer.getName());
-        if (player != null
-            && BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player) != null
-            && !BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player)
-            .isSpectator(player)) {
-          players.add(player);
-        }
+  public List<PlayerContext> getPlayers() {
+    List<PlayerContext> playerContexts = new ArrayList<>();
+    for (PlayerContext playerCtx : this.gameCtx.getPlayers()) {
+      if (playerCtx.getTeam() == this) {
+        playerContexts.add(playerCtx);
       }
     }
-
-    return players;
+    return playerContexts;
   }
 
   public boolean isBedDestroyed() {
@@ -212,7 +191,7 @@ public class TeamNew implements ConfigurationSerializable {
 
   @SuppressWarnings("deprecation")
   public boolean isInTeam(Player p) {
-    if (BedwarsRel.getInstance().isSpigot()) {
+    if (BedwarsRevol.getInstance().isSpigot()) {
       return this.getScoreboardTeam().hasEntry(p.getName());
     } else {
       return this.getScoreboardTeam().hasPlayer(p);
@@ -228,7 +207,7 @@ public class TeamNew implements ConfigurationSerializable {
 
   @SuppressWarnings("deprecation")
   public void removePlayer(Player player) {
-    if (BedwarsRel.getInstance().isSpigot()) {
+    if (BedwarsRevol.getInstance().isSpigot()) {
       if (this.getScoreboardTeam().hasEntry(player.getName())) {
         this.getScoreboardTeam().removeEntry(player.getName());
       }
@@ -238,7 +217,7 @@ public class TeamNew implements ConfigurationSerializable {
       }
     }
 
-    if (BedwarsRel.getInstance().getBooleanConfig("overwrite-names", false) && player.isOnline()) {
+    if (BedwarsRevol.getInstance().getBooleanConfig("overwrite-names", false) && player.isOnline()) {
       player.setDisplayName(ChatColor.RESET + ChatColor.stripColor(player.getName()));
       player.setPlayerListName(ChatColor.RESET + player.getPlayer().getName());
     }
@@ -251,14 +230,14 @@ public class TeamNew implements ConfigurationSerializable {
     team.put("name", this.getName());
     team.put("color", this.getColor().toString());
     team.put("maxplayers", this.getMaxPlayers());
-    team.put("spawn", Utils.locationSerialize(this.getSpawnLocation()));
-    team.put("bedhead", Utils.locationSerialize(this.getTargetHeadBlock()));
-    team.put("baseloc1", Utils.locationSerialize(this.baseLoc1));
-    team.put("baseloc2", Utils.locationSerialize(this.baseLoc2));
-    team.put("chestloc", Utils.locationSerialize(this.chestLoc));
+    team.put("spawn", UtilsNew.locationSerialize(this.getSpawnLocation()));
+    team.put("bedhead", UtilsNew.locationSerialize(this.getTargetHeadBlock()));
+    team.put("baseloc1", UtilsNew.locationSerialize(this.baseLoc1));
+    team.put("baseloc2", UtilsNew.locationSerialize(this.baseLoc2));
+    team.put("chestloc", UtilsNew.locationSerialize(this.chestLoc));
 
     if (this.targetFeetBlock != null) {
-      team.put("bedfeed", Utils.locationSerialize(this.targetFeetBlock));
+      team.put("bedfeed", UtilsNew.locationSerialize(this.targetFeetBlock));
     }
 
     return team;

@@ -333,7 +333,6 @@ public final class UtilsNew {
     if (isBed == null) {
       return false;
     }
-
     return (isBed.getType() == Material.BED || isBed.getType() == Material.BED_BLOCK);
   }
 

@@ -58,24 +58,22 @@ public class GameManagerNew {
 //
 //    return null;
 //  }
-//
-//  public Game getGameByLocation(Location loc) {
-//    for (Game game : this.gamesContexts) {
-//      if (game.getRegion() == null) {
-//        continue;
-//      }
-//
-//      if (game.getRegion().getWorld() == null) {
-//        continue;
-//      }
-//
-//      if (game.getRegion().isInRegion(loc)) {
-//        return game;
-//      }
-//    }
-//
-//    return null;
-//  }
+
+  public GameContext getGameByLocation(Location loc) {
+    for (GameContext ctx : this.gamesContexts) {
+      if (ctx.getRegion() == null) {
+        continue;
+      }
+      if (ctx.getRegion().getWorld() == null) {
+        continue;
+      }
+      if (ctx.getRegion().isInRegion(loc)) {
+        return ctx;
+      }
+    }
+
+    return null;
+  }
 
   public GameContext getGameBySignLocation(Location location) {
     for (GameContext ctx : this.gamesContexts) {
@@ -271,7 +269,7 @@ public class GameManagerNew {
               ._l(BedwarsRevol.getInstance().getServer().getConsoleSender(), "success.gameloaded",
                   ImmutableMap.of("game", ctx.getRegion().getName()))));
     } catch (Exception ex) {
-      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       BedwarsRevol.getInstance().getServer().getConsoleSender()
           .sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
               ._l(BedwarsRevol.getInstance().getServer().getConsoleSender(), "errors.gameloaderror",

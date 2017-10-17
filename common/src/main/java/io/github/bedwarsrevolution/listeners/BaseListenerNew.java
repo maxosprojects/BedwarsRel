@@ -1,6 +1,6 @@
 package io.github.bedwarsrevolution.listeners;
 
-import io.github.bedwarsrel.BedwarsRel;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import org.bukkit.event.Listener;
 
 public abstract class BaseListenerNew implements Listener {
@@ -10,8 +10,8 @@ public abstract class BaseListenerNew implements Listener {
   }
 
   private void registerEvents() {
-    BedwarsRel.getInstance().getServer().getPluginManager()
-        .registerEvents(this, BedwarsRel.getInstance());
+    BedwarsRevol.getInstance().getServer().getPluginManager()
+        .registerEvents(this, BedwarsRevol.getInstance());
   }
 
 }

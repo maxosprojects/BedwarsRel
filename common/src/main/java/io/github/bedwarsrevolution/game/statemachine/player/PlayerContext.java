@@ -1,15 +1,14 @@
 package io.github.bedwarsrevolution.game.statemachine.player;
 
-import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.shop.Shop;
-import io.github.bedwarsrel.shop.upgrades.Upgrade;
-import io.github.bedwarsrel.shop.upgrades.UpgradeCycle;
-import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
-import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.DamageHolder;
 import io.github.bedwarsrevolution.game.PlayerStorageNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.shop.Shop;
+import io.github.bedwarsrevolution.shop.upgrades.Upgrade;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeCycle;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeScope;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,12 +49,15 @@ public class PlayerContext {
   @Setter
   private boolean virtuallyAlive = true;
   private Map<Class<? extends Upgrade>, List<Upgrade>> upgrades = new HashMap<>();
+  @Getter
+  @Setter
+  private boolean oneStackPerShift = true;
 
   public PlayerContext(Player player, GameContext gameContext) {
     this.player = player;
     this.gameContext = gameContext;
     this.storage = new PlayerStorageNew(player);
-    this.shop = new Shop(gameContext.getShopCategories(), player);
+    this.shop = new Shop(gameContext.getShopCategories(), this);
   }
 
   public void setDamager(Player damager) {
@@ -164,6 +166,36 @@ public class PlayerContext {
     if (!this.player.getWorld().getName().equals(location.getWorld().getName())) {
       this.teleporting = true;
     }
+  }
+
+  public <T extends Upgrade> List<T> getUpgrades(Class<T> upgradeClass) {
+    return (List<T>) this.upgrades.get(upgradeClass);
+  }
+
+  /**
+   * Replaces any existing upgrade of the same java class
+   * @param upgrade
+   * @param <T>
+   */
+  public <T extends Upgrade> void setUpgrade(T upgrade) {
+    List<Upgrade> list = new ArrayList<>();
+    list.add(upgrade);
+    this.upgrades.put(upgrade.getClass(), list);
+  }
+
+  /**
+   * Adds an upgrade.
+   * Multiple upgrades of the same java class are possible
+   * @param upgrade
+   * @param <T>
+   */
+  public <T extends Upgrade> void addUpgrade(T upgrade) {
+    List<Upgrade> list = this.upgrades.get(upgrade.getClass());
+    if (list == null) {
+      list = new ArrayList<>();
+      this.upgrades.put(upgrade.getClass(), list);
+    }
+    list.add(upgrade);
   }
 
 }

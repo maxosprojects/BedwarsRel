@@ -71,21 +71,20 @@ public class RegionNew {
     this(new Location(w, x1, y1, z1), new Location(w, x2, y2, z2), w.getName());
   }
 
-  @SuppressWarnings("deprecation")
-  public void addBreakedBlock(Block bedBlock) {
-    if (bedBlock.getState().getData() instanceof Directional) {
-      this.breakedBlockFace.put(bedBlock,
-          ((Directional) bedBlock.getState().getData()).getFacing());
+  public void addBrokenBlock(Block brokenBlock) {
+    if (brokenBlock.getState().getData() instanceof Directional) {
+      this.breakedBlockFace.put(brokenBlock,
+          ((Directional) brokenBlock.getState().getData()).getFacing());
     }
 
-    this.breakedBlockTypes.put(bedBlock, bedBlock.getTypeId());
-    this.breakedBlockData.put(bedBlock, bedBlock.getData());
+    this.breakedBlockTypes.put(brokenBlock, brokenBlock.getTypeId());
+    this.breakedBlockData.put(brokenBlock, brokenBlock.getData());
 
-    if (bedBlock.getState().getData() instanceof Redstone) {
-      this.breakedBlockPower.put(bedBlock, ((Redstone) bedBlock.getState().getData()).isPowered());
+    if (brokenBlock.getState().getData() instanceof Redstone) {
+      this.breakedBlockPower.put(brokenBlock, ((Redstone) brokenBlock.getState().getData()).isPowered());
     }
 
-    this.breakedBlocks.add(bedBlock);
+    this.breakedBlocks.add(brokenBlock);
   }
 
   public void addInventory(Inventory inventory) {

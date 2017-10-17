@@ -1,15 +1,13 @@
 package io.github.bedwarsrevolution.game.statemachine.player;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.shop.Shop;
-import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.DamageHolder;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.shop.Shop;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
-import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -71,44 +69,44 @@ public class PlayerStatePlaying extends PlayerState {
     DamageHolder damage = playerCtx.getLastDamagedBy();
     boolean damageCausedRecently = damage.wasCausedRecently();
 
-    PlayerStatistic diedPlayerStats = null;
-    PlayerStatistic killerPlayerStats = null;
-    if (BedwarsRevol.getInstance().statisticsEnabled()) {
-      diedPlayerStats = BedwarsRevol.getInstance().getPlayerStatisticManager().getStatistic(playerCtx.getPlayer());
-      boolean onlyOnBedDestroyed = BedwarsRevol.getInstance()
-          .getBooleanConfig("statistics.bed-destroyed-kills", false);
-      boolean teamBedDestroyed = team.isBedDestroyed();
-
-      if (!onlyOnBedDestroyed || teamBedDestroyed) {
-        diedPlayerStats.setCurrentDeaths(diedPlayerStats.getCurrentDeaths() + 1);
-        diedPlayerStats.setCurrentScore(diedPlayerStats.getCurrentScore() +
-            BedwarsRevol.getInstance().getIntConfig("statistics.scores.die", 0));
-      }
-
-      if (damageCausedRecently) {
-        if (!onlyOnBedDestroyed || teamBedDestroyed) {
-          killerPlayerStats = BedwarsRevol.getInstance().getPlayerStatisticManager()
-              .getStatistic(damage.getDamager());
-          if (killerPlayerStats != null) {
-            killerPlayerStats.setCurrentKills(killerPlayerStats.getCurrentKills() + 1);
-            killerPlayerStats.setCurrentScore(killerPlayerStats.getCurrentScore() +
-                BedwarsRevol.getInstance().getIntConfig("statistics.scores.kill", 10));
-          }
-        }
-      }
-
-      // dispatch reward commands directly
-      if (BedwarsRevol.getInstance().getBooleanConfig("rewards.enabled", false)
-          && damageCausedRecently
-          && (!onlyOnBedDestroyed || teamBedDestroyed)) {
-        List<String> commands = BedwarsRevol.getInstance().getConfig()
-            .getStringList("rewards.player-kill");
-        BedwarsRevol.getInstance().dispatchRewardCommands(commands,
-            ImmutableMap.of("{player}", damage.getDamager().getName(), "{score}",
-                String.valueOf(BedwarsRevol.getInstance()
-                    .getIntConfig("statistics.scores.kill", 10))));
-      }
-    }
+//    PlayerStatistic diedPlayerStats = null;
+//    PlayerStatistic killerPlayerStats = null;
+//    if (BedwarsRevol.getInstance().statisticsEnabled()) {
+//      diedPlayerStats = BedwarsRevol.getInstance().getPlayerStatisticManager().getStatistic(playerCtx.getPlayer());
+//      boolean onlyOnBedDestroyed = BedwarsRevol.getInstance()
+//          .getBooleanConfig("statistics.bed-destroyed-kills", false);
+//      boolean teamBedDestroyed = team.isBedDestroyed();
+//
+//      if (!onlyOnBedDestroyed || teamBedDestroyed) {
+//        diedPlayerStats.setCurrentDeaths(diedPlayerStats.getCurrentDeaths() + 1);
+//        diedPlayerStats.setCurrentScore(diedPlayerStats.getCurrentScore() +
+//            BedwarsRevol.getInstance().getIntConfig("statistics.scores.die", 0));
+//      }
+//
+//      if (damageCausedRecently) {
+//        if (!onlyOnBedDestroyed || teamBedDestroyed) {
+//          killerPlayerStats = BedwarsRevol.getInstance().getPlayerStatisticManager()
+//              .getStatistic(damage.getDamager());
+//          if (killerPlayerStats != null) {
+//            killerPlayerStats.setCurrentKills(killerPlayerStats.getCurrentKills() + 1);
+//            killerPlayerStats.setCurrentScore(killerPlayerStats.getCurrentScore() +
+//                BedwarsRevol.getInstance().getIntConfig("statistics.scores.kill", 10));
+//          }
+//        }
+//      }
+//
+//      // dispatch reward commands directly
+//      if (BedwarsRevol.getInstance().getBooleanConfig("rewards.enabled", false)
+//          && damageCausedRecently
+//          && (!onlyOnBedDestroyed || teamBedDestroyed)) {
+//        List<String> commands = BedwarsRevol.getInstance().getConfig()
+//            .getStringList("rewards.player-kill");
+//        BedwarsRevol.getInstance().dispatchRewardCommands(commands,
+//            ImmutableMap.of("{player}", damage.getDamager().getName(), "{score}",
+//                String.valueOf(BedwarsRevol.getInstance()
+//                    .getIntConfig("statistics.scores.kill", 10))));
+//      }
+//    }
 
     if (damageCausedRecently) {
       for (PlayerContext aPlayerCtx : playerCtx.getGameContext().getPlayers()) {
