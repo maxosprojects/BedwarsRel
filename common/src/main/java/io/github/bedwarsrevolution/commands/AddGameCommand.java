@@ -18,35 +18,35 @@ public class AddGameCommand extends BaseCommand {
 
   @Override
   public boolean execute(CommandSender sender, ArrayList<String> args) {
-    if (!sender.hasPermission("bw." + this.getPermission())) {
-      return false;
-    }
-
-    Game addGame = this.getPlugin().getGameManager().addGame(args.get(0));
-    String minPlayers = args.get(1);
-
-    if (!Utils.isNumber(minPlayers)) {
-      sender.sendMessage(
-          ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
-              ._l(sender, "errors.minplayersmustnumber")));
-      return false;
-    }
-
-    if (addGame == null) {
-      sender.sendMessage(
-          ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.gameexists")));
-      return false;
-    }
-
-    int min = Integer.parseInt(minPlayers);
-    if (min <= 0) {
-      min = 1;
-    }
-
-    addGame.setMinPlayers(min);
-    sender.sendMessage(ChatWriter.pluginMessage(ChatColor.GREEN
-        + BedwarsRel
-        ._l(sender, "success.gameadded", ImmutableMap.of("game", args.get(0).toString()))));
+//    if (!sender.hasPermission("bw." + this.getPermission())) {
+//      return false;
+//    }
+//
+//    Game addGame = this.getPlugin().getGameManager().addGame(args.get(0));
+//    String minPlayers = args.get(1);
+//
+//    if (!Utils.isNumber(minPlayers)) {
+//      sender.sendMessage(
+//          ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
+//              ._l(sender, "errors.minplayersmustnumber")));
+//      return false;
+//    }
+//
+//    if (addGame == null) {
+//      sender.sendMessage(
+//          ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.gameexists")));
+//      return false;
+//    }
+//
+//    int min = Integer.parseInt(minPlayers);
+//    if (min <= 0) {
+//      min = 1;
+//    }
+//
+//    addGame.setMinPlayers(min);
+//    sender.sendMessage(ChatWriter.pluginMessage(ChatColor.GREEN
+//        + BedwarsRel
+//        ._l(sender, "success.gameadded", ImmutableMap.of("game", args.get(0).toString()))));
     return true;
   }
 

@@ -2,7 +2,7 @@ package io.github.bedwarsrel.listener.events;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameStateOld;
+import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.listener.BaseListener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,7 +25,7 @@ public class EntityPickupItemEventListener extends BaseListener {
       }
     }
 
-    if (game.getState() != GameStateOld.WAITING && game.isInGame(player)) {
+    if (game.getState() != GameState.WAITING && game.isInGame(player)) {
       return;
     }
 

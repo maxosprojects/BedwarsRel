@@ -1,21 +1,17 @@
-package io.github.bedwarsrel.game;
+package io.github.bedwarsrevolution.game;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsPlayerJoinTeamEvent;
 import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
-import io.github.bedwarsrel.shop.upgrades.UpgradeArmorProtection;
-import io.github.bedwarsrel.shop.upgrades.UpgradeArmorProtectionEnum;
-import io.github.bedwarsrel.shop.upgrades.UpgradeSwordSharpness;
-import io.github.bedwarsrel.shop.upgrades.UpgradeSwordSharpnessEnum;
+import io.github.bedwarsrel.game.TeamColor;
 import io.github.bedwarsrel.shop.upgrades.Upgrade;
 import io.github.bedwarsrel.shop.upgrades.UpgradeBaseAlarm;
 import io.github.bedwarsrel.utils.Utils;
-
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import lombok.Data;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,8 +27,7 @@ import org.bukkit.inventory.Inventory;
 
 @Data
 @SerializableAs("Team")
-public class Team implements ConfigurationSerializable {
-
+public class TeamNew implements ConfigurationSerializable {
   private List<Block> chests = null;
   private TeamColor color = null;
   private Inventory inventory = null;
@@ -46,8 +41,9 @@ public class Team implements ConfigurationSerializable {
   private Location baseLoc2;
   private Location chestLoc;
   private Map<Class<? extends Upgrade>, Upgrade> upgrades = new HashMap<>();
+  private GameContext gameCtx;
 
-  public Team(Map<String, Object> deserialize) {
+  public TeamNew(Map<String, Object> deserialize) {
     this.reset();
     this.setName(deserialize.get("name").toString());
     this.setMaxPlayers(Integer.parseInt(deserialize.get("maxplayers").toString()));
@@ -68,7 +64,7 @@ public class Team implements ConfigurationSerializable {
     }
   }
 
-  public Team(String name, TeamColor color, int maxPlayers,
+  public TeamNew(String name, TeamColor color, int maxPlayers,
       org.bukkit.scoreboard.Team scoreboardTeam) {
     this.reset();
     this.setName(name);
@@ -91,12 +87,12 @@ public class Team implements ConfigurationSerializable {
   @SuppressWarnings("deprecation")
   public boolean addPlayer(Player player) {
 
-    BedwarsPlayerJoinTeamEvent playerJoinTeamEvent = new BedwarsPlayerJoinTeamEvent(this, player);
-    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(playerJoinTeamEvent);
-
-    if (playerJoinTeamEvent.isCancelled()) {
-      return false;
-    }
+//    BedwarsPlayerJoinTeamEvent playerJoinTeamEvent = new BedwarsPlayerJoinTeamEvent(this, player);
+//    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(playerJoinTeamEvent);
+//
+//    if (playerJoinTeamEvent.isCancelled()) {
+//      return false;
+//    }
 
     if (BedwarsRel.getInstance().isSpigot()) {
       if (this.getScoreboardTeam().getEntries().size() >= this.getMaxPlayers()) {
@@ -121,14 +117,14 @@ public class Team implements ConfigurationSerializable {
           + this.getChatColor() + ChatColor.stripColor(player.getDisplayName());
     }
 
-    BedwarsPlayerSetNameEvent playerSetNameEvent =
-        new BedwarsPlayerSetNameEvent(this, displayName, playerListName, player);
-    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(playerSetNameEvent);
-
-    if (!playerSetNameEvent.isCancelled()) {
-      player.setDisplayName(playerSetNameEvent.getDisplayName());
-      player.setPlayerListName(playerSetNameEvent.getPlayerListName());
-    }
+//    BedwarsPlayerSetNameEvent playerSetNameEvent =
+//        new BedwarsPlayerSetNameEvent(this, displayName, playerListName, player);
+//    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(playerSetNameEvent);
+//
+//    if (!playerSetNameEvent.isCancelled()) {
+//      player.setDisplayName(playerSetNameEvent.getDisplayName());
+//      player.setPlayerListName(playerSetNameEvent.getPlayerListName());
+//    }
 
     if (BedwarsRel.getInstance().isSpigot()) {
       this.getScoreboardTeam().addEntry(player.getName());
@@ -201,8 +197,8 @@ public class Team implements ConfigurationSerializable {
     return players;
   }
 
-  public boolean isBedDestroyed(Game game) {
-    Material targetMaterial = game.getTargetMaterial();
+  public boolean isBedDestroyed() {
+    Material targetMaterial = this.gameCtx.getTargetMaterial();
 
     this.getTargetHeadBlock().getBlock().getChunk().load(true);
     if (this.getTargetFeetBlock() == null) {

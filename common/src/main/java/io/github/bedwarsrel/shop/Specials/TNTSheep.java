@@ -3,7 +3,7 @@ package io.github.bedwarsrel.shop.Specials;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.events.BedwarsUseTNTSheepEvent;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameStateOld;
+import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.utils.ChatWriter;
 import java.util.ArrayList;
@@ -189,7 +189,7 @@ public class TNTSheep extends SpecialItem {
       public void run() {
         final TNTSheep that = TNTSheep.this;
 
-        if (that.game.isStopping() || that.game.getState() != GameStateOld.RUNNING) {
+        if (that.game.isStopping() || that.game.getState() != GameState.RUNNING) {
           return;
         }
 

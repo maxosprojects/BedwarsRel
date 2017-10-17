@@ -1,6 +1,10 @@
-package io.github.bedwarsrel.game;
+package io.github.bedwarsrevolution.game;
 
 import io.github.bedwarsrel.BedwarsRel;
+import io.github.bedwarsrel.game.Game;
+import io.github.bedwarsrel.game.ResourceSpawner;
+import io.github.bedwarsrel.game.Team;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,8 +27,7 @@ import org.bukkit.material.Lever;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Redstone;
 
-public class Region {
-
+public class RegionNew {
   public final static int CHUNK_SIZE = 16;
   private HashMap<Block, Byte> breakedBlockData = null;
   private HashMap<Block, BlockFace> breakedBlockFace = null;
@@ -40,7 +43,7 @@ public class Region {
   private List<Entity> removingEntities = null;
   private World world = null;
 
-  public Region(Location pos1, Location pos2, String name) {
+  public RegionNew(Location pos1, Location pos2, String name) {
     if (pos1 == null || pos2 == null) {
       return;
     }
@@ -51,20 +54,20 @@ public class Region {
 
     this.world = pos1.getWorld();
     this.setMinMax(pos1, pos2);
-    this.placedBlocks = new ArrayList<Block>();
-    this.breakedBlocks = new ArrayList<Block>();
-    this.breakedBlockTypes = new HashMap<Block, Integer>();
-    this.breakedBlockData = new HashMap<Block, Byte>();
-    this.breakedBlockFace = new HashMap<Block, BlockFace>();
-    this.placedUnbreakableBlocks = new ArrayList<Block>();
-    this.breakedBlockPower = new HashMap<Block, Boolean>();
-    this.inventories = new ArrayList<Inventory>();
-    this.removingEntities = new ArrayList<Entity>();
+    this.placedBlocks = new ArrayList<>();
+    this.breakedBlocks = new ArrayList<>();
+    this.breakedBlockTypes = new HashMap<>();
+    this.breakedBlockData = new HashMap<>();
+    this.breakedBlockFace = new HashMap<>();
+    this.placedUnbreakableBlocks = new ArrayList<>();
+    this.breakedBlockPower = new HashMap<>();
+    this.inventories = new ArrayList<>();
+    this.removingEntities = new ArrayList<>();
 
     this.name = name;
   }
 
-  public Region(World w, int x1, int y1, int z1, int x2, int y2, int z2) {
+  public RegionNew(World w, int x1, int y1, int z1, int x2, int y2, int z2) {
     this(new Location(w, x1, y1, z1), new Location(w, x2, y2, z2), w.getName());
   }
 
@@ -195,8 +198,8 @@ public class Region {
     int minZ = (int) Math.floor(this.minCorner.getZ());
     int maxZ = (int) Math.ceil(this.maxCorner.getZ());
 
-    for (int x = minX; x <= maxX; x += Region.CHUNK_SIZE) {
-      for (int z = minZ; z <= maxZ; z += Region.CHUNK_SIZE) {
+    for (int x = minX; x <= maxX; x += RegionNew.CHUNK_SIZE) {
+      for (int z = minZ; z <= maxZ; z += RegionNew.CHUNK_SIZE) {
         Chunk chunk = this.world.getChunkAt(x, z);
         if (!chunk.isLoaded()) {
           chunk.load();
@@ -218,7 +221,7 @@ public class Region {
   }
 
   @SuppressWarnings("deprecation")
-  public void reset(Game game) {
+  public void reset(GameContext ctx) {
     this.loadChunks();
 
     for (Inventory inventory : this.inventories) {
@@ -281,8 +284,8 @@ public class Region {
 
     this.breakedBlocks.clear();
 
-    Material targetMaterial = game.getTargetMaterial();
-    for (Team team : game.getTeams().values()) {
+    Material targetMaterial = ctx.getTargetMaterial();
+    for (TeamNew team : ctx.getTeams().values()) {
       if (team.getHeadTarget() == null) {
         continue;
       }
@@ -320,7 +323,7 @@ public class Region {
       }
     }
 
-    for (ResourceSpawner spawner : game.getRessourceSpawner()) {
+    for (ResourceSpawnerNew spawner : ctx.getResourceSpawners()) {
       spawner.getLocation().getChunk().load();
     }
 

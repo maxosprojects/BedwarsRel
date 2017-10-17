@@ -2,7 +2,7 @@ package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameStateOld;
+import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.utils.ChatWriter;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -47,7 +47,7 @@ public class WarpPowderListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameStateOld.RUNNING) {
+    if (game.getState() != GameState.RUNNING) {
       return;
     }
 
@@ -83,7 +83,7 @@ public class WarpPowderListener implements Listener {
       return;
     }
 
-    if (g.getState() == GameStateOld.RUNNING
+    if (g.getState() == GameState.RUNNING
         && event.getItemDrop().getItemStack().getItemMeta().getDisplayName() != null
         && event.getItemDrop().getItemStack().getItemMeta().getDisplayName()
         .equals(BedwarsRel._l("ingame.specials.warp-powder.cancel"))) {
@@ -106,7 +106,7 @@ public class WarpPowderListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameStateOld.RUNNING) {
+    if (game.getState() != GameState.RUNNING) {
       return;
     }
 
@@ -168,7 +168,7 @@ public class WarpPowderListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameStateOld.RUNNING) {
+    if (game.getState() != GameState.RUNNING) {
       return;
     }
 

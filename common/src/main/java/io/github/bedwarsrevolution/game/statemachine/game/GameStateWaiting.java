@@ -5,14 +5,17 @@ import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.utils.Utils;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.GameLobbyCountdownNew;
+import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
-import io.github.bedwarsrevolution.utils.ChatWriter;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -93,67 +96,70 @@ public class GameStateWaiting implements GameState {
       return;
     }
 
-    if (pie.getAction() == Action.PHYSICAL) {
+    if (event.getAction() == Action.PHYSICAL) {
       if (clickedBlock != null && (clickedBlock.getType() == Material.WHEAT
           || clickedBlock.getType() == Material.SOIL)) {
-        pie.setCancelled(true);
+        event.setCancelled(true);
         return;
       }
     }
 
-    if (pie.getAction() != Action.RIGHT_CLICK_BLOCK
-        && pie.getAction() != Action.RIGHT_CLICK_AIR) {
+    if (event.getAction() != Action.RIGHT_CLICK_BLOCK
+        && event.getAction() != Action.RIGHT_CLICK_AIR) {
       return;
     }
 
+    Player player = event.getPlayer();
     switch (interactingMaterial) {
-      case BED:
-        pie.setCancelled(true);
-        if (!g.isAutobalanceEnabled()) {
-          g.getPlayerStorage(player).openTeamSelection(g);
-        }
-
-        break;
+//      case BED:
+//        pie.setCancelled(true);
+//        if (!g.isAutobalanceEnabled()) {
+//          g.getPlayerStorage(player).openTeamSelection(g);
+//        }
+//        break;
       case DIAMOND:
-        pie.setCancelled(true);
-        if (player.isOp() || player.hasPermission("bw.setup")) {
-          g.start(player);
-        } else if (player.hasPermission("bw.vip.forcestart")) {
-          if (g.isStartable()) {
-            g.start(player);
-          } else {
-            if (!g.hasEnoughPlayers()) {
-              player.sendMessage(ChatWriter.pluginMessage(
-                  ChatColor.RED + BedwarsRel._l(player, "lobby.cancelstart.not_enough_players")));
-            } else if (!g.hasEnoughTeams()) {
-              player.sendMessage(ChatWriter
-                  .pluginMessage(
-                      ChatColor.RED + BedwarsRel
-                          ._l(player, "lobby.cancelstart.not_enough_teams")));
-            }
-          }
-        }
+        event.setCancelled(true);
+        this.forceStart(ctx, player);
         break;
-      case EMERALD:
-        pie.setCancelled(true);
-        if ((player.isOp() || player.hasPermission("bw.setup")
-            || player.hasPermission("bw.vip.reducecountdown"))
-            && g.getGameLobbyCountdown().getCounter() > g.getGameLobbyCountdown()
-            .getLobbytimeWhenFull()) {
-          g.getGameLobbyCountdown().setCounter(g.getGameLobbyCountdown().getLobbytimeWhenFull());
-        }
-        break;
+//      case EMERALD:
+//        pie.setCancelled(true);
+//        if ((player.isOp() || player.hasPermission("bw.setup")
+//            || player.hasPermission("bw.vip.reducecountdown"))
+//            && g.getGameLobbyCountdown().getCounter() > g.getGameLobbyCountdown()
+//            .getLobbytimeWhenFull()) {
+//          g.getGameLobbyCountdown().setCounter(g.getGameLobbyCountdown().getLobbytimeWhenFull());
+//        }
+//        break;
       case SLIME_BALL:
-        pie.setCancelled(true);
-        g.playerLeave(player, false);
+        event.setCancelled(true);
+        this.playerLeaves(ctx, ctx.getPlayerContext(player), false);
         break;
-      case LEATHER_CHESTPLATE:
-        pie.setCancelled(true);
-        player.updateInventory();
-        break;
+//      case LEATHER_CHESTPLATE:
+//        event.setCancelled(true);
+//        player.updateInventory();
+//        break;
       default:
         break;
     }
+  }
+
+  private void forceStart(GameContext ctx, Player player) {
+    boolean enoughPlayers = this.isEnoughPlayers(ctx);
+    if (player.isOp() || player.hasPermission("bw.setup")) {
+      ctx.setState(new GameStateRunning());
+    } else if (player.hasPermission("bw.vip.forcestart")) {
+      if (enoughPlayers && this.isEnoughTeams(ctx)) {
+        ctx.setState(new GameStateRunning());
+      } else if (!enoughPlayers) {
+          player.sendMessage(ChatWriterNew.pluginMessage(
+              ChatColor.RED + BedwarsRevol._l(player, "lobby.cancelstart.not_enough_players")));
+      } else {
+          player.sendMessage(ChatWriterNew
+              .pluginMessage(
+                  ChatColor.RED + BedwarsRevol
+                      ._l(player, "lobby.cancelstart.not_enough_teams")));
+        }
+      }
   }
 
   @Override
@@ -173,8 +179,9 @@ public class GameStateWaiting implements GameState {
 
   @Override
   public void onEventPlayerChangeWorld(GameContext ctx, PlayerChangedWorldEvent event) {
-    if (!game.getPlayerFlags(change.getPlayer()).isTeleporting()) {
-      game.playerLeave(change.getPlayer(), false);
+    PlayerContext playerCtx = ctx.getPlayerContext(event.getPlayer());
+    if (!playerCtx.isTeleporting()) {
+      this.playerLeaves(ctx, playerCtx, false);
     }
   }
 
@@ -189,7 +196,7 @@ public class GameStateWaiting implements GameState {
       if (player.hasPermission("bw.vip.joinfull")) {
         List<PlayerContext> nonVip = ctx.getNonVipPlayers();
         if (nonVip.size() == 0) {
-          player.sendMessage(ChatWriter.pluginMessage(
+          player.sendMessage(ChatWriterNew.pluginMessage(
               ChatColor.RED + BedwarsRevol._l(player, "lobby.gamefullpremium")));
           return;
         }
@@ -200,16 +207,17 @@ public class GameStateWaiting implements GameState {
           kickNonVip = nonVip.get(Utils.randInt(0, nonVip.size() - 1));
         }
         Player kickedPlayer = kickNonVip.getPlayer();
-        kickedPlayer.sendMessage(ChatWriter.pluginMessage(
+        kickedPlayer.sendMessage(ChatWriterNew.pluginMessage(
             ChatColor.RED + BedwarsRevol._l(kickedPlayer, "lobby.kickedbyvip")));
         this.playerLeaves(ctx, kickNonVip, false);
       } else {
-        player.sendMessage(ChatWriter.pluginMessage(
+        player.sendMessage(ChatWriterNew.pluginMessage(
             ChatColor.RED + BedwarsRevol._l(player, "lobby.gamefull")));
         return;
       }
     }
 
+    BedwarsRevol.getInstance().getGameManager().playerJoined(player, ctx);
     PlayerContext playerCtx = ctx.addPlayer(player);
 
 //    BedwarsPlayerJoinEvent joiningEvent = new BedwarsPlayerJoinEvent(this, p);
@@ -247,7 +255,7 @@ public class GameStateWaiting implements GameState {
 //    }.runTaskLater(BedwarsRel.getInstance(), 5L);
 
     playerCtx.storeInventory();
-    playerCtx.cleanInventory();
+    playerCtx.clear(false);
 
 //      if (!BedwarsRel.getInstance().isBungee()) {
 //        final Location location = this.getPlayerTeleportLocation(p);
@@ -286,12 +294,16 @@ public class GameStateWaiting implements GameState {
       Player aPlayer = aPlayerCtx.getPlayer();
       if (aPlayer.isOnline()) {
         aPlayer.sendMessage(
-            ChatWriter.pluginMessage(ChatColor.GREEN + BedwarsRel._l(aPlayer, "lobby.playerjoin",
+            ChatWriterNew
+                .pluginMessage(ChatColor.GREEN + BedwarsRevol._l(aPlayer, "lobby.playerjoin",
                 ImmutableMap.of("player", player.getDisplayName() + ChatColor.GREEN))));
       }
     }
 
-    Team team = this.getLowestTeam();
+    TeamNew team = this.getLowestTeam(ctx);
+    if (team == null) {
+      throw new IllegalStateException("No teams defined or no players joined");
+    }
     team.addPlayer(player);
 //      if (!this.isAutobalanceEnabled()) {
 //        this.freePlayers.add(p);
@@ -307,17 +319,17 @@ public class GameStateWaiting implements GameState {
 //    BedwarsPlayerJoinedEvent joinEvent = new BedwarsPlayerJoinedEvent(this, null, p);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(joinEvent);
 
-    this.updateScoreboard();
-    BedwarsRevol.updateSigns();
+    this.updateScoreboard(ctx);
+    ctx.updateSigns();
 
-    player.sendMessage(ChatWriter.pluginMessage(
+    player.sendMessage(ChatWriterNew.pluginMessage(
         ChatColor.GREEN + BedwarsRevol._l(player, "success.joined")));
 
-    boolean enoughPlayers = this.isEnoughPlayers();
-    if (enoughPlayers && this.isEnoughTeams()) {
+    boolean enoughPlayers = this.isEnoughPlayers(ctx);
+    if (enoughPlayers && this.isEnoughTeams(ctx)) {
       if (this.lobbyCountdown == null) {
         this.lobbyCountdown = new GameLobbyCountdownNew(ctx, this);
-        this.lobbyCountdown.runTaskTimer(BedwarsRel.getInstance(), 20L, 20L);
+        this.lobbyCountdown.runTaskTimer(BedwarsRevol.getInstance(), 20L, 20L);
       }
     } else if (!enoughPlayers) {
       Collection<PlayerContext> players = ctx.getPlayers();
@@ -325,19 +337,46 @@ public class GameStateWaiting implements GameState {
       for (PlayerContext aPlayerCtx : players) {
         Player aPlayer = aPlayerCtx.getPlayer();
         if (aPlayer.isOnline()) {
-          aPlayer.sendMessage(ChatWriter.pluginMessage(
-              ChatColor.GREEN + BedwarsRel._l(aPlayer, "lobby.moreplayersneeded", "count",
+          aPlayer.sendMessage(ChatWriterNew.pluginMessage(
+              ChatColor.GREEN + BedwarsRevol._l(aPlayer, "lobby.moreplayersneeded", "count",
                   ImmutableMap.of("count", String.valueOf(playersNeeded)))));
         }
       }
     } else {
-      for (Player aPlayer : this.getPlayers()) {
+      for (PlayerContext aPlayerCtx : ctx.getPlayers()) {
+        Player aPlayer = aPlayerCtx.getPlayer();
         if (aPlayer.isOnline()) {
-          aPlayer.sendMessage(ChatWriter.pluginMessage(
-              ChatColor.RED + BedwarsRel._l(aPlayer, "lobby.moreteamsneeded")));
+          aPlayer.sendMessage(ChatWriterNew.pluginMessage(
+              ChatColor.RED + BedwarsRevol._l(aPlayer, "lobby.moreteamsneeded")));
         }
       }
     }
+  }
+
+  private boolean isEnoughTeams(GameContext ctx) {
+    for (Collection<PlayerContext> players : ctx.getTeamsToPlayers().values()) {
+      if (players.isEmpty()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private boolean isEnoughPlayers(GameContext ctx) {
+    return ctx.getPlayers().size() >= ctx.getMinPlayers();
+  }
+
+  private TeamNew getLowestTeam(GameContext ctx) {
+    int lowestNum = Integer.MAX_VALUE;
+    TeamNew lowestTeam = null;
+    for (Entry<TeamNew, Collection<PlayerContext>> entry : ctx.getTeamsToPlayers().entrySet()) {
+      int size = entry.getValue().size();
+      if (size < lowestNum) {
+        lowestNum = size;
+        lowestTeam = entry.getKey();
+      }
+    }
+    return lowestTeam;
   }
 
   private void setLobbyInventory(GameContext ctx, PlayerContext playerCtx) {
@@ -480,10 +519,10 @@ public class GameStateWaiting implements GameState {
     if (playerCtx.getPlayer().isOnline()) {
       if (kicked) {
         player.sendMessage(
-            ChatWriter.pluginMessage(ChatColor.RED + BedwarsRevol._l(
+            ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol._l(
                 player, "ingame.player.waskicked")));
       } else {
-        player.sendMessage(ChatWriter.pluginMessage(
+        player.sendMessage(ChatWriterNew.pluginMessage(
             ChatColor.GREEN + BedwarsRevol._l(player, "success.left")));
       }
     }

@@ -21,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 
 @Getter
 @Setter
-@SerializableAs("RessourceSpawner")
+@SerializableAs("ResourceSpawner")
 public class ResourceSpawner implements Runnable, ConfigurationSerializable {
 
   private Game game;

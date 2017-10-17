@@ -17,19 +17,19 @@ public class StartGameCommand extends BaseCommand implements ICommand {
 
   @Override
   public boolean execute(CommandSender sender, ArrayList<String> args) {
-    if (!sender.hasPermission("bw." + this.getPermission())) {
-      return false;
-    }
-
-    Game game = this.getPlugin().getGameManager().getGameContext(args.get(0));
-    if (game == null) {
-      sender.sendMessage(ChatWriter.pluginMessage(ChatColor.RED
-          + BedwarsRel
-          ._l(sender, "errors.gamenotfound", ImmutableMap.of("game", args.get(0).toString()))));
-      return false;
-    }
-
-    game.run(sender);
+//    if (!sender.hasPermission("bw." + this.getPermission())) {
+//      return false;
+//    }
+//
+//    Game game = this.getPlugin().getGameManager().getGameContext(args.get(0));
+//    if (game == null) {
+//      sender.sendMessage(ChatWriter.pluginMessage(ChatColor.RED
+//          + BedwarsRel
+//          ._l(sender, "errors.gamenotfound", ImmutableMap.of("game", args.get(0).toString()))));
+//      return false;
+//    }
+//
+//    game.run(sender);
     return true;
   }
 

@@ -3,7 +3,6 @@ package io.github.bedwarsrevolution.commands;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameStateOld;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrel.utils.ChatWriter;
 import io.github.bedwarsrel.utils.Utils;
@@ -19,39 +18,39 @@ public class SetMinPlayersCommand extends BaseCommand implements ICommand {
 
   @Override
   public boolean execute(CommandSender sender, ArrayList<String> args) {
-    if (!sender.hasPermission("bw." + this.getPermission())) {
-      return false;
-    }
-
-    Game game = this.getPlugin().getGameManager().getGameContext(args.get(0));
-    String minplayers = args.get(1).toString();
-
-    if (game == null) {
-      sender.sendMessage(ChatWriter.pluginMessage(ChatColor.RED
-          + BedwarsRel
-          ._l(sender, "errors.gamenotfound", ImmutableMap.of("game", args.get(0).toString()))));
-      return false;
-    }
-
-    if (game.getState() == GameStateOld.RUNNING) {
-      sender.sendMessage(
-          ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
-              ._l(sender, "errors.notwhilegamerunning")));
-      return false;
-    }
-
-    if (!Utils.isNumber(minplayers)) {
-      sender.sendMessage(
-          ChatWriter
-              .pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.minplayersnumeric")));
-      return true;
-    }
-
-    game.setMinPlayers(Integer.valueOf(minplayers));
-    sender
-        .sendMessage(
-            ChatWriter
-                .pluginMessage(ChatColor.GREEN + BedwarsRel._l(sender, "success.minplayersset")));
+//    if (!sender.hasPermission("bw." + this.getPermission())) {
+//      return false;
+//    }
+//
+//    Game game = this.getPlugin().getGameManager().getGameContext(args.get(0));
+//    String minplayers = args.get(1).toString();
+//
+//    if (game == null) {
+//      sender.sendMessage(ChatWriter.pluginMessage(ChatColor.RED
+//          + BedwarsRel
+//          ._l(sender, "errors.gamenotfound", ImmutableMap.of("game", args.get(0).toString()))));
+//      return false;
+//    }
+//
+//    if (game.getState() == GameStateOld.RUNNING) {
+//      sender.sendMessage(
+//          ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
+//              ._l(sender, "errors.notwhilegamerunning")));
+//      return false;
+//    }
+//
+//    if (!Utils.isNumber(minplayers)) {
+//      sender.sendMessage(
+//          ChatWriter
+//              .pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.minplayersnumeric")));
+//      return true;
+//    }
+//
+//    game.setMinPlayers(Integer.valueOf(minplayers));
+//    sender
+//        .sendMessage(
+//            ChatWriter
+//                .pluginMessage(ChatColor.GREEN + BedwarsRel._l(sender, "success.minplayersset")));
     return true;
   }
 

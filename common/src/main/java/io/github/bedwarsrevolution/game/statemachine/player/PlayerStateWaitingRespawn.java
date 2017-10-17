@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 /**
  * Created by {maxos} 2017
  */
-public class PlayerStateWaitingRespawn implements PlayerState {
+public class PlayerStateWaitingRespawn extends PlayerState {
 
   @Override
   public void onDeath(PlayerContext playerCtx) {

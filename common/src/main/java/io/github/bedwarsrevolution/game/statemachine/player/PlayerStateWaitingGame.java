@@ -1,27 +1,16 @@
 package io.github.bedwarsrevolution.game.statemachine.player;
 
-import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
-import io.github.bedwarsrevolution.utils.ChatWriter;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.material.Wool;
 
 /**
  * Created by {maxos} 2017
  */
-public class PlayerStateWaitingGame implements PlayerState {
+public class PlayerStateWaitingGame extends PlayerState {
 
   @Override
   public void onDeath(PlayerContext playerCtx) {

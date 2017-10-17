@@ -3,7 +3,7 @@ package io.github.bedwarsrevolution.utils;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import org.bukkit.ChatColor;
 
-public class ChatWriter {
+public class ChatWriterNew {
 
   public static String pluginMessage(String str) {
     return ChatColor.translateAlternateColorCodes('&',

@@ -1,18 +1,20 @@
 package io.github.bedwarsrevolution.game.statemachine.game;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.GameJoinSign;
 import io.github.bedwarsrel.game.GameLobbyCountdown;
-import io.github.bedwarsrel.game.Region;
-import io.github.bedwarsrel.game.ResourceSpawner;
 import io.github.bedwarsrel.game.RespawnProtectionRunnable;
-import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.shop.MerchantCategory;
-import io.github.bedwarsrel.shop.Shop;
 import io.github.bedwarsrel.utils.Utils;
-import io.github.bedwarsrevolution.game.GameManagerReworked;
+import io.github.bedwarsrevolution.game.GameCheckResult;
+import io.github.bedwarsrevolution.game.GameJoinSignNew;
+import io.github.bedwarsrevolution.game.GameManagerNew;
+import io.github.bedwarsrevolution.game.RegionNew;
+import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
+import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
-import io.github.bedwarsrevolution.utils.ChatWriter;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +31,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -38,25 +41,34 @@ import org.bukkit.scoreboard.Scoreboard;
  * Created by {maxos} 2017
  */
 public class GameContext {
+
   public static final int MAX_OBJECTIVE_DISPLAY_LENGTH = 32;
   public static final int MAX_SCORE_LENGTH = 40;
 
   @Getter
   @Setter
   private GameState state = new GameStateWaiting();
+  @Setter
   private boolean autobalance = false;
+  @Setter
   private boolean hungerEnabled = false;
+  @Setter
   private String builder = null;
+  @Setter
   private YamlConfiguration config = null;
   private GameLobbyCountdown gameLobbyCountdown = null;
   private Location hologramLocation = null;
-  private Map<Location, GameJoinSign> joinSigns = new HashMap<>();
+  @Getter
+  private Map<Location, GameJoinSignNew> joinSigns = new HashMap<>();
   private int length = 0;
   @Getter
   private Location lobby = null;
   private Location loc1 = null;
   private Location loc2 = null;
+  @Setter
   private Location mainLobby = null;
+  @Getter
+  @Setter
   private int minPlayers = 0;
   @Getter
   private String name = null;
@@ -65,15 +77,23 @@ public class GameContext {
   private Map<Player, PlayerContext> playerContexts = new HashMap<>();
   private int record = 0;
   private List<String> recordHolders = new ArrayList<>();
+  @Setter
+  private String regionName;
   @Getter
-  private Region region = null;
-  private List<ResourceSpawner> resourceSpawners = new ArrayList<>();
+  @Setter
+  private RegionNew region = null;
+  @Getter
+  private List<ResourceSpawnerNew> resourceSpawners = new ArrayList<>();
   private Map<Player, RespawnProtectionRunnable> respawnProtections = new HashMap<>();
   private List<BukkitTask> runningTasks = new ArrayList<>();
   @Getter
   private Scoreboard scoreboard = null;
+  @Setter
   private Material targetMaterial = null;
-  private Map<String, Team> teams = new HashMap<>();
+  @Getter
+  private Map<String, TeamNew> teams = new HashMap<>();
+  @Getter
+  @Setter
   private int time = 1000;
   private int timeLeft = 0;
   private List<Map<String, Object>> defaultUpgrades;
@@ -103,8 +123,8 @@ public class GameContext {
     return this.playerContexts.get(player);
   }
 
-  public Team getTeamByDyeColor(DyeColor color) {
-    for (Team t : this.teams.values()) {
+  public TeamNew getTeamByDyeColor(DyeColor color) {
+    for (TeamNew t : this.teams.values()) {
       if (t.getColor().getDyeColor().equals(color)) {
         return t;
       }
@@ -126,7 +146,7 @@ public class GameContext {
 
   public int getMaxPlayers() {
     int maxPlayers = 0;
-    for (Team team : this.teams.values()) {
+    for (TeamNew team : this.teams.values()) {
       maxPlayers += team.getMaxPlayers();
     }
     return maxPlayers;
@@ -149,9 +169,9 @@ public class GameContext {
     return this.playerContexts.values();
   }
 
-  public Team getLowestTeam() {
-    Team lowest = this.teams.values().iterator().next();
-    for (Team team : this.teams.values()) {
+  public TeamNew getLowestTeam() {
+    TeamNew lowest = this.teams.values().iterator().next();
+    for (TeamNew team : this.teams.values()) {
       if (team.getPlayers().size() < lowest.getPlayers().size()) {
         lowest = team;
       }
@@ -165,9 +185,9 @@ public class GameContext {
 
   public void updateSigns() {
     boolean removedItem = false;
-    Iterator<GameJoinSign> iterator = this.joinSigns.values().iterator();
+    Iterator<GameJoinSignNew> iterator = this.joinSigns.values().iterator();
     while (iterator.hasNext()) {
-      GameJoinSign sign = iterator.next();
+      GameJoinSignNew sign = iterator.next();
       Chunk signChunk = sign.getSign().getLocation().getChunk();
       if (!signChunk.isLoaded()) {
         signChunk.load(true);
@@ -194,7 +214,7 @@ public class GameContext {
     try {
       File config = new File(
           BedwarsRel.getInstance().getDataFolder() + "/"
-              + GameManagerReworked.gamesPath + "/" + this.name + "/sign.yml");
+              + GameManagerNew.gamesPath + "/" + this.name + "/sign.yml");
 
       YamlConfiguration cfg = new YamlConfiguration();
       if (config.exists()) {
@@ -211,9 +231,224 @@ public class GameContext {
     } catch (Exception ex) {
       BedwarsRel.getInstance().getBugsnag().notify(ex);
       BedwarsRel.getInstance().getServer().getConsoleSender()
-          .sendMessage(ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel
+          .sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRel
               ._l(BedwarsRel.getInstance().getServer().getConsoleSender(), "errors.savesign")));
     }
+  }
+
+  public Map<TeamNew, Collection<PlayerContext>> getTeamsToPlayers() {
+    Multimap<TeamNew, PlayerContext> map = ArrayListMultimap.create();
+    for (PlayerContext playerCtx : this.playerContexts.values()) {
+      map.put(playerCtx.getTeam(), playerCtx);
+    }
+    return map.asMap();
+  }
+
+  public TeamNew getTeamOfEnderChest(Block chest) {
+    for (TeamNew team : this.teams.values()) {
+      if (team.getChests().contains(chest)) {
+        return team;
+      }
+    }
+
+    return null;
+  }
+
+  public void reset() {
+//    // clear protections
+//    this.clearProtections();
+
+    // reset region
+    this.resetRegion();
+  }
+
+  public void resetRegion() {
+    if (this.region == null) {
+      return;
+    }
+    this.region.reset(this);
+  }
+
+  public void stopWorkers() {
+    for (BukkitTask task : this.runningTasks) {
+      try {
+        task.cancel();
+      } catch (Exception ex) {
+        BedwarsRel.getInstance().getBugsnag().notify(ex);
+        // already cancelled
+      }
+    }
+
+    this.runningTasks.clear();
+  }
+
+  public void sendTeamDeadMessage(TeamNew team) {
+//    if (deathTeam.getPlayers().size() == 1 && deathTeam.isBedDestroyed(this.getGame())) {
+//      for (Player aPlayer : this.getGame().getPlayers()) {
+//        if (aPlayer.isOnline()) {
+//          aPlayer.sendMessage(
+//              ChatWriter.pluginMessage(
+//                  BedwarsRel._l(aPlayer, "ingame.team-dead", ImmutableMap.of("team",
+//                      deathTeam.getChatColor() + deathTeam.getDisplayName()))));
+//        }
+//      }
+//    }
+  }
+
+  public Location getTopMiddle() {
+    return this.region.getTopMiddle();
+  }
+
+  public void addWorker(BukkitTask task) {
+    this.runningTasks.add(task);
+  }
+
+  public void stop() {
+    this.stopWorkers();
+//    this.clearProtections();
+
+//    try {
+    for (PlayerContext playerCtx : this.getPlayers()) {
+      this.state.playerLeaves(this, playerCtx, false);
+    }
+//    } catch (Exception e) {
+//      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      e.printStackTrace();
+//    }
+    this.resetRegion();
+    this.state = new GameStateStopped();
+    this.updateSigns();
+  }
+
+  public void addResourceSpawner(ResourceSpawnerNew rs) {
+    this.resourceSpawners.add(rs);
+  }
+
+  public void addTeam(TeamNew team) {
+    org.bukkit.scoreboard.Team newTeam = this.scoreboard.registerNewTeam(team.getName());
+    newTeam.setDisplayName(team.getName());
+    newTeam.setPrefix(team.getChatColor().toString());
+    team.setScoreboardTeam(newTeam);
+    this.teams.put(team.getName(), team);
+  }
+
+  public void addJoinSign(Location location) {
+    if (this.joinSigns.containsKey(location)) {
+      this.joinSigns.remove(location);
+    }
+    this.joinSigns.put(location, new GameJoinSignNew(this, location));
+    this.updateSignConfig();
+  }
+
+  public void setLoc(Location loc, String type) {
+    if (type.equalsIgnoreCase("loc1")) {
+      this.loc1 = loc;
+    } else {
+      this.loc2 = loc;
+    }
+  }
+
+  public void setLobby(Location lobby) {
+    if (this.region != null) {
+      if (this.region.getWorld().equals(lobby.getWorld())) {
+        BedwarsRel.getInstance().getServer().getConsoleSender().sendMessage(
+            ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRel
+                ._l(BedwarsRel.getInstance().getServer().getConsoleSender(),
+                    "errors.lobbyongameworld")));
+        return;
+      }
+    }
+
+    this.lobby = lobby;
+  }
+
+  public GameCheckResult checkGame() {
+    if (this.loc1 == null || this.loc2 == null) {
+      return GameCheckResult.LOC_NOT_SET_ERROR;
+    }
+
+    if (this.teams == null || this.teams.size() <= 1) {
+      return GameCheckResult.TEAM_SIZE_LOW_ERROR;
+    }
+
+    GameCheckResult teamCheck = this.checkTeams();
+    if (teamCheck != GameCheckResult.OK) {
+      return teamCheck;
+    }
+
+    if (this.getResourceSpawners().size() == 0) {
+      return GameCheckResult.NO_RES_SPAWNER_ERROR;
+    }
+
+    if (this.lobby == null) {
+      return GameCheckResult.NO_LOBBY_SET;
+    }
+
+    if (BedwarsRel.getInstance().toMainLobby() && this.mainLobby == null) {
+      return GameCheckResult.NO_MAIN_LOBBY_SET;
+    }
+
+    return GameCheckResult.OK;
+  }
+
+  private GameCheckResult checkTeams() {
+    for (TeamNew t : this.teams.values()) {
+      if (t.getSpawnLocation() == null) {
+        return GameCheckResult.TEAMS_WITHOUT_SPAWNS;
+      }
+
+      Material targetMaterial = this.getTargetMaterial();
+
+      if (targetMaterial.equals(Material.BED_BLOCK)) {
+        if ((t.getHeadTarget() == null || t.getFeetTarget() == null)
+            || (!Utils.isBedBlock(t.getHeadTarget()) || !Utils.isBedBlock(t.getFeetTarget()))) {
+          return GameCheckResult.TEAM_NO_WRONG_BED;
+        }
+      } else {
+        if (t.getHeadTarget() == null) {
+          return GameCheckResult.TEAM_NO_WRONG_TARGET;
+        }
+
+        if (!t.getHeadTarget().getType().equals(targetMaterial)) {
+          return GameCheckResult.TEAM_NO_WRONG_TARGET;
+        }
+      }
+
+      if (t.getBaseLoc1() == null || t.getBaseLoc2() == null) {
+        return GameCheckResult.LOC_BASE_NOT_SET_ERROR;
+      }
+
+      if (t.getChestLoc() == null) {
+        return GameCheckResult.LOC_TEAM_CHEST_NOT_SET_ERROR;
+      }
+
+    }
+    return GameCheckResult.OK;
+  }
+
+  public boolean start(CommandSender sender) {
+//    if (this.state != GameState.STOPPED) {
+//      sender
+//          .sendMessage(
+//              ChatWriter
+//                  .pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.cantstartagain")));
+//      return false;
+//    }
+
+    GameCheckResult gcc = this.checkGame();
+    if (gcc != GameCheckResult.OK) {
+      sender.sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + gcc.getCodeMessage()));
+      return false;
+    }
+
+    if (sender instanceof Player) {
+      sender.sendMessage(
+          ChatWriterNew.pluginMessage(ChatColor.GREEN + BedwarsRel._l(sender, "success.gamerun")));
+    }
+
+    this.state = new GameStateWaiting();
+    this.updateSigns();
+    return true;
   }
 
 }

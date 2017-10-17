@@ -2,7 +2,7 @@ package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameStateOld;
+import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.game.Team;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -41,7 +41,7 @@ public class TrapListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameStateOld.RUNNING) {
+    if (game.getState() != GameState.RUNNING) {
       return;
     }
 
@@ -73,7 +73,7 @@ public class TrapListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameStateOld.RUNNING) {
+    if (game.getState() != GameState.RUNNING) {
       return;
     }
 
@@ -126,7 +126,7 @@ public class TrapListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameStateOld.RUNNING) {
+    if (game.getState() != GameState.RUNNING) {
       return;
     }
 

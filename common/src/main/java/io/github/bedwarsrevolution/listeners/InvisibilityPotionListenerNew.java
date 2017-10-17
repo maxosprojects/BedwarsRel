@@ -1,9 +1,9 @@
 package io.github.bedwarsrevolution.listeners;
 
-import static io.github.bedwarsrevolution.listeners.InvisibilityPotionListener.Parts.CHEST;
-import static io.github.bedwarsrevolution.listeners.InvisibilityPotionListener.Parts.FEET;
-import static io.github.bedwarsrevolution.listeners.InvisibilityPotionListener.Parts.HEAD;
-import static io.github.bedwarsrevolution.listeners.InvisibilityPotionListener.Parts.LEGS;
+import static io.github.bedwarsrevolution.listeners.InvisibilityPotionListenerNew.Parts.CHEST;
+import static io.github.bedwarsrevolution.listeners.InvisibilityPotionListenerNew.Parts.FEET;
+import static io.github.bedwarsrevolution.listeners.InvisibilityPotionListenerNew.Parts.HEAD;
+import static io.github.bedwarsrevolution.listeners.InvisibilityPotionListenerNew.Parts.LEGS;
 
 import com.comphenix.packetwrapper.WrapperPlayServerEntityEquipment;
 import com.comphenix.protocol.PacketType.Play.Server;
@@ -18,6 +18,9 @@ import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.listener.BaseListener;
 import io.github.bedwarsrel.shop.CraftItemStack;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.TeamNew;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -37,7 +40,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-public class InvisibilityPotionListener extends BaseListener {
+public class InvisibilityPotionListenerNew extends BaseListener {
   private Map<Player, BukkitTask> invisibilityTasks = new HashMap<>();
   // Maps "player that is hidden" to "from which player"
   private Multimap<Integer, Player> playerInvisibleTo = HashMultimap.create();
@@ -82,7 +85,7 @@ public class InvisibilityPotionListener extends BaseListener {
             public void run() {
               invisibilityTasks.remove(player);
               try {
-                InvisibilityPotionListener.this.unhideArmor(player, methodUnhide);
+                InvisibilityPotionListenerNew.this.unhideArmor(player, methodUnhide);
               } catch (InvocationTargetException | IllegalAccessException e) {
                 e.printStackTrace();
               }
@@ -100,7 +103,7 @@ public class InvisibilityPotionListener extends BaseListener {
     }
   }
 
-  public InvisibilityPotionListener registerInterceptor() {
+  public InvisibilityPotionListenerNew registerInterceptor() {
     BedwarsRevol plugin = BedwarsRevol.getInstance();
     plugin.getProtocolManager().addPacketListener(
       new PacketAdapter(plugin, ListenerPriority.HIGHEST, Server.ENTITY_EQUIPMENT) {
@@ -113,10 +116,10 @@ public class InvisibilityPotionListener extends BaseListener {
             int invisiblePlayerId = wrapper.getEntityID();
             int slot = wrapper.getSlot().ordinal();
             ItemStack item = wrapper.getItem();
-            InvisibilityPotionListener.this.tableLock.lock();
-            boolean invisible = InvisibilityPotionListener.this
+            InvisibilityPotionListenerNew.this.tableLock.lock();
+            boolean invisible = InvisibilityPotionListenerNew.this
                 .playerInvisibleTo.containsEntry(invisiblePlayerId, invisibleTo);
-            InvisibilityPotionListener.this.tableLock.unlock();
+            InvisibilityPotionListenerNew.this.tableLock.unlock();
             if (invisible && slot >= 2
                 && item != null && item.getAmount() > 0 && item.getType() != Material.AIR) {
               event.setCancelled(true);
@@ -129,20 +132,21 @@ public class InvisibilityPotionListener extends BaseListener {
 
   private void hideArmor(Player player, Method method)
       throws InvocationTargetException, IllegalAccessException {
-    Game game = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
-    if (game != null && !game.isSpectator(player)) {
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    if (ctx != null && !ctx.getPlayerContext(player).getState().isSpectator()) {
       int entityId = player.getEntityId();
-      Team playerTeam = game.getPlayerTeam(player);
-      for (Team team : game.getTeams().values()) {
-        if (team != playerTeam) {
-          for (Player playerInOtherTeam : team.getPlayers()) {
-            for (Parts part : Parts.values()) {
-              method.invoke(null, entityId, playerInOtherTeam, part.ordinal());
-              this.tableLock.lock();
-              playerInvisibleTo.put(entityId, playerInOtherTeam);
-              toInvisiblePlayer.put(playerInOtherTeam, entityId);
-              this.tableLock.unlock();
-            }
+      PlayerContext playerCtx = ctx.getPlayerContext(player);
+      TeamNew playerTeam = playerCtx.getTeam();
+      for (PlayerContext otherPlayerCtx : ctx.getPlayers()) {
+        // Hide from all players on all other teams
+        if (otherPlayerCtx.getTeam() != playerTeam) {
+          for (Parts part : Parts.values()) {
+            method.invoke(null, entityId, otherPlayerCtx, part.ordinal());
+            this.tableLock.lock();
+            Player otherPlayer = otherPlayerCtx.getPlayer();
+            playerInvisibleTo.put(entityId, otherPlayer);
+            toInvisiblePlayer.put(otherPlayer, entityId);
+            this.tableLock.unlock();
           }
         }
       }
@@ -151,8 +155,9 @@ public class InvisibilityPotionListener extends BaseListener {
 
   private void unhideArmor(Player player, Method method)
       throws InvocationTargetException, IllegalAccessException {
-    Game game = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
-    boolean makeVisible = player.isOnline() && !game.isSpectator(player);
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    boolean makeVisible = player.isOnline()
+        && !ctx.getPlayerContext(player).getState().isSpectator();
     int entityId = player.getEntityId();
     Object feet = getNms(player.getInventory().getBoots());
     Object legs = getNms(player.getInventory().getLeggings());

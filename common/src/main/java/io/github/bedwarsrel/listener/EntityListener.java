@@ -3,7 +3,7 @@ package io.github.bedwarsrel.listener;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameStateOld;
+import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.game.TeamJoinMetaDataValue;
 import io.github.bedwarsrel.utils.ChatWriter;
@@ -52,7 +52,7 @@ public class EntityListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameStateOld.STOPPED) {
+    if (game.getState() == GameState.STOPPED) {
       return;
     }
 
@@ -79,7 +79,7 @@ public class EntityListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameStateOld.STOPPED) {
+    if (game.getState() == GameState.STOPPED) {
       return;
     }
 
@@ -104,7 +104,7 @@ public class EntityListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameStateOld.WAITING) {
+    if (game.getState() == GameState.WAITING) {
       event.setCancelled(true);
     }
   }
@@ -128,7 +128,7 @@ public class EntityListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameStateOld.STOPPED) {
+    if (game.getState() == GameState.STOPPED) {
       return;
     }
 
@@ -163,7 +163,7 @@ public class EntityListener extends BaseListener {
       return;
     }
 
-    if (game.getState() == GameStateOld.STOPPED) {
+    if (game.getState() == GameState.STOPPED) {
       return;
     }
 
@@ -256,7 +256,7 @@ public class EntityListener extends BaseListener {
         return;
       }
 
-      if (game.getState() != GameStateOld.WAITING) {
+      if (game.getState() != GameState.WAITING) {
         return;
       }
 
@@ -320,7 +320,7 @@ public class EntityListener extends BaseListener {
       return;
     }
 
-    if (game.getState() != GameStateOld.RUNNING) {
+    if (game.getState() != GameState.RUNNING) {
       return;
     }
 

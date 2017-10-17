@@ -1,14 +1,18 @@
 package io.github.bedwarsrevolution.game.statemachine.player;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.shop.Shop;
 import io.github.bedwarsrel.statistics.PlayerStatistic;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.DamageHolder;
-import io.github.bedwarsrevolution.utils.ChatWriter;
+import io.github.bedwarsrevolution.game.TeamNew;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.List;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
@@ -25,6 +29,8 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 /**
  * Created by {maxos} 2017
@@ -40,9 +46,9 @@ public class PlayerStatePlaying extends PlayerState {
 //    pde.setKeepInventory(
 //            BedwarsRel.getInstance().getBooleanConfig("keep-inventory-on-death", false));
 
-    if (this.isEndGameRunning()) {
-      return;
-    }
+//    if (this.isEndGameRunning()) {
+//      return;
+//    }
 
 //    BedwarsPlayerKilledEvent killedEvent =
 //        new BedwarsPlayerKilledEvent(this.getGame(), player, killer);
@@ -61,7 +67,7 @@ public class PlayerStatePlaying extends PlayerState {
 //      }
 //    }
 
-    Team team = playerCtx.getTeam();
+    TeamNew team = playerCtx.getTeam();
     DamageHolder damage = playerCtx.getLastDamagedBy();
     boolean damageCausedRecently = damage.wasCausedRecently();
 
@@ -105,101 +111,120 @@ public class PlayerStatePlaying extends PlayerState {
     }
 
     if (damageCausedRecently) {
-      for (Player aPlayer : playerCtx.getGameContext().getPlayers()) {
+      for (PlayerContext aPlayerCtx : playerCtx.getGameContext().getPlayers()) {
+        Player aPlayer = aPlayerCtx.getPlayer();
         if (aPlayer.isOnline()) {
           aPlayer.sendMessage(
-              ChatWriter.pluginMessage(
+              ChatWriterNew.pluginMessage(
                   ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.player.died", ImmutableMap
                       .of("player",
-                          Game.getPlayerWithTeamString(player, team, ChatColor.GOLD)))));
+                          UtilsNew.getPlayerWithTeamString(aPlayer, team, ChatColor.GOLD)))));
         }
       }
 
-      this.sendTeamDeadMessage(team);
-      this.checkGameOver();
+      GameContext ctx = playerCtx.getGameContext();
+      ctx.sendTeamDeadMessage(team);
       return;
     }
 
-    Team killerTeam = this.getGame().getPlayerTeam(killer);
-    if (killerTeam == null) {
-      for (Player aPlayer : this.getGame().getPlayers()) {
-        if (aPlayer.isOnline()) {
-          aPlayer.sendMessage(
-              ChatWriter.pluginMessage(
-                  ChatColor.GOLD + BedwarsRel._l(aPlayer, "ingame.player.died", ImmutableMap
-                      .of("player",
-                          Game.getPlayerWithTeamString(player, team, ChatColor.GOLD)))));
-        }
-      }
-      this.sendTeamDeadMessage(team);
-      this.checkGameOver();
+//    Team killerTeam = this.getGame().getPlayerTeam(killer);
+//    if (killerTeam == null) {
+//      for (Player aPlayer : this.getGame().getPlayers()) {
+//        if (aPlayer.isOnline()) {
+//          aPlayer.sendMessage(
+//              ChatWriter.pluginMessage(
+//                  ChatColor.GOLD + BedwarsRel._l(aPlayer, "ingame.player.died", ImmutableMap
+//                      .of("player",
+//                          Game.getPlayerWithTeamString(player, team, ChatColor.GOLD)))));
+//        }
+//      }
+//      this.sendTeamDeadMessage(team);
+//      return;
+//    }
+
+//    String hearts = "";
+//    DecimalFormat format = new DecimalFormat("#");
+//    double health = ((double) killer.getHealth()) / ((double) killer.getMaxHealth())
+//        * ((double) killer.getHealthScale());
+//    if (!BedwarsRel.getInstance().getBooleanConfig("hearts-in-halfs", true)) {
+//      format = new DecimalFormat("#.#");
+//      health = health / 2;
+//    }
+//
+//    if (BedwarsRel.getInstance().getBooleanConfig("hearts-on-death", true)) {
+//      hearts = "[" + ChatColor.RED + "\u2764" + format.format(health) + ChatColor.GOLD + "]";
+//    }
+//
+//    for (Player aPlayer : this.getGame().getPlayers()) {
+//      if (aPlayer.isOnline()) {
+//        aPlayer.sendMessage(
+//            ChatWriter.pluginMessage(ChatColor.GOLD + BedwarsRel._l(aPlayer, "ingame.player.killed",
+//                ImmutableMap.of("killer",
+//                    Game.getPlayerWithTeamString(killer, killerTeam, ChatColor.GOLD, hearts),
+//                    "player",
+//                    Game.getPlayerWithTeamString(player, team, ChatColor.GOLD)))));
+//      }
+//    }
+
+//    if (team.isBedDestroyed()) {
+//      killer.playSound(killer.getLocation(), SoundMachine.get("LEVEL_UP", "ENTITY_PLAYER_LEVELUP"),
+//          Float.valueOf("1.0"), Float.valueOf("1.0"));
+//    }
+//    this.sendTeamDeadMessage(team);
+
+
+
+
+
+
+    if (!playerCtx.isVirtuallyAlive()) {
       return;
     }
 
-    String hearts = "";
-    DecimalFormat format = new DecimalFormat("#");
-    double health = ((double) killer.getHealth()) / ((double) killer.getMaxHealth())
-        * ((double) killer.getHealthScale());
-    if (!BedwarsRel.getInstance().getBooleanConfig("hearts-in-halfs", true)) {
-      format = new DecimalFormat("#.#");
-      health = health / 2;
-    }
+    playerCtx.clear(false);
+    playerCtx.respawn();
 
-    if (BedwarsRel.getInstance().getBooleanConfig("hearts-on-death", true)) {
-      hearts = "[" + ChatColor.RED + "\u2764" + format.format(health) + ChatColor.GOLD + "]";
-    }
+    playerCtx.setVirtuallyAlive(false);
 
-    for (Player aPlayer : this.getGame().getPlayers()) {
-      if (aPlayer.isOnline()) {
-        aPlayer.sendMessage(
-            ChatWriter.pluginMessage(ChatColor.GOLD + BedwarsRel._l(aPlayer, "ingame.player.killed",
-                ImmutableMap.of("killer",
-                    Game.getPlayerWithTeamString(killer, killerTeam, ChatColor.GOLD, hearts),
-                    "player",
-                    Game.getPlayerWithTeamString(player, team, ChatColor.GOLD)))));
-      }
-    }
-
-    if (team.isBedDestroyed(this.getGame())) {
-      killer.playSound(killer.getLocation(), SoundMachine.get("LEVEL_UP", "ENTITY_PLAYER_LEVELUP"),
-          Float.valueOf("1.0"), Float.valueOf("1.0"));
-    }
-    this.sendTeamDeadMessage(team);
-    this.checkGameOver();
-
-
-
-
-
-
-    if (!this.isPlayerVirtuallyAlive(player)) {
-      return;
-    }
-
-    PlayerStorage storage = this.getPlayerStorage(player);
-    storage.clean(false);
-    storage.respawn();
-
-    this.setPlayerVirtuallyAlive(player, false);
-
-    this.getCycle().checkGameOver();
-
-    if (this.getState() == GameStateOld.RUNNING && this.isStopping()) {
-      String title = ChatColor.translateAlternateColorCodes('&',
-          BedwarsRel._l(player, "ingame.title.youdied"));
-      player.sendTitle(title, "", 0, 40, 10);
-    }
-
+//    if (this.getState() == GameStateOld.RUNNING && this.isStopping()) {
+//      String title = ChatColor.translateAlternateColorCodes('&',
+//          BedwarsRel._l(player, "ingame.title.youdied"));
+//      player.sendTitle(title, "", 0, 40, 10);
+//    }
+    Player player = playerCtx.getPlayer();
     player.setGameMode(GameMode.SPECTATOR);
-    Location location = this.getTopMiddle();
-    this.setTeleportingIfWorldChange(player, location);
-    player.teleport(this.getTopMiddle());
+    Location location = playerCtx.getGameContext().getTopMiddle();
+    playerCtx.setTeleportingIfWorldChange(location);
+    player.teleport(location);
 
-    if (this.getState() == GameStateOld.RUNNING
-        && !this.getCycle().isEndGameRunning()
-        && !this.isStopping()) {
-      this.addWaitingRespawn(player);
-    }
+    this.runWaitingRespawn(playerCtx);
+  }
+
+  private void runWaitingRespawn(final PlayerContext playerCtx) {
+    // Task with countdown till respawn
+    BukkitTask task = new BukkitRunnable() {
+      private int respawnIn = 5;
+      @Override
+      public void run() {
+        Player player = playerCtx.getPlayer();
+          String title = ChatColor.translateAlternateColorCodes('&',
+              BedwarsRevol._l(player, "ingame.title.youdied"));
+          String subtitle = ChatColor.translateAlternateColorCodes('&',
+              BedwarsRevol._l(player, "ingame.title.respawninseconds",
+                  ImmutableMap.of("time", Integer.toString(this.respawnIn))));
+          player.sendTitle(title, subtitle, 0, 20, 10);
+        this.respawnIn--;
+        if (this.respawnIn == 0) {
+          this.cancel();
+          Location location = playerCtx.getTeam().getSpawnLocation();
+          playerCtx.setTeleportingIfWorldChange(location);
+          player.teleport(location);
+          player.setGameMode(GameMode.SURVIVAL);
+          playerCtx.setVirtuallyAlive(true);
+        }
+      }
+    }.runTaskTimer(BedwarsRevol.getInstance(), 0, 20);
+    playerCtx.getGameContext().addWorker(task);
   }
 
   @Override

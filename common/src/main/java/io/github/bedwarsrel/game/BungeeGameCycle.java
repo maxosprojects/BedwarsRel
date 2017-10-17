@@ -109,7 +109,7 @@ public class BungeeGameCycle extends GameCycle {
       this.getGame().clearProtections();
 
       // set state and with that, the sign
-      this.getGame().setState(GameStateOld.WAITING);
+      this.getGame().setState(GameState.WAITING);
       this.getGame().updateScoreboard();
 
       // reset region
@@ -208,7 +208,7 @@ public class BungeeGameCycle extends GameCycle {
     final Player p = player;
 
     if (this.getGame().isFull() && !player.hasPermission("bw.vip.joinfull")) {
-      if (this.getGame().getState() != GameStateOld.RUNNING
+      if (this.getGame().getState() != GameState.RUNNING
           || !BedwarsRel.getInstance().spectationEnabled()) {
         this.bungeeSendToServer(BedwarsRel.getInstance().getBungeeHub(), p, false);
         new BukkitRunnable() {
@@ -223,7 +223,7 @@ public class BungeeGameCycle extends GameCycle {
         return false;
       }
     } else if (this.getGame().isFull() && player.hasPermission("bw.vip.joinfull")) {
-      if (this.getGame().getState() == GameStateOld.WAITING) {
+      if (this.getGame().getState() == GameState.WAITING) {
         List<Player> players = this.getGame().getNonVipPlayers();
 
         if (players.size() == 0) {
@@ -261,7 +261,7 @@ public class BungeeGameCycle extends GameCycle {
           }
         }.runTaskLater(BedwarsRel.getInstance(), 60L);
       } else {
-        if (this.getGame().getState() == GameStateOld.RUNNING
+        if (this.getGame().getState() == GameState.RUNNING
             && !BedwarsRel.getInstance().spectationEnabled()) {
 
           new BukkitRunnable() {
@@ -296,7 +296,7 @@ public class BungeeGameCycle extends GameCycle {
       this.bungeeSendToServer(BedwarsRel.getInstance().getBungeeHub(), player, true);
     }
 
-    if (this.getGame().getState() == GameStateOld.RUNNING && !this.getGame().isStopping()) {
+    if (this.getGame().getState() == GameState.RUNNING && !this.getGame().isStopping()) {
       this.checkGameOver();
     }
   }

@@ -50,4 +50,5 @@ public interface GameState {
   void playerJoins(GameContext ctx, Player player);
 
   void playerLeaves(GameContext ctx, PlayerContext playerCtx, boolean kicked);
+
 }

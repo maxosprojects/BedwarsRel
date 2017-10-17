@@ -2,7 +2,7 @@ package io.github.bedwarsrel.shop.Specials;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameStateOld;
+import io.github.bedwarsrel.game.GameState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,7 +32,7 @@ public class ProtectionWallListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameStateOld.RUNNING) {
+    if (game.getState() != GameState.RUNNING) {
       return;
     }
 

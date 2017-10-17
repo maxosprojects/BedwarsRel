@@ -3,9 +3,9 @@ package io.github.bedwarsrevolution.listeners;
 import io.github.bedwarsrel.BedwarsRel;
 import org.bukkit.event.Listener;
 
-public abstract class BaseListener implements Listener {
+public abstract class BaseListenerNew implements Listener {
 
-  public BaseListener() {
+  public BaseListenerNew() {
     this.registerEvents();
   }
 

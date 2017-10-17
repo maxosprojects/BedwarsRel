@@ -358,11 +358,11 @@ public class GameManager {
   }
 
   public void unloadGame(Game game) {
-    if (game.getState() != GameStateOld.STOPPED) {
+    if (game.getState() != GameState.STOPPED) {
       game.stop();
     }
 
-    game.setState(GameStateOld.STOPPED);
+    game.setState(GameState.STOPPED);
     game.setScoreboard(BedwarsRel.getInstance().getScoreboardManager().getNewScoreboard());
 
     try {

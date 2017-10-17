@@ -2,7 +2,7 @@ package io.github.bedwarsrel.shop.upgrades;
 
 import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameStateOld;
+import io.github.bedwarsrel.game.GameState;
 import io.github.bedwarsrel.game.Team;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,7 +41,7 @@ public class UpgradeBaseAlarmListener implements Listener {
       return;
     }
 
-    if (game.getState() != GameStateOld.RUNNING) {
+    if (game.getState() != GameState.RUNNING) {
       return;
     }
 

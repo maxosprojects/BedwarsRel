@@ -3,7 +3,8 @@ package io.github.bedwarsrevolution.game.statemachine.player;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrel.utils.Utils;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrevolution.utils.ChatWriter;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.UtilsNew;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -43,9 +44,9 @@ public abstract class PlayerState {
           msgKey = "ingame.player.left";
         }
         aPlayer.sendMessage(
-            ChatWriter.pluginMessage(ChatColor.RED + BedwarsRevol
+            ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
                 ._l(aPlayer, msgKey, ImmutableMap.of("player",
-                    Utils.getPlayerWithTeamString(playerCtx.getPlayer(),
+                    UtilsNew.getPlayerWithTeamString(playerCtx.getPlayer(),
                         playerCtx.getTeam(), ChatColor.RED) + ChatColor.RED))));
       }
     }

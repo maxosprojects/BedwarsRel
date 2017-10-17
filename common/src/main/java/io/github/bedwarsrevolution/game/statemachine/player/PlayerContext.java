@@ -2,14 +2,21 @@ package io.github.bedwarsrevolution.game.statemachine.player;
 
 import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.shop.Shop;
+import io.github.bedwarsrel.shop.upgrades.Upgrade;
+import io.github.bedwarsrel.shop.upgrades.UpgradeCycle;
+import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.DamageHolder;
 import io.github.bedwarsrevolution.game.PlayerStorageNew;
+import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -19,6 +26,7 @@ import org.bukkit.potion.PotionEffect;
  * Created by {maxos} 2017
  */
 public class PlayerContext {
+
   private final PlayerStorageNew storage;
   @Getter
   private Player player;
@@ -34,10 +42,14 @@ public class PlayerContext {
   private DamageHolder lastDamagedBy;
   @Getter
   @Setter
-  private Team team;
+  private TeamNew team;
   @Getter
   @Setter
   private boolean teleporting;
+  @Getter
+  @Setter
+  private boolean virtuallyAlive = true;
+  private Map<Class<? extends Upgrade>, List<Upgrade>> upgrades = new HashMap<>();
 
   public PlayerContext(Player player, GameContext gameContext) {
     this.player = player;
@@ -58,7 +70,7 @@ public class PlayerContext {
     this.storage.store();
   }
 
-  public void cleanInventory() {
+  public void clear(boolean deep) {
     PlayerInventory inv = this.player.getInventory();
     inv.setArmorContents(new ItemStack[4]);
     inv.setContents(new ItemStack[]{});
@@ -80,12 +92,6 @@ public class PlayerContext {
     this.player.setFireTicks(0);
     this.player.setFoodLevel(20);
     this.player.updateInventory();
-    if (Boolean.TRUE == true) {
-      throw new RuntimeException(
-          "don't forget to teleport");
-    }
-//    this.player.teleport()
-
     if (this.player.isInsideVehicle()) {
       this.player.leaveVehicle();
     }
@@ -137,6 +143,27 @@ public class PlayerContext {
 
   public void restoreLocation() {
     this.player.teleport(this.storage.getLocation());
+  }
+
+  public void respawn() {
+    for (List<Upgrade> list : this.upgrades.values()) {
+      for (Upgrade upgrade : list) {
+        upgrade.activate(UpgradeScope.PLAYER, UpgradeCycle.RESPAWN);
+      }
+    }
+    for (Upgrade up : this.team.getUpgrades().values()) {
+      if (up.getApplyTo() == UpgradeScope.PLAYER) {
+        up.activate(UpgradeScope.PLAYER, UpgradeCycle.RESPAWN);
+      }
+    }
+    this.player.getInventory().setHeldItemSlot(0);
+    this.player.updateInventory();
+  }
+
+  protected void setTeleportingIfWorldChange(Location location) {
+    if (!this.player.getWorld().getName().equals(location.getWorld().getName())) {
+      this.teleporting = true;
+    }
   }
 
 }

@@ -1,7 +1,8 @@
 package io.github.bedwarsrevolution.game.statemachine.game;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrevolution.utils.ChatWriter;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -93,9 +94,13 @@ public class GameStateStopped implements GameState {
 //      ((BungeeGameCycle) this.cycle).sendBungeeMessage(p,
 //          ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel._l(p, "errors.cantjoingame")));
 //    } else {
-      player.sendMessage(ChatWriter.pluginMessage(ChatColor.RED + BedwarsRevol
+      player.sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
           ._l(player, "errors.cantjoingame")));
 //    }
+  }
+
+  @Override
+  public void playerLeaves(GameContext ctx, PlayerContext playerCtx, boolean kicked) {
   }
 
 }

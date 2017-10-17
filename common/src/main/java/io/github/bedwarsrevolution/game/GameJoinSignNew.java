@@ -1,31 +1,27 @@
-package io.github.bedwarsrel.game;
+package io.github.bedwarsrevolution.game;
 
 import io.github.bedwarsrel.BedwarsRel;
+import io.github.bedwarsrel.game.Game;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.game.statemachine.game.GameStateWaiting;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 
-public class GameJoinSign {
+public class GameJoinSignNew {
 
-  private Game game = null;
+  private GameContext gameCtx = null;
   private Location signLocation = null;
 
-  public GameJoinSign(Game game, Location sign) {
-    this.game = game;
+  public GameJoinSignNew(GameContext ctx, Location sign) {
+    this.gameCtx = ctx;
     this.signLocation = sign;
   }
 
   private String getCurrentPlayersString() {
-    int maxPlayers = this.game.getMaxPlayers();
-    int currentPlayers = 0;
-    if (this.game.getState() == GameState.RUNNING) {
-      currentPlayers = this.game.getTeamPlayers().size();
-    } else if (this.game.getState() == GameState.WAITING) {
-      currentPlayers = this.game.getPlayers().size();
-    } else {
-      currentPlayers = 0;
-    }
+    int maxPlayers = this.gameCtx.getMaxPlayers();
+    int currentPlayers = this.gameCtx.getPlayers().size();
 
     String current = "0";
     if (currentPlayers >= maxPlayers) {
@@ -38,15 +34,8 @@ public class GameJoinSign {
   }
 
   private String getMaxPlayersString() {
-    int maxPlayers = this.game.getMaxPlayers();
-    int currentPlayers = 0;
-    if (this.game.getState() == GameState.RUNNING) {
-      currentPlayers = this.game.getTeamPlayers().size();
-    } else if (this.game.getState() == GameState.WAITING) {
-      currentPlayers = this.game.getPlayers().size();
-    } else {
-      currentPlayers = 0;
-    }
+    int maxPlayers = this.gameCtx.getMaxPlayers();
+    int currentPlayers = this.gameCtx.getPlayers().size();
 
     String max = String.valueOf(maxPlayers);
 
@@ -81,10 +70,10 @@ public class GameJoinSign {
 
   private String getStatus() {
     String status = null;
-    if (this.game.getState() == GameState.WAITING && this.game.isFull()) {
+    if (this.gameCtx.getState() instanceof GameStateWaiting && this.gameCtx.isFull()) {
       status = ChatColor.RED + BedwarsRel._l("sign.gamestate.full");
     } else {
-      status = BedwarsRel._l("sign.gamestate." + this.game.getState().toString().toLowerCase());
+      status = BedwarsRel._l("sign.gamestate." + this.gameCtx.getState().toString().toLowerCase());
     }
 
     return status;
@@ -94,8 +83,8 @@ public class GameJoinSign {
     String finalLine = line;
 
     finalLine = finalLine.replace("$title$", BedwarsRel._l("sign.firstline"));
-    finalLine = finalLine.replace("$gamename$", this.game.getName());
-    finalLine = finalLine.replace("$regionname$", this.game.getRegion().getName());
+    finalLine = finalLine.replace("$gamename$", this.gameCtx.getName());
+    finalLine = finalLine.replace("$regionname$", this.gameCtx.getRegion().getName());
     finalLine = finalLine.replace("$maxplayers$", this.getMaxPlayersString());
     finalLine = finalLine.replace("$currentplayers$", this.getCurrentPlayersString());
     finalLine = finalLine.replace("$status$", this.getStatus());

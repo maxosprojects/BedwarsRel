@@ -49,16 +49,11 @@ import io.github.bedwarsrevolution.commands.StatsCommand;
 import io.github.bedwarsrevolution.commands.StopGameCommand;
 import io.github.bedwarsrel.database.MysqlDatabaseManager;
 import io.github.bedwarsrel.database.YamlDatabaseManager;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameStateOld;
-import io.github.bedwarsrel.game.ResourceSpawner;
-import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrel.listener.BlockListener;
 import io.github.bedwarsrel.listener.ChunkListener;
 import io.github.bedwarsrel.listener.EntityListener;
 import io.github.bedwarsrel.listener.HangingListener;
 import io.github.bedwarsrel.listener.InvisibilityPotionListener;
-import io.github.bedwarsrel.listener.PlayerListener;
 import io.github.bedwarsrel.listener.PlayerSpigotListener;
 import io.github.bedwarsrel.listener.ServerListener;
 import io.github.bedwarsrel.listener.SignListener;
@@ -77,8 +72,13 @@ import io.github.bedwarsrel.updater.PluginUpdater;
 import io.github.bedwarsrel.updater.PluginUpdater.UpdateCallback;
 import io.github.bedwarsrel.updater.PluginUpdater.UpdateResult;
 import io.github.bedwarsrel.utils.BStatsMetrics;
-import io.github.bedwarsrevolution.game.GameManagerReworked;
-import io.github.bedwarsrevolution.utils.BedwarsCommandExecutor;
+import io.github.bedwarsrevolution.game.GameManagerNew;
+import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
+import io.github.bedwarsrevolution.game.TeamNew;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.game.statemachine.game.GameStateRunning;
+import io.github.bedwarsrevolution.listeners.PlayerListenerNew;
+import io.github.bedwarsrevolution.utils.BedwarsCommandExecutorNew;
 import io.github.bedwarsrel.utils.McStatsMetrics;
 import io.github.bedwarsrel.utils.SupportData;
 import io.github.bedwarsrel.utils.Utils;
@@ -125,7 +125,7 @@ public class BedwarsRevol extends JavaPlugin {
   @Setter
   private DatabaseManager databaseManager = null;
   @Getter
-  private GameManagerReworked gameManager = null;
+  private GameManagerNew gameManager = null;
   private IHologramInteraction holographicInteraction = null;
   private boolean isSpigot = false;
   @Getter
@@ -742,7 +742,7 @@ public class BedwarsRevol extends JavaPlugin {
   @Override
   public void onDisable() {
     this.stopTimeListener();
-    this.gameManager.unloadGames();
+    this.gameManager.stopGames();
 
     if (this.isHologramsEnabled() && this.holographicInteraction != null) {
       this.holographicInteraction.unloadHolograms();
@@ -800,7 +800,7 @@ public class BedwarsRevol extends JavaPlugin {
     this.registerCommands();
     this.registerListeners();
 
-    this.gameManager = new GameManagerReworked();
+    this.gameManager = new GameManagerNew();
 
     // bungeecord
     if (BedwarsRevol.getInstance().isBungee()) {
@@ -842,7 +842,7 @@ public class BedwarsRevol extends JavaPlugin {
   }
 
   private void registerCommands() {
-    BedwarsCommandExecutor executor = new BedwarsCommandExecutor(this);
+    BedwarsCommandExecutorNew executor = new BedwarsCommandExecutorNew(this);
 
     this.commands.add(new HelpCommand(this));
     this.commands.add(new SetSpawnerCommand(this));
@@ -884,15 +884,15 @@ public class BedwarsRevol extends JavaPlugin {
   }
 
   private void registerConfigurationClasses() {
-    ConfigurationSerialization.registerClass(ResourceSpawner.class, "ResourceSpawner");
-    ConfigurationSerialization.registerClass(Team.class, "Team");
+    ConfigurationSerialization.registerClass(ResourceSpawnerNew.class, "ResourceSpawner");
+    ConfigurationSerialization.registerClass(TeamNew.class, "Team");
     ConfigurationSerialization.registerClass(PlayerStatistic.class, "PlayerStatistic");
   }
 
   private void registerListeners() {
     new WeatherListener();
     new BlockListener();
-    new PlayerListener();
+    new PlayerListenerNew();
     if (!BedwarsRevol.getInstance().getCurrentVersion().startsWith("v1_8")) {
       new PlayerSwapHandItemsEventListener();
     }
@@ -973,9 +973,9 @@ public class BedwarsRevol extends JavaPlugin {
 
       @Override
       public void run() {
-        for (Game g : BedwarsRevol.getInstance().getGameManager().getGamesContexts()) {
-          if (g.getState() == GameStateOld.RUNNING) {
-            g.getRegion().getWorld().setTime(g.getTime());
+        for (GameContext ctx : BedwarsRevol.getInstance().getGameManager().getGamesContexts()) {
+          if (ctx.getState() instanceof GameStateRunning) {
+            ctx.getRegion().getWorld().setTime(ctx.getTime());
           }
         }
       }

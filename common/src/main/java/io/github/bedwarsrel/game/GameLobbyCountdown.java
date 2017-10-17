@@ -36,7 +36,7 @@ public class GameLobbyCountdown extends BukkitRunnable {
     ArrayList<Player> players = this.game.getPlayers();
     float xpPerLevel = 1.0F / this.lobbytime;
 
-    if (this.game.getState() != GameStateOld.WAITING) {
+    if (this.game.getState() != GameState.WAITING) {
       this.game.setGameLobbyCountdown(null);
       this.cancel();
       return;

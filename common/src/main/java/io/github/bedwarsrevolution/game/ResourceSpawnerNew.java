@@ -1,10 +1,9 @@
 package io.github.bedwarsrevolution.game;
 
 import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.events.BedwarsResourceSpawnEvent;
-import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrel.shop.ItemStackParser;
 import io.github.bedwarsrel.utils.Utils;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +22,8 @@ import org.bukkit.inventory.ItemStack;
 @Getter
 @Setter
 @SerializableAs("ResourceSpawner")
-public class ResourceSpawner implements Runnable, ConfigurationSerializable {
-
-  private Game game;
+public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
+  private GameContext ctx;
   private int interval = 1000;
   private List<ItemStack> resources = new ArrayList<>();
   private Location location;
@@ -33,7 +31,7 @@ public class ResourceSpawner implements Runnable, ConfigurationSerializable {
   private String name;
   private String team;
 
-  public ResourceSpawner(Map<String, Object> deserialize) {
+  public ResourceSpawnerNew(Map<String, Object> deserialize) {
     this.location = Utils.locationDeserialize(deserialize.get("location"));
     this.name = deserialize.get("name").toString();
 
@@ -61,8 +59,8 @@ public class ResourceSpawner implements Runnable, ConfigurationSerializable {
     }
   }
 
-  public ResourceSpawner(Game game, String name, Location location) {
-    this.game = game;
+  public ResourceSpawnerNew(GameContext ctx, String name, Location location) {
+    this.ctx = ctx;
     this.name = name;
     if (!BedwarsRel.getInstance().getConfig().contains("resource." + this.name)) {
       throw new IllegalArgumentException("Can't find resource " + this.name + " in config.yml");
@@ -105,7 +103,7 @@ public class ResourceSpawner implements Runnable, ConfigurationSerializable {
   }
 
   public void dropItem(Location dropLocation, ItemStack itemStack) {
-    Item item = this.game.getRegion().getWorld().dropItemNaturally(dropLocation, itemStack);
+    Item item = this.ctx.getRegion().getWorld().dropItemNaturally(dropLocation, itemStack);
     item.setPickupDelay(0);
     if (this.spread != 1.0) {
       item.setVelocity(item.getVelocity().multiply(this.spread));
@@ -122,15 +120,15 @@ public class ResourceSpawner implements Runnable, ConfigurationSerializable {
     for (ItemStack itemStack : this.resources) {
       ItemStack item = itemStack.clone();
 
-      BedwarsResourceSpawnEvent resourceSpawnEvent =
-          new BedwarsResourceSpawnEvent(this.game, this.location, item);
-      BedwarsRel.getInstance().getServer().getPluginManager().callEvent(resourceSpawnEvent);
-
-      if (resourceSpawnEvent.isCancelled()) {
-        return;
-      }
-
-      item = resourceSpawnEvent.getResource();
+//      BedwarsResourceSpawnEvent resourceSpawnEvent =
+//          new BedwarsResourceSpawnEvent(this.ctx, this.location, item);
+//      BedwarsRel.getInstance().getServer().getPluginManager().callEvent(resourceSpawnEvent);
+//
+//      if (resourceSpawnEvent.isCancelled()) {
+//        return;
+//      }
+//
+//      item = resourceSpawnEvent.getResource();
 
       if (BedwarsRel.getInstance().getBooleanConfig("spawn-resources-in-chest", true)) {
         BlockState blockState = dropLocation.getBlock().getState();
