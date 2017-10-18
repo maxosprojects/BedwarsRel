@@ -6,6 +6,7 @@ import io.github.bedwarsrevolution.game.GameOverTaskNew;
 import io.github.bedwarsrevolution.game.RegionNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeBaseAlarm;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.TitleWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
@@ -43,6 +44,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
@@ -688,8 +690,34 @@ public class GameStateRunning extends GameState {
   }
 
   @Override
-  public String getTranslation() {
+  protected String getStatusKey() {
     return TRANSLATION;
+  }
+
+  @Override
+  public void updateTime() {
+    this.ctx.getRegion().getWorld().setTime(this.ctx.getTime());
+  }
+
+  @Override
+  public void onEventPlayerMove(PlayerMoveEvent event) {
+    Player player = event.getPlayer();
+    PlayerContext playerCtx = this.ctx.getPlayerContext(player);
+    if (playerCtx.getState().isSpectator()) {
+      return;
+    }
+    TeamNew team = playerCtx.getTeam();
+    for (TeamNew otherTeam : this.ctx.getTeams().values()) {
+      if (otherTeam == team) {
+        continue;
+      }
+      UpgradeBaseAlarm alarm = otherTeam.getUpgrade(UpgradeBaseAlarm.class);
+      if (alarm != null) {
+        if (alarm.isLocationIn(event.getTo())) {
+          alarm.trigger(player);
+        }
+      }
+    }
   }
 
   private boolean handleDestroyTargetMaterial(PlayerContext playerCtx, Block block) {

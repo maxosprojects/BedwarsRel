@@ -43,7 +43,6 @@ import io.github.bedwarsrevolution.game.GameManagerNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
-import io.github.bedwarsrevolution.game.statemachine.game.GameStateRunning;
 import io.github.bedwarsrevolution.listeners.BlockListenerNew;
 import io.github.bedwarsrevolution.listeners.ChunkListenerNew;
 import io.github.bedwarsrevolution.listeners.EntityListenerNew;
@@ -953,9 +952,7 @@ public class BedwarsRevol extends JavaPlugin {
       @Override
       public void run() {
         for (GameContext ctx : BedwarsRevol.getInstance().getGameManager().getGamesContexts()) {
-          if (ctx.getState() instanceof GameStateRunning) {
-            ctx.getRegion().getWorld().setTime(ctx.getTime());
-          }
+          ctx.getState().updateTime();
         }
       }
     }, (long) 5 * 20, (long) 5 * 20);

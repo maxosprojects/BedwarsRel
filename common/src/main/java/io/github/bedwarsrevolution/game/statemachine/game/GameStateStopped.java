@@ -160,7 +160,7 @@ public class GameStateStopped extends GameState {
   }
 
   @Override
-  public String getTranslation() {
+  protected String getStatusKey() {
     return TRANSLATION;
   }
 }

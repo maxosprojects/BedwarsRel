@@ -26,6 +26,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -149,7 +150,17 @@ public abstract class GameState {
     event.setCancelled(true);
   }
 
-  public abstract String getTranslation();
+  public String getStatus() {
+    return BedwarsRevol._l("sign.gamestate." + this.getStatusKey());
+  }
+
+  protected abstract String getStatusKey();
+
+  public void updateTime() {
+  }
+
+  public void onEventPlayerMove(PlayerMoveEvent event) {
+  }
 
 //  private String getStatus(Game game) {
 //    String status = null;

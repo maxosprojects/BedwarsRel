@@ -2,7 +2,6 @@ package io.github.bedwarsrevolution.game;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
-import io.github.bedwarsrevolution.game.statemachine.game.GameStateWaiting;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
@@ -67,18 +66,6 @@ public class GameJoinSignNew {
     return sign;
   }
 
-  private String getStatus() {
-    String status = null;
-    if (this.gameCtx.getState() instanceof GameStateWaiting && this.gameCtx.isFull()) {
-      status = ChatColor.RED + BedwarsRevol._l("sign.gamestate.full");
-    } else {
-      status = BedwarsRevol._l("sign.gamestate."
-          + this.gameCtx.getState().getTranslation());
-    }
-
-    return status;
-  }
-
   private String replacePlaceholder(String line) {
     String finalLine = line;
 
@@ -87,7 +74,7 @@ public class GameJoinSignNew {
     finalLine = finalLine.replace("$regionname$", this.gameCtx.getRegion().getName());
     finalLine = finalLine.replace("$maxplayers$", this.getMaxPlayersString());
     finalLine = finalLine.replace("$currentplayers$", this.getCurrentPlayersString());
-    finalLine = finalLine.replace("$status$", this.getStatus());
+    finalLine = finalLine.replace("$status$", this.gameCtx.getState().getStatus());
 
     return finalLine;
   }
