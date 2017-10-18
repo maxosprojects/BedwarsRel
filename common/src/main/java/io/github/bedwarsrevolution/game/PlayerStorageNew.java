@@ -1,32 +1,11 @@
 package io.github.bedwarsrevolution.game;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.events.BedwarsOpenTeamSelectionEvent;
-import io.github.bedwarsrel.events.BedwarsPlayerSetNameEvent;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.PlayerFlags;
-import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.shop.upgrades.Upgrade;
-import io.github.bedwarsrel.shop.upgrades.UpgradeCycle;
-import io.github.bedwarsrel.shop.upgrades.UpgradeScope;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Wool;
 import org.bukkit.potion.PotionEffect;
 
 /**

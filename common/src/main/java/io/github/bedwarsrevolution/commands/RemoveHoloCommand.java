@@ -1,8 +1,7 @@
 package io.github.bedwarsrevolution.commands;
 
-import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -22,39 +21,39 @@ public class RemoveHoloCommand extends BaseCommand implements ICommand {
       return false;
     }
 
-    final Player player = (Player) sender;
-    player.setMetadata("bw-remove-holo", new FixedMetadataValue(BedwarsRel.getInstance(), true));
-    if (BedwarsRel.getInstance().getHolographicInteractor().getType()
-        .equalsIgnoreCase("HolographicDisplays")) {
-      player.sendMessage(
-          ChatWriter
-              .pluginMessage(
-                  ChatColor.GREEN + BedwarsRel._l(player, "commands.removeholo.explain")));
-
-    } else if (BedwarsRel.getInstance().getHolographicInteractor().getType()
-        .equalsIgnoreCase("HologramAPI")) {
-
-      for (Location location : BedwarsRel.getInstance().getHolographicInteractor()
-          .getHologramLocations()) {
-        if (player.getEyeLocation().getBlockX() == location.getBlockX()
-            && player.getEyeLocation().getBlockY() == location.getBlockY()
-            && player.getEyeLocation().getBlockZ() == location.getBlockZ()) {
-          BedwarsRel.getInstance().getHolographicInteractor().onHologramTouch(player, location);
-        }
-      }
-      BedwarsRel.getInstance().getServer().getScheduler().runTaskLater(BedwarsRel.getInstance(),
-          new Runnable() {
-
-            @Override
-            public void run() {
-              if (player.hasMetadata("bw-remove-holo")) {
-                player.removeMetadata("bw-remove-holo", BedwarsRel.getInstance());
-              }
-            }
-
-          }, 10L * 20L);
-
-    }
+//    final Player player = (Player) sender;
+//    player.setMetadata("bw-remove-holo", new FixedMetadataValue(BedwarsRevol.getInstance(), true));
+//    if (BedwarsRevol.getInstance().getHolographicInteractor().getType()
+//        .equalsIgnoreCase("HolographicDisplays")) {
+//      player.sendMessage(
+//          ChatWriterNew
+//              .pluginMessage(
+//                  ChatColor.GREEN + BedwarsRevol._l(player, "commands.removeholo.explain")));
+//
+//    } else if (BedwarsRevol.getInstance().getHolographicInteractor().getType()
+//        .equalsIgnoreCase("HologramAPI")) {
+//
+//      for (Location location : BedwarsRevol.getInstance().getHolographicInteractor()
+//          .getHologramLocations()) {
+//        if (player.getEyeLocation().getBlockX() == location.getBlockX()
+//            && player.getEyeLocation().getBlockY() == location.getBlockY()
+//            && player.getEyeLocation().getBlockZ() == location.getBlockZ()) {
+//          BedwarsRevol.getInstance().getHolographicInteractor().onHologramTouch(player, location);
+//        }
+//      }
+//      BedwarsRevol.getInstance().getServer().getScheduler().runTaskLater(BedwarsRevol.getInstance(),
+//          new Runnable() {
+//
+//            @Override
+//            public void run() {
+//              if (player.hasMetadata("bw-remove-holo")) {
+//                player.removeMetadata("bw-remove-holo", BedwarsRevol.getInstance());
+//              }
+//            }
+//
+//          }, 10L * 20L);
+//
+//    }
     return true;
   }
 
@@ -70,12 +69,12 @@ public class RemoveHoloCommand extends BaseCommand implements ICommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.removeholo.desc");
+    return BedwarsRevol._l("commands.removeholo.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.removeholo.name");
+    return BedwarsRevol._l("commands.removeholo.name");
   }
 
   @Override

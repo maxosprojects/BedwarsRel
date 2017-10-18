@@ -1,6 +1,6 @@
 package io.github.bedwarsrevolution.shop;
 
-import io.github.bedwarsrel.BedwarsRel;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.shop.upgrades.Upgrade;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeItem;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeRegistry;
@@ -70,7 +70,7 @@ public class MerchantCategory {
   }
 
   private static void logError(String text) {
-    BedwarsRel.getInstance().getServer().getConsoleSender().sendMessage(ChatColor.RED + text);
+    BedwarsRevol.getInstance().getServer().getConsoleSender().sendMessage(ChatColor.RED + text);
   }
 
   @SuppressWarnings({"unchecked", "deprecation"})
@@ -191,10 +191,10 @@ public class MerchantCategory {
 
     // check if is resource
     ConfigurationSection resourceSection =
-        BedwarsRel.getInstance().getConfig().getConfigurationSection("resource");
+        BedwarsRevol.getInstance().getConfig().getConfigurationSection("resource");
     for (String key : resourceSection.getKeys(false)) {
       List<Object> resourceList =
-          (List<Object>) BedwarsRel.getInstance().getConfig().getList("resource." + key + ".item");
+          (List<Object>) BedwarsRevol.getInstance().getConfig().getList("resource." + key + ".item");
 
       for (Object resource : resourceList) {
         ItemStack itemStack = ItemStack.deserialize((Map<String, Object>) resource);

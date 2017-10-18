@@ -3,7 +3,6 @@ package io.github.bedwarsrevolution.shop.actions;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.shop.Shop;
 import java.util.Map;
-import org.bukkit.entity.Player;
 
 public class ShopActionNoOp extends ShopAction {
 

@@ -1,6 +1,5 @@
 package io.github.bedwarsrevolution;
 
-import com.bugsnag.Bugsnag;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.google.common.collect.ImmutableMap;
@@ -248,7 +247,7 @@ public class BedwarsRevol extends JavaPlugin {
 //      public void beforeNotify(Report report) {
 //        Boolean shouldBeSent = false;
 //        for (StackTraceElement stackTraceElement : report.getException().getStackTrace()) {
-//          if (stackTraceElement.toString().contains("io.github.bedwarsrel.BedwarsRel")) {
+//          if (stackTraceElement.toString().contains("io.github.bedwarsrevolution.BedwarsRevol")) {
 //            shouldBeSent = true;
 //            break;
 //          }
@@ -524,13 +523,13 @@ public class BedwarsRevol extends JavaPlugin {
   public Class<?> getVersionRelatedClass(String className) {
     try {
       Class<?> clazz = Class.forName(
-          "io.github.bedwarsrel.com." + this.getCurrentVersion().toLowerCase() + "." + className);
+          "io.github.bedwarsrevolution.com." + this.getCurrentVersion().toLowerCase() + "." + className);
       return clazz;
     } catch (Exception ex) {
 //      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       this.getServer().getConsoleSender()
           .sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED
-              + "Couldn't find version related class io.github.bedwarsrel.com."
+              + "Couldn't find version related class io.github.bedwarsrevolution.com."
               + this.getCurrentVersion() + "." + className));
     }
 
@@ -740,7 +739,7 @@ public class BedwarsRevol extends JavaPlugin {
       this.getServer().getConsoleSender().sendMessage(ChatWriterNew
           .pluginMessage(ChatColor.RED + "*** You will get NO support regarding this build ***"));
       this.getServer().getConsoleSender().sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED
-          + "*** Please download a stable build from https://github.com/BedwarsRel/BedwarsRel/releases ***"));
+          + "*** Please download a stable build from https://github.com/maxosprojects/BedwarsRel/releases ***"));
     }
 
 //    this.registerBugsnag();
@@ -780,8 +779,6 @@ public class BedwarsRevol extends JavaPlugin {
     this.registerCommands();
     this.registerListeners();
 
-    this.gameManager = new GameManagerNew();
-
     // bungeecord
     if (BedwarsRevol.getInstance().isBungee()) {
       this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -794,6 +791,7 @@ public class BedwarsRevol extends JavaPlugin {
 
     // Loading
     this.scoreboardManager = Bukkit.getScoreboardManager();
+    this.gameManager = new GameManagerNew();
     this.gameManager.loadGames();
     this.startTimeListener();
 //    this.startMetricsIfEnabled();
@@ -813,7 +811,7 @@ public class BedwarsRevol extends JavaPlugin {
 //    try {
 //      this.bugsnag = new Bugsnag("c23593c1e2f40fc0da36564af1bd00c6");
 //      this.bugsnag.setAppVersion(SupportData.getPluginVersion());
-//      this.bugsnag.setProjectPackages("io.github.bedwarsrel");
+//      this.bugsnag.setProjectPackages("io.github.bedwarsrevolution");
 //      this.bugsnag.setReleaseStage(SupportData.getPluginVersionType());
 //    } catch (Exception e) {
 //      this.getServer().getConsoleSender().sendMessage(

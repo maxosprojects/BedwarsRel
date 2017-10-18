@@ -1,9 +1,8 @@
 package io.github.bedwarsrevolution.commands;
 
-import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
-import io.github.bedwarsrel.utils.HastebinUtility;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.HastebinUtilityNew;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -30,8 +29,8 @@ public class ItemsPasteCommand extends BaseCommand implements ICommand {
     }
 
     final Player player = (Player) sender;
-    BedwarsRel.getInstance().getServer().getScheduler()
-        .runTaskAsynchronously(BedwarsRel.getInstance(),
+    BedwarsRevol.getInstance().getServer().getScheduler()
+        .runTaskAsynchronously(BedwarsRevol.getInstance(),
             new Runnable() {
               @Override
               public void run() {
@@ -60,8 +59,8 @@ public class ItemsPasteCommand extends BaseCommand implements ICommand {
                   b.append(
                       "\n# This is not a working shop - it's just a list of items you can add to your shop!");
 
-                  String link = HastebinUtility.upload(b.toString());
-                  sender.sendMessage(ChatWriter
+                  String link = HastebinUtilityNew.upload(b.toString());
+                  sender.sendMessage(ChatWriterNew
                       .pluginMessage(ChatColor.GREEN + "Success! Items pasted on " + link));
                 } catch (IOException e) {
                   e.printStackTrace();
@@ -83,12 +82,12 @@ public class ItemsPasteCommand extends BaseCommand implements ICommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.itemspaste.desc");
+    return BedwarsRevol._l("commands.itemspaste.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.itemspaste.name");
+    return BedwarsRevol._l("commands.itemspaste.name");
   }
 
   @Override

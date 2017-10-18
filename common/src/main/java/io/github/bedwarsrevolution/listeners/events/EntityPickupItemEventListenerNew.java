@@ -1,14 +1,13 @@
 package io.github.bedwarsrevolution.listeners.events;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
-import io.github.bedwarsrel.listener.BaseListener;
+import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.listeners.BaseListenerNew;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 
-public class EntityPickupItemEventListenerNew extends BaseListener {
+public class EntityPickupItemEventListenerNew extends BaseListenerNew {
 
   @EventHandler
   public void onEntityPickupItem(EntityPickupItemEvent event) {
@@ -16,20 +15,11 @@ public class EntityPickupItemEventListenerNew extends BaseListener {
       return;
     }
     Player player = (Player) event.getEntity();
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
-
-    if (game == null) {
-      game = BedwarsRel.getInstance().getGameManager().getGameByLocation(player.getLocation());
-      if (game == null) {
-        return;
-      }
-    }
-
-    if (game.getState() != GameState.WAITING && game.isInGame(player)) {
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    if (ctx == null) {
       return;
     }
-
-    event.setCancelled(true);
+    ctx.getState().onEventEntityPickupItem(event);
   }
 
 }

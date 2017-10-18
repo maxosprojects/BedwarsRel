@@ -1,10 +1,9 @@
 package io.github.bedwarsrevolution.commands;
 
-import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
-import io.github.bedwarsrel.utils.HastebinUtility;
-import io.github.bedwarsrel.utils.SupportData;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.HastebinUtilityNew;
+import io.github.bedwarsrevolution.utils.SupportDataNew;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,22 +23,22 @@ public class DebugPasteCommand extends BaseCommand implements ICommand {
       return false;
     }
 
-    BedwarsRel.getInstance().getServer().getScheduler()
-        .runTaskAsynchronously(BedwarsRel.getInstance(),
+    BedwarsRevol.getInstance().getServer().getScheduler()
+        .runTaskAsynchronously(BedwarsRevol.getInstance(),
             new Runnable() {
               @Override
               public void run() {
                 try {
-                  String configYML = HastebinUtility.upload(SupportData.getConfigFile());
-                  String shopYML = HastebinUtility.upload(SupportData.getShopConfigFile());
+                  String configYML = HastebinUtilityNew.upload(SupportDataNew.getConfigFile());
+                  String shopYML = HastebinUtilityNew.upload(SupportDataNew.getShopConfigFile());
                   String latestLOG;
                   try {
-                    latestLOG = HastebinUtility
-                        .upload(new File(BedwarsRel.getInstance().getDataFolder(),
+                    latestLOG = HastebinUtilityNew
+                        .upload(new File(BedwarsRevol.getInstance().getDataFolder(),
                             "../../logs/latest.log"));
                   } catch (IOException ignored) {
                     sender.sendMessage(
-                        ChatWriter
+                        ChatWriterNew
                             .pluginMessage("&clatest.log is too big to be pasted, will ignore"));
                     latestLOG = "too big :(";
                   }
@@ -53,24 +52,24 @@ public class DebugPasteCommand extends BaseCommand implements ICommand {
                   b.append("\n# General Information\n");
                   b.append("version:\n");
                   b.append("  plugin: ")
-                      .append("\"" + BedwarsRel.getInstance().getDescription().getVersion() + "\"");
-                  if (SupportData.getPluginVersionArray().length == 3
-                      && !SupportData.getPluginVersionArray()[1].equals("unknown")) {
+                      .append("\"" + BedwarsRevol.getInstance().getDescription().getVersion() + "\"");
+                  if (SupportDataNew.getPluginVersionArray().length == 3
+                      && !SupportDataNew.getPluginVersionArray()[1].equals("unknown")) {
                     b.append("(https://github.com/BedwarsRel/BedwarsRel/tree/"
-                        + SupportData.getPluginVersionArray()[1] + ")");
+                        + SupportDataNew.getPluginVersionArray()[1] + ")");
                   }
                   b.append('\n');
-                  b.append("  server: ").append("\"" + SupportData.getServerVersion() + "\"")
+                  b.append("  server: ").append("\"" + SupportDataNew.getServerVersion() + "\"")
                       .append('\n');
-                  b.append("  bukkit: ").append("\"" + SupportData.getBukkitVersion() + "\"")
+                  b.append("  bukkit: ").append("\"" + SupportDataNew.getBukkitVersion() + "\"")
                       .append('\n');
                   b.append("online_mode: ")
-                      .append(BedwarsRel.getInstance().getServer().getOnlineMode())
+                      .append(BedwarsRevol.getInstance().getServer().getOnlineMode())
                       .append('\n');
                   b.append("plugins("
-                      + BedwarsRel.getInstance().getServer().getPluginManager().getPlugins().length
+                      + BedwarsRevol.getInstance().getServer().getPluginManager().getPlugins().length
                       + "):");
-                  for (String plugin : SupportData.getPlugins()) {
+                  for (String plugin : SupportDataNew.getPlugins()) {
                     b.append("\n  ").append("\"" + plugin + "\"");
                   }
                   b.append("\n\n# JVM\n");
@@ -95,8 +94,8 @@ public class DebugPasteCommand extends BaseCommand implements ICommand {
                   b.append("\n# Please add a link to this file to your bug report!");
                   b.append("\n# https://github.com/BedwarsRel/BedwarsRel/issues");
 
-                  String link = HastebinUtility.upload(b.toString());
-                  sender.sendMessage(ChatWriter
+                  String link = HastebinUtilityNew.upload(b.toString());
+                  sender.sendMessage(ChatWriterNew
                       .pluginMessage(ChatColor.GREEN + "Success! Support data pasted on " + link));
                 } catch (IOException e) {
                   e.printStackTrace();
@@ -118,12 +117,12 @@ public class DebugPasteCommand extends BaseCommand implements ICommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.debugpaste.desc");
+    return BedwarsRevol._l("commands.debugpaste.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.debugpaste.name");
+    return BedwarsRevol._l("commands.debugpaste.name");
   }
 
   @Override

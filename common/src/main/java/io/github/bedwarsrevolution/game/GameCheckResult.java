@@ -1,7 +1,7 @@
 package io.github.bedwarsrevolution.game;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import java.util.HashMap;
 
 public enum GameCheckResult {
@@ -22,14 +22,12 @@ public enum GameCheckResult {
   }
 
   public String getCodeMessage(ImmutableMap<String, String> map) {
-    return BedwarsRel
-        ._l(BedwarsRel.getInstance().getServer().getConsoleSender(), "gamecheck." + this.toString(),
-            map);
+    return BedwarsRevol._l(BedwarsRevol.getInstance().getServer()
+            .getConsoleSender(), "gamecheck." + this.toString(), map);
   }
 
   public String getCodeMessage() {
-    return BedwarsRel
-        ._l(BedwarsRel.getInstance().getServer().getConsoleSender(),
+    return BedwarsRevol._l(BedwarsRevol.getInstance().getServer().getConsoleSender(),
             "gamecheck." + this.toString());
   }
 }

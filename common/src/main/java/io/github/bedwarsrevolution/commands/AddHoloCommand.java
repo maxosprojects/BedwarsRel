@@ -1,9 +1,8 @@
 package io.github.bedwarsrevolution.commands;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -21,19 +20,19 @@ public class AddHoloCommand extends BaseCommand implements ICommand {
       return false;
     }
 
-    if (!BedwarsRel.getInstance().isHologramsEnabled()) {
-      String missingholodependency = BedwarsRel.getInstance().getMissingHoloDependency();
+    if (!BedwarsRevol.getInstance().isHologramsEnabled()) {
+      String missingholodependency = BedwarsRevol.getInstance().getMissingHoloDependency();
 
-      sender.sendMessage(ChatWriter.pluginMessage(ChatColor.RED
-          + BedwarsRel._l(sender, "errors.holodependencynotfound",
+      sender.sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED
+          + BedwarsRevol._l(sender, "errors.holodependencynotfound",
           ImmutableMap.of("dependency", missingholodependency))));
       return true;
     }
 
-    Player player = (Player) sender;
-    BedwarsRel.getInstance().getHolographicInteractor()
-        .addHologramLocation(player.getEyeLocation());
-    BedwarsRel.getInstance().getHolographicInteractor().updateHolograms();
+//    Player player = (Player) sender;
+//    BedwarsRevol.getInstance().getHolographicInteractor()
+//        .addHologramLocation(player.getEyeLocation());
+//    BedwarsRevol.getInstance().getHolographicInteractor().updateHolograms();
     return true;
   }
 
@@ -49,12 +48,12 @@ public class AddHoloCommand extends BaseCommand implements ICommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.addholo.desc");
+    return BedwarsRevol._l("commands.addholo.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.addholo.name");
+    return BedwarsRevol._l("commands.addholo.name");
   }
 
   @Override

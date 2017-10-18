@@ -1,11 +1,7 @@
 package io.github.bedwarsrevolution.commands;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -64,12 +60,12 @@ public class RemoveTeamCommand extends BaseCommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.removeteam.desc");
+    return BedwarsRevol._l("commands.removeteam.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.removeteam.name");
+    return BedwarsRevol._l("commands.removeteam.name");
   }
 
   @Override

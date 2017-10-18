@@ -1,8 +1,6 @@
 package io.github.bedwarsrevolution.utils;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.Team;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.TeamNew;
 import java.io.File;
 import java.io.IOException;
@@ -44,66 +42,67 @@ public final class UtilsNew {
       Class.forName("net.md_5.bungee.BungeeCord");
       return true;
     } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
+      e.printStackTrace();
     }
 
     return false;
   }
 
-  public static void createParticleInGame(Game game, String particle, Location loc) {
-    try {
-      Class<?> clazz = Class.forName("io.github.bedwarsrel.com."
-          + BedwarsRel.getInstance().getCurrentVersion().toLowerCase() + ".ParticleSpawner");
-
-      Method particleMethod = clazz.getDeclaredMethod("spawnParticle", List.class, String.class,
-          float.class, float.class, float.class);
-      particleMethod.invoke(null, game.getPlayers(), particle, (float) loc.getX(),
-          (float) loc.getY(), (float) loc.getZ());
-    } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
-    }
-  }
+//  public static void createParticleInGame(Game game, String particle, Location loc) {
+//    try {
+//      Class<?> clazz = Class.forName("io.github.bedwarsrel.com."
+//          + BedwarsRel.getInstance().getCurrentVersion().toLowerCase() + ".ParticleSpawner");
+//
+//      Method particleMethod = clazz.getDeclaredMethod("spawnParticle", List.class, String.class,
+//          float.class, float.class, float.class);
+//      particleMethod.invoke(null, game.getPlayers(), particle, (float) loc.getX(),
+//          (float) loc.getY(), (float) loc.getZ());
+//    } catch (Exception ex) {
+//      BedwarsRel.getInstance().getBugsnag().notify(ex);
+//    }
+//  }
 
   private static final void die(String foa) {
     throw new IllegalArgumentException(foa);
   }
 
-  public static void equipArmorStand(LivingEntity armor, Team team) {
-    if (!(armor instanceof ArmorStand)) {
-      return;
-    }
-
-    ArmorStand stand = (ArmorStand) armor;
-
-    // helmet
-    ItemStack helmet = new ItemStack(Material.LEATHER_HELMET, 1);
-    LeatherArmorMeta meta = (LeatherArmorMeta) helmet.getItemMeta();
-    meta.setColor(team.getColor().getColor());
-    helmet.setItemMeta(meta);
-
-    // chestplate
-    ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
-    meta = (LeatherArmorMeta) chestplate.getItemMeta();
-    meta.setColor(team.getColor().getColor());
-    chestplate.setItemMeta(meta);
-
-    // leggings
-    ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS, 1);
-    meta = (LeatherArmorMeta) leggings.getItemMeta();
-    meta.setColor(team.getColor().getColor());
-    leggings.setItemMeta(meta);
-
-    // boots
-    ItemStack boots = new ItemStack(Material.LEATHER_BOOTS, 1);
-    meta = (LeatherArmorMeta) boots.getItemMeta();
-    meta.setColor(team.getColor().getColor());
-    boots.setItemMeta(meta);
-
-    stand.setHelmet(helmet);
-    stand.setChestplate(chestplate);
-    stand.setLeggings(leggings);
-    stand.setBoots(boots);
-  }
+//  public static void equipArmorStand(LivingEntity armor, Team team) {
+//    if (!(armor instanceof ArmorStand)) {
+//      return;
+//    }
+//
+//    ArmorStand stand = (ArmorStand) armor;
+//
+//    // helmet
+//    ItemStack helmet = new ItemStack(Material.LEATHER_HELMET, 1);
+//    LeatherArmorMeta meta = (LeatherArmorMeta) helmet.getItemMeta();
+//    meta.setColor(team.getColor().getColor());
+//    helmet.setItemMeta(meta);
+//
+//    // chestplate
+//    ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE, 1);
+//    meta = (LeatherArmorMeta) chestplate.getItemMeta();
+//    meta.setColor(team.getColor().getColor());
+//    chestplate.setItemMeta(meta);
+//
+//    // leggings
+//    ItemStack leggings = new ItemStack(Material.LEATHER_LEGGINGS, 1);
+//    meta = (LeatherArmorMeta) leggings.getItemMeta();
+//    meta.setColor(team.getColor().getColor());
+//    leggings.setItemMeta(meta);
+//
+//    // boots
+//    ItemStack boots = new ItemStack(Material.LEATHER_BOOTS, 1);
+//    meta = (LeatherArmorMeta) boots.getItemMeta();
+//    meta.setColor(team.getColor().getColor());
+//    boots.setItemMeta(meta);
+//
+//    stand.setHelmet(helmet);
+//    stand.setChestplate(chestplate);
+//    stand.setLeggings(leggings);
+//    stand.setBoots(boots);
+//  }
 
   public static Block getBedNeighbor(Block head) {
     if (UtilsNew.isBedBlock(head.getRelative(BlockFace.EAST))) {
@@ -160,19 +159,19 @@ public final class UtilsNew {
     return null;
   }
 
-  public static Object getCraftPlayer(Player player) {
-    try {
-      Class<?> craftPlayerClass = BedwarsRel.getInstance()
-          .getCraftBukkitClass("entity.CraftPlayer");
-      Method getHandle = craftPlayerClass.getMethod("getHandle", new Class[]{});
-      getHandle.setAccessible(true);
-
-      return getHandle.invoke(player, new Object[]{});
-    } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
-      return null;
-    }
-  }
+//  public static Object getCraftPlayer(Player player) {
+//    try {
+//      Class<?> craftPlayerClass = BedwarsRel.getInstance()
+//          .getCraftBukkitClass("entity.CraftPlayer");
+//      Method getHandle = craftPlayerClass.getMethod("getHandle", new Class[]{});
+//      getHandle.setAccessible(true);
+//
+//      return getHandle.invoke(player, new Object[]{});
+//    } catch (Exception e) {
+//      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      return null;
+//    }
+//  }
 
   public static Location getDirectionLocation(Location location, int blockOffset) {
     Location loc = location.clone();
@@ -198,38 +197,39 @@ public final class UtilsNew {
     return hrStr + ":" + minStr + ":" + secStr;
   }
 
-  public static Class<?> getGenericTypeOfParameter(Class<?> clazz, String method,
-      int parameterIndex) {
-    try {
-      Method m = clazz.getMethod(method, new Class<?>[]{Set.class, int.class});
-      ParameterizedType type = (ParameterizedType) m.getGenericParameterTypes()[parameterIndex];
-      return (Class<?>) type.getActualTypeArguments()[0];
-    } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
-      try {
-        Method m = clazz.getMethod(method, new Class<?>[]{HashSet.class, int.class});
-        ParameterizedType type = (ParameterizedType) m.getGenericParameterTypes()[parameterIndex];
-        return (Class<?>) type.getActualTypeArguments()[0];
-      } catch (Exception ex) {
-        BedwarsRel.getInstance().getBugsnag().notify(ex);
-        ex.printStackTrace();
-      }
-    }
-
-    return null;
-  }
+//  public static Class<?> getGenericTypeOfParameter(Class<?> clazz, String method,
+//      int parameterIndex) {
+//    try {
+//      Method m = clazz.getMethod(method, new Class<?>[]{Set.class, int.class});
+//      ParameterizedType type = (ParameterizedType) m.getGenericParameterTypes()[parameterIndex];
+//      return (Class<?>) type.getActualTypeArguments()[0];
+//    } catch (Exception e) {
+//      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      try {
+//        Method m = clazz.getMethod(method, new Class<?>[]{HashSet.class, int.class});
+//        ParameterizedType type = (ParameterizedType) m.getGenericParameterTypes()[parameterIndex];
+//        return (Class<?>) type.getActualTypeArguments()[0];
+//      } catch (Exception ex) {
+//        BedwarsRel.getInstance().getBugsnag().notify(ex);
+//        ex.printStackTrace();
+//      }
+//    }
+//
+//    return null;
+//  }
 
   @SuppressWarnings("deprecation")
   public static Material getMaterialByConfig(String key, Material defaultMaterial) {
     try {
-      String cfg = BedwarsRel.getInstance().getStringConfig(key, defaultMaterial.name());
+      String cfg = BedwarsRevol.getInstance().getStringConfig(key, defaultMaterial.name());
       if (UtilsNew.isNumber(cfg)) {
         return Material.getMaterial(Integer.valueOf(cfg));
       } else {
         return Material.getMaterial(cfg.toUpperCase());
       }
     } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+      ex.printStackTrace();
       // just return default
     }
 
@@ -384,7 +384,7 @@ public final class UtilsNew {
       double z = Double.valueOf(section.get("z").toString());
       float yaw = Float.valueOf(section.get("yaw").toString());
       float pitch = Float.valueOf(section.get("pitch").toString());
-      World world = BedwarsRel.getInstance().getServer().getWorld(section.get("world").toString());
+      World world = BedwarsRevol.getInstance().getServer().getWorld(section.get("world").toString());
 
       if (world == null) {
         return null;
@@ -392,7 +392,7 @@ public final class UtilsNew {
 
       return new Location(world, x, y, z, yaw, pitch);
     } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       ex.printStackTrace();
     }
 
@@ -421,7 +421,7 @@ public final class UtilsNew {
       double z = Double.valueOf(section.get("z").toString());
       float yaw = Float.valueOf(section.get("yaw").toString());
       float pitch = Float.valueOf(section.get("pitch").toString());
-      World world = BedwarsRel.getInstance().getServer().getWorld(section.get("world").toString());
+      World world = BedwarsRevol.getInstance().getServer().getWorld(section.get("world").toString());
 
       if (world == null) {
         return null;
@@ -429,7 +429,7 @@ public final class UtilsNew {
 
       return new Location(world, x, y, z, yaw, pitch);
     } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       ex.printStackTrace();
     }
 
@@ -457,8 +457,9 @@ public final class UtilsNew {
         return Material.getMaterial(material.toUpperCase());
       }
     } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       // failed to parse
+      ex.printStackTrace();
     }
 
     return null;
@@ -760,7 +761,7 @@ public final class UtilsNew {
   }
 
   public static String getPlayerWithTeamString(Player player, TeamNew team, ChatColor before) {
-    if (BedwarsRel.getInstance().getBooleanConfig("teamname-in-chat", true)) {
+    if (BedwarsRevol.getInstance().getBooleanConfig("teamname-in-chat", true)) {
       return player.getDisplayName() + before + " (" + team.getChatColor() + team.getDisplayName()
           + before + ")";
     }
@@ -769,7 +770,7 @@ public final class UtilsNew {
 
   public static String getPlayerWithTeamString(Player player, TeamNew team, ChatColor before,
       String playerAdding) {
-    if (BedwarsRel.getInstance().getBooleanConfig("teamname-in-chat", true)) {
+    if (BedwarsRevol.getInstance().getBooleanConfig("teamname-in-chat", true)) {
       return player.getDisplayName() + before + playerAdding + before + " (" + team.getChatColor()
           + team.getDisplayName() + before + ")";
     }

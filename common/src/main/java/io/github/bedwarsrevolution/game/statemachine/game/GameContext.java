@@ -99,13 +99,11 @@ public class GameContext {
   @Getter
   @Setter
   private int time = 1000;
-  private int timeLeft = 0;
   private List<Map<String, Object>> defaultUpgrades;
 
   public GameContext(String name) {
     this.name = name;
     this.scoreboard = BedwarsRevol.getInstance().getScoreboardManager().getNewScoreboard();
-    this.timeLeft = BedwarsRevol.getInstance().getMaxLength();
     this.record = BedwarsRevol.getInstance().getMaxLength();
     this.length = BedwarsRevol.getInstance().getMaxLength();
     this.autobalance = BedwarsRevol.getInstance().getBooleanConfig("global-autobalance", false);

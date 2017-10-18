@@ -1,7 +1,7 @@
 package io.github.bedwarsrevolution.localization;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,7 +46,8 @@ public class LocalizationConfigNew extends YamlConfiguration {
   @SuppressWarnings("unchecked")
   public String getPlayerLocale(Player player) {
     try {
-      Method getHandleMethod = BedwarsRel.getInstance().getCraftBukkitClass("entity.CraftPlayer")
+      Method getHandleMethod = BedwarsRevol.getInstance()
+          .getCraftBukkitClass("entity.CraftPlayer")
           .getMethod("getHandle", new Class[]{});
       getHandleMethod.setAccessible(true);
       Object nmsPlayer = getHandleMethod.invoke(player, new Object[]{});
@@ -55,16 +56,17 @@ public class LocalizationConfigNew extends YamlConfiguration {
       localeField.setAccessible(true);
       return localeField.get(nmsPlayer).toString().split("_")[0].toLowerCase();
     } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
-      return BedwarsRel.getInstance().getFallbackLocale();
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+      ex.printStackTrace();
+      return BedwarsRevol.getInstance().getFallbackLocale();
     }
   }
 
   @Override
   public String getString(String path) {
     if (super.get(path) == null) {
-      BedwarsRel.getInstance().getServer().getConsoleSender()
-          .sendMessage(ChatWriter
+      BedwarsRevol.getInstance().getServer().getConsoleSender()
+          .sendMessage(ChatWriterNew
               .pluginMessage(ChatColor.GOLD + "No translation found for: \"" + path + "\""));
       return "LOCALE_NOT_FOUND";
     }
@@ -73,9 +75,8 @@ public class LocalizationConfigNew extends YamlConfiguration {
   }
 
   public void loadLocale() {
-    File locFile =
-        new File(
-            BedwarsRel.getInstance().getDataFolder().getPath() + "/locale/" + this.locale + ".yml");
+    File locFile = new File(BedwarsRevol.getInstance().getDataFolder()
+        .getPath() + "/locale/" + this.locale + ".yml");
     BufferedReader reader = null;
     InputStream inputStream = null;
     if (locFile.exists()) {
@@ -84,28 +85,25 @@ public class LocalizationConfigNew extends YamlConfiguration {
       } catch (FileNotFoundException e) {
         // NO ERROR
       }
-      BedwarsRel.getInstance().getServer().getConsoleSender().sendMessage(ChatWriter
+      BedwarsRevol.getInstance().getServer().getConsoleSender().sendMessage(ChatWriterNew
           .pluginMessage(ChatColor.GOLD + "Using your custom locale \"" + this.locale + "\"."));
     } else {
+      inputStream = BedwarsRevol.getInstance().getResource("locale/" + this.locale + ".yml");
       if (inputStream == null) {
-        inputStream = BedwarsRel.getInstance().getResource("locale/" + this.locale + ".yml");
-      }
-      if (inputStream == null) {
-        BedwarsRel.getInstance().getServer().getConsoleSender()
-            .sendMessage(ChatWriter.pluginMessage(ChatColor.GOLD + "The locale \"" + this.locale
+        BedwarsRevol.getInstance().getServer().getConsoleSender()
+            .sendMessage(ChatWriterNew.pluginMessage(ChatColor.GOLD + "The locale \"" + this.locale
                 + "\" defined in your config is not available. Using fallback locale: "
-                + BedwarsRel.getInstance().getFallbackLocale()));
-        inputStream = BedwarsRel.getInstance()
-            .getResource("locale/" + BedwarsRel.getInstance().getFallbackLocale() + ".yml");
+                + BedwarsRevol.getInstance().getFallbackLocale()));
+        inputStream = BedwarsRevol.getInstance()
+            .getResource("locale/" + BedwarsRevol.getInstance().getFallbackLocale() + ".yml");
       }
     }
     try {
       reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
       this.load(reader);
     } catch (Exception e) {
-      BedwarsRel.getInstance().getServer().getConsoleSender().sendMessage(
-          ChatWriter.pluginMessage(ChatColor.RED + "Failed to load localization language!"));
-      return;
+      BedwarsRevol.getInstance().getServer().getConsoleSender().sendMessage(
+          ChatWriterNew.pluginMessage(ChatColor.RED + "Failed to load localization language!"));
     } finally {
       if (reader != null) {
         try {

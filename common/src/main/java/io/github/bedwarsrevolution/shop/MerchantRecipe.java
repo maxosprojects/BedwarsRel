@@ -1,6 +1,6 @@
 package io.github.bedwarsrevolution.shop;
 
-import io.github.bedwarsrel.BedwarsRel;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import java.lang.reflect.Method;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -14,13 +14,13 @@ public class MerchantRecipe {
   }
 
   public MerchantRecipe(Object item1, Object item2, Object reward) {
-    this.merchantRecipe = BedwarsRel.getInstance().getMinecraftServerClass("MerchantRecipe");
-    Class isClass = BedwarsRel.getInstance().getMinecraftServerClass("ItemStack");
+    this.merchantRecipe = BedwarsRevol.getInstance().getMinecraftServerClass("MerchantRecipe");
+    Class isClass = BedwarsRevol.getInstance().getMinecraftServerClass("ItemStack");
     try {
       this.instance = this.merchantRecipe.getDeclaredConstructor(isClass, isClass, isClass)
           .newInstance(item1, item2, reward);
     } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
       e.printStackTrace();
     }
   }
@@ -30,7 +30,7 @@ public class MerchantRecipe {
   }
 
   public static Class getReflectionClass() {
-    return BedwarsRel.getInstance().getMinecraftServerClass("MerchantRecipe");
+    return BedwarsRevol.getInstance().getMinecraftServerClass("MerchantRecipe");
   }
 
   public Object getInstance() {
@@ -43,7 +43,7 @@ public class MerchantRecipe {
       m.setAccessible(true);
       return m.invoke(this.merchantRecipe);
     } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
       e.printStackTrace();
     }
     return null;
@@ -55,7 +55,7 @@ public class MerchantRecipe {
       m.setAccessible(true);
       return m.invoke(this.merchantRecipe);
     } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
       e.printStackTrace();
     }
     return null;
@@ -67,7 +67,7 @@ public class MerchantRecipe {
       m.setAccessible(true);
       return m.invoke(this.merchantRecipe);
     } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
       e.printStackTrace();
     }
     return null;

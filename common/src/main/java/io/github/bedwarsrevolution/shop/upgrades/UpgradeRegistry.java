@@ -1,6 +1,6 @@
 package io.github.bedwarsrevolution.shop.upgrades;
 
-import io.github.bedwarsrel.BedwarsRel;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +10,8 @@ public class UpgradeRegistry {
   private static Map<String, List<Upgrade>> upgrades = new HashMap<>();
 
   public static void loadUpgrades() {
-    BedwarsRel.getInstance().getServer().getPluginManager().registerEvents(new UpgradeBaseAlarmListener(),
-        BedwarsRel.getInstance());
+    BedwarsRevol.getInstance().getServer().getPluginManager().
+        registerEvents(new UpgradeBaseAlarmListener(), BedwarsRevol.getInstance());
 
     addUpgrade(new UpgradeBaseAlarm());
 

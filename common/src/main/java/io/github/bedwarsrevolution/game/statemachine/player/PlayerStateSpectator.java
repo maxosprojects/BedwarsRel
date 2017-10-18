@@ -1,7 +1,6 @@
 package io.github.bedwarsrevolution.game.statemachine.player;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;

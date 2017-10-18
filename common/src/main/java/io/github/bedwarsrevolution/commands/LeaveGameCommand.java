@@ -1,8 +1,7 @@
 package io.github.bedwarsrevolution.commands;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import java.util.ArrayList;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,15 +17,12 @@ public class LeaveGameCommand extends BaseCommand {
     if (!super.hasPermission(sender)) {
       return false;
     }
-
     Player player = (Player) sender;
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
-
-    if (game == null) {
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    if (ctx == null) {
       return true;
     }
-
-    game.playerLeave(player, false);
+    ctx.getState().playerLeaves(ctx.getPlayerContext(player), false);
     return true;
   }
 
@@ -42,12 +38,12 @@ public class LeaveGameCommand extends BaseCommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.leave.desc");
+    return BedwarsRevol._l("commands.leave.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.leave.name");
+    return BedwarsRevol._l("commands.leave.name");
   }
 
   @Override

@@ -1,18 +1,10 @@
 package io.github.bedwarsrevolution.game;
 
-import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.utils.ChatWriter;
-import io.github.bedwarsrel.utils.SoundMachine;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.game.GameStateWaiting;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class GameLobbyCountdownNew extends BukkitRunnable {
@@ -30,9 +22,9 @@ public class GameLobbyCountdownNew extends BukkitRunnable {
   public GameLobbyCountdownNew(GameContext ctx, GameStateWaiting state) {
     this.ctx = ctx;
     this.state = state;
-    this.counter = BedwarsRel.getInstance().getConfig().getInt("lobbytime");
+    this.counter = BedwarsRevol.getInstance().getConfig().getInt("lobbytime");
     this.lobbytime = this.counter;
-    this.lobbytimeWhenFull = BedwarsRel.getInstance().getConfig().getInt("lobbytime-full");
+    this.lobbytimeWhenFull = BedwarsRevol.getInstance().getConfig().getInt("lobbytime-full");
   }
 
   @Override

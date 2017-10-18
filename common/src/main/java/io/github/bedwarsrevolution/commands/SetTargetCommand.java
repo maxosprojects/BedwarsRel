@@ -1,12 +1,7 @@
 package io.github.bedwarsrevolution.commands;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
-import io.github.bedwarsrel.utils.Utils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -122,12 +117,12 @@ public class SetTargetCommand extends BaseCommand implements ICommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.settarget.desc");
+    return BedwarsRevol._l("commands.settarget.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.settarget.name");
+    return BedwarsRevol._l("commands.settarget.name");
   }
 
   @Override
@@ -148,7 +143,7 @@ public class SetTargetCommand extends BaseCommand implements ICommand {
       }
 
     } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
       e.printStackTrace();
     }
 
@@ -161,13 +156,14 @@ public class SetTargetCommand extends BaseCommand implements ICommand {
       targetBlockMethod =
           player.getClass().getMethod("getTargetBlock", new Class<?>[]{Set.class, int.class});
     } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+      ex.printStackTrace();
       try {
         targetBlockMethod = player.getClass().getMethod("getTargetBlock",
             new Class<?>[]{HashSet.class, int.class});
       } catch (Exception exc) {
-        BedwarsRel.getInstance().getBugsnag().notify(exc);
-        exc.printStackTrace();
+//        BedwarsRevol.getInstance().getBugsnag().notify(exc);
+//        exc.printStackTrace();
       }
     }
 

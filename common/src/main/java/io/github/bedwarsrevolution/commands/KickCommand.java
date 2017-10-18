@@ -1,9 +1,8 @@
 package io.github.bedwarsrevolution.commands;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.ArrayList;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -21,28 +20,28 @@ public class KickCommand extends BaseCommand implements ICommand {
     }
 
     Player player = (Player) sender;
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
 
     // find player
-    Player kickPlayer = BedwarsRel.getInstance().getServer().getPlayer(args.get(0).toString());
+    Player kickPlayer = BedwarsRevol.getInstance().getServer().getPlayer(args.get(0).toString());
 
-    if (game == null) {
+    if (ctx == null) {
       player
-          .sendMessage(ChatWriter.pluginMessage(BedwarsRel._l(player, "errors.notingameforkick")));
+          .sendMessage(ChatWriterNew.pluginMessage(BedwarsRevol._l(player, "errors.notingameforkick")));
       return true;
     }
 
     if (kickPlayer == null || !kickPlayer.isOnline()) {
-      player.sendMessage(ChatWriter.pluginMessage(BedwarsRel._l(player, "errors.playernotfound")));
+      player.sendMessage(ChatWriterNew.pluginMessage(BedwarsRevol._l(player, "errors.playernotfound")));
       return true;
     }
 
-    if (!game.isInGame(kickPlayer)) {
-      player.sendMessage(ChatWriter.pluginMessage(BedwarsRel._l(player, "errors.playernotingame")));
+    if (ctx != BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(kickPlayer)) {
+      player.sendMessage(ChatWriterNew.pluginMessage(BedwarsRevol._l(player, "errors.playernotingame")));
       return true;
     }
 
-    game.playerLeave(kickPlayer, true);
+    ctx.getState().playerLeaves(ctx.getPlayerContext(kickPlayer), true);
     return true;
   }
 
@@ -58,12 +57,12 @@ public class KickCommand extends BaseCommand implements ICommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.kick.desc");
+    return BedwarsRevol._l("commands.kick.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.kick.name");
+    return BedwarsRevol._l("commands.kick.name");
   }
 
   @Override

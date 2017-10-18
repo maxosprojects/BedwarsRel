@@ -1,9 +1,6 @@
 package io.github.bedwarsrevolution.game;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.ResourceSpawner;
-import io.github.bedwarsrel.game.Team;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -381,9 +378,8 @@ public class RegionNew {
       if (e.getType() == EntityType.VILLAGER) {
         LivingEntity le = (LivingEntity) e;
         le.setCustomNameVisible(false);
-        le.setCustomName(
-            BedwarsRel
-                ._l(BedwarsRel.getInstance().getServer().getConsoleSender(), "ingame.shop.name"));
+        le.setCustomName(BedwarsRevol._l(BedwarsRevol.getInstance().getServer()
+            .getConsoleSender(), "ingame.shop.name"));
       }
     }
   }

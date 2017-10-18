@@ -2,7 +2,7 @@ package io.github.bedwarsrevolution.commands;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.Utils;
+import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -54,7 +54,7 @@ public class HelpCommand extends BaseCommand {
         paginate = "1";
       }
 
-      if (!Utils.isNumber(paginate)) {
+      if (!UtilsNew.isNumber(paginate)) {
         paginate = "1";
       }
     }

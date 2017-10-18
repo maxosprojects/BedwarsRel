@@ -1,14 +1,13 @@
 package io.github.bedwarsrevolution.listeners;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.listener.BaseListener;
+import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.SignChangeEvent;
 
-public class SignListenerNew extends BaseListener {
+public class SignListenerNew extends BaseListenerNew {
 
   @EventHandler
   public void onSignChange(SignChangeEvent sce) {
@@ -16,17 +15,15 @@ public class SignListenerNew extends BaseListener {
     if (!"[bw]".equals(firstLine)) {
       return;
     }
-
     Player player = sce.getPlayer();
     if (!player.hasPermission("bw.setup")) {
       return;
     }
-
     String gameName = sce.getLine(1).trim();
-    Game game = BedwarsRel.getInstance().getGameManager().getGame(gameName);
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameContext(gameName);
 
-    if (game == null) {
-      String notfound = BedwarsRel._l("errors.gamenotfoundsimple");
+    if (ctx == null) {
+      String notfound = BedwarsRevol._l("errors.gamenotfoundsimple");
       if (notfound.length() > 16) {
         String[] splitted = notfound.split(" ", 4);
         for (int i = 0; i < splitted.length; i++) {
@@ -43,8 +40,8 @@ public class SignListenerNew extends BaseListener {
     }
 
     sce.setCancelled(true);
-    game.addJoinSign(sce.getBlock().getLocation());
-    game.updateSigns();
+    ctx.addJoinSign(sce.getBlock().getLocation());
+    ctx.updateSigns();
   }
 
 }

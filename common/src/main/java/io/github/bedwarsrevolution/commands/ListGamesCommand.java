@@ -1,11 +1,7 @@
 package io.github.bedwarsrevolution.commands;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameCheckCode;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
@@ -106,12 +102,12 @@ public class ListGamesCommand extends BaseCommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.list.desc");
+    return BedwarsRevol._l("commands.list.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.list.name");
+    return BedwarsRevol._l("commands.list.name");
   }
 
   @Override

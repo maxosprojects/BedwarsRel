@@ -1,10 +1,7 @@
 package io.github.bedwarsrevolution.commands;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -70,12 +67,12 @@ public class StopGameCommand extends BaseCommand implements ICommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.stop.desc");
+    return BedwarsRevol._l("commands.stop.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.stop.name");
+    return BedwarsRevol._l("commands.stop.name");
   }
 
   @Override

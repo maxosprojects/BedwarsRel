@@ -10,24 +10,29 @@ import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.TitleWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -40,10 +45,15 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Bed;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -57,6 +67,7 @@ public class GameStateRunning extends GameState {
 
   public GameStateRunning(GameContext ctx) {
     super(ctx);
+    this.timeLeft = BedwarsRevol.getInstance().getMaxLength();
   }
 
   @Override
@@ -68,7 +79,7 @@ public class GameStateRunning extends GameState {
   }
 
   @Override
-  public void onEventDamage(EntityDamageEvent event) {
+  public void onEventEntityDamage(EntityDamageEvent event) {
     if (!(event.getEntity() instanceof Player)) {
       return;
     }
@@ -495,7 +506,7 @@ public class GameStateRunning extends GameState {
 
   @Override
   public void onEventBlockPlace(BlockPlaceEvent event) {
-    Player player = event.getPlayer();
+    final Player player = event.getPlayer();
     PlayerContext playerCtx = this.ctx.getPlayerContext(player);
     if (playerCtx.getState().isSpectator()) {
       event.setCancelled(true);
@@ -547,9 +558,26 @@ public class GameStateRunning extends GameState {
 //      playerTeam.addChest(placedBlock);
 //    }
 
-    if (!event.isCancelled()) {
+    if (replacedBlock != null && !event.isCancelled()) {
       this.ctx.getRegion().addPlacedBlock(placedBlock,
           (replacedBlock.getType().equals(Material.AIR) ? null : replacedBlock));
+    }
+
+    Block block = event.getBlock();
+    if (block.getType() == Material.TNT) {
+      event.setCancelled(true);
+      Location loc = block.getLocation().add(0.5D, 0.0D, 0.5D);
+      block.getWorld().spawnEntity(loc, EntityType.PRIMED_TNT);
+      new BukkitRunnable() {
+        public void run() {
+//          player.getInventory().removeItem(new ItemStack[]{new ItemStack(Material.TNT, 1)});
+//          player.updateInventory();
+          PlayerInventory inv = player.getInventory();
+          int slot = inv.getHeldItemSlot();
+          ItemStack stack = inv.getItem(slot);
+          stack.setAmount(stack.getAmount() - 1);
+        }
+      }.runTaskLater(BedwarsRevol.getInstance(), 1L);
     }
   }
 
@@ -567,7 +595,97 @@ public class GameStateRunning extends GameState {
     }
   }
 
-  private void handleDestroyTargetMaterial(PlayerContext playerCtx, Block block) {
+  @Override
+  public void onEventPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+  }
+
+  @Override
+  public void onEventChunkUnload(ChunkUnloadEvent event) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventEntityExplode(EntityExplodeEvent event) {
+    Iterator<Block> explodeBlocks = event.blockList().iterator();
+    boolean tntDestroyEnabled = BedwarsRevol.getInstance()
+        .getBooleanConfig("explodes.destroy-worldblocks", false);
+    boolean tntDestroyBeds = BedwarsRevol.getInstance()
+        .getBooleanConfig("explodes.destroy-beds", false);
+
+    if (!BedwarsRevol.getInstance().getBooleanConfig("explodes.drop-blocks", false)) {
+      event.setYield(0F);
+    }
+
+    Material targetMaterial = this.ctx.getTargetMaterial();
+    while (explodeBlocks.hasNext()) {
+      Block exploding = explodeBlocks.next();
+      if (!this.ctx.getRegion().isInRegion(exploding.getLocation())) {
+        explodeBlocks.remove();
+        continue;
+      }
+      if ((!tntDestroyEnabled
+              && !tntDestroyBeds)
+          || (!tntDestroyEnabled
+              && exploding.getType() != Material.BED_BLOCK
+              && exploding.getType() != Material.BED)) {
+        if (!this.ctx.getRegion().isPlacedBlock(exploding)) {
+          if (BedwarsRevol.getInstance().isBreakableType(exploding.getType())) {
+            this.ctx.getRegion().addBrokenBlock(exploding);
+            continue;
+          }
+          explodeBlocks.remove();
+        } else {
+          this.ctx.getRegion().removePlacedBlock(exploding);
+        }
+        continue;
+      }
+      if (this.ctx.getRegion().isPlacedBlock(exploding)) {
+        this.ctx.getRegion().removePlacedBlock(exploding);
+        continue;
+      }
+      if (exploding.getType().equals(targetMaterial)) {
+        if (!tntDestroyBeds) {
+          explodeBlocks.remove();
+          continue;
+        }
+        // only destroyable by tnt
+        if (!event.getEntityType().equals(EntityType.PRIMED_TNT)
+            && !event.getEntityType().equals(EntityType.MINECART_TNT)) {
+          explodeBlocks.remove();
+          continue;
+        }
+        // when it wasn't player who ignited the tnt
+        TNTPrimed primedTnt = (TNTPrimed) event.getEntity();
+        if (!(primedTnt.getSource() instanceof Player)) {
+          explodeBlocks.remove();
+          continue;
+        }
+        PlayerContext player = this.ctx.getPlayerContext((Player) primedTnt.getSource());
+        if (!this.handleDestroyTargetMaterial(player, exploding)) {
+          explodeBlocks.remove();
+        }
+      } else {
+        this.ctx.getRegion().addBrokenBlock(exploding);
+      }
+    }
+  }
+
+  @Override
+  public void onEventRegainHealth(EntityRegainHealthEvent event) {
+    Player player = (Player) event.getEntity();
+    PlayerContext playerCtx = this.ctx.getPlayerContext(player);
+    if (player.getHealth() >= player.getMaxHealth()) {
+      playerCtx.setDamager(null);
+    }
+  }
+
+  @Override
+  public void onEventServerListPing(ServerListPingEvent event) {
+    event.setMotd(motdReplacePlaceholder(ChatColor.translateAlternateColorCodes('&',
+        BedwarsRevol.getInstance().getConfig().getString("bungeecord.motds.running"))));
+  }
+
+  private boolean handleDestroyTargetMaterial(PlayerContext playerCtx, Block block) {
     Player player = playerCtx.getPlayer();
     TeamNew team = playerCtx.getTeam();
     TeamNew bedDestroyTeam = null;
@@ -588,12 +706,12 @@ public class GameStateRunning extends GameState {
       if (bedBlock.equals(breakBlock)) {
         player.sendMessage(ChatWriterNew.pluginMessage(
             ChatColor.RED + BedwarsRevol._l(player, "ingame.blocks.ownbeddestroy")));
-        return;
+        return false;
       }
 
       bedDestroyTeam = this.ctx.getTeamOfBed(breakBlock);
       if (bedDestroyTeam == null) {
-        return;
+        return false;
       }
       this.dropTargetBlock(block);
     } else {
@@ -601,12 +719,12 @@ public class GameStateRunning extends GameState {
         player.sendMessage(
             ChatWriterNew.pluginMessage(
                 ChatColor.RED + BedwarsRevol._l(player, "ingame.blocks.ownbeddestroy")));
-        return;
+        return false;
       }
 
       bedDestroyTeam = this.ctx.getTeamOfBed(block);
       if (bedDestroyTeam == null) {
-        return;
+        return false;
       }
 
       this.dropTargetBlock(block);
@@ -661,6 +779,7 @@ public class GameStateRunning extends GameState {
             .getStringConfig("bed-sound", "ENDERDRAGON_GROWL").toUpperCase()),
         30.0F, 10.0F);
     this.updateScoreboard();
+    return true;
   }
 
   private void updateScoreboard() {

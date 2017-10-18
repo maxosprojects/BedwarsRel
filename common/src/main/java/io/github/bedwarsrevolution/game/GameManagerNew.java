@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -49,15 +50,14 @@ public class GameManagerNew {
     return null;
   }
 
-//  public Game getGameByChunkLocation(int x, int z) {
-//    for (Game game : this.gamesContexts) {
-//      if (game.getRegion().chunkIsInRegion(x, z)) {
-//        return game;
-//      }
-//    }
-//
-//    return null;
-//  }
+  public GameContext getGameByChunkLocation(int x, int z) {
+    for (GameContext ctx : this.gamesContexts) {
+      if (ctx.getRegion().chunkIsInRegion(x, z)) {
+        return ctx;
+      }
+    }
+    return null;
+  }
 
   public GameContext getGameByLocation(Location loc) {
     for (GameContext ctx : this.gamesContexts) {
@@ -97,25 +97,23 @@ public class GameManagerNew {
     return this.gamesContexts;
   }
 
-//  public List<Game> getGamesByWorld(World world) {
-//    List<Game> games = new ArrayList<Game>();
-//
-//    for (Game game : this.gamesContexts) {
-//      if (game.getRegion() == null) {
-//        continue;
-//      }
-//
-//      if (game.getRegion().getWorld() == null) {
-//        continue;
-//      }
-//
-//      if (game.getRegion().getWorld().equals(world)) {
-//        games.add(game);
-//      }
-//    }
-//
-//    return games;
-//  }
+  public List<GameContext> getGamesByWorld(World world) {
+    List<GameContext> games = new ArrayList<>();
+    for (GameContext ctx : this.gamesContexts) {
+      RegionNew region = ctx.getRegion();
+      if (region == null) {
+        continue;
+      }
+      World aWorld = region.getWorld();
+      if (aWorld == null) {
+        continue;
+      }
+      if (aWorld.equals(world)) {
+        games.add(ctx);
+      }
+    }
+    return games;
+  }
 
   @SuppressWarnings("unchecked")
   private void loadGame(File configFile) {

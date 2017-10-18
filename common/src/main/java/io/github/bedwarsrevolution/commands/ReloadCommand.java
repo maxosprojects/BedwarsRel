@@ -1,9 +1,8 @@
 package io.github.bedwarsrevolution.commands;
 
-import io.github.bedwarsrel.BedwarsRel;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.updater.ConfigUpdater;
-import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrevolution.updater.ConfigUpdaterNew;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.io.File;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
@@ -21,7 +20,7 @@ public class ReloadCommand extends BaseCommand {
       return false;
     }
 
-    File config = new File(BedwarsRel.getInstance().getDataFolder(), "config.yml");
+    File config = new File(BedwarsRevol.getInstance().getDataFolder(), "config.yml");
     String command = "";
 
     if (args.size() > 0) {
@@ -33,58 +32,58 @@ public class ReloadCommand extends BaseCommand {
     if (command.equalsIgnoreCase("all")) {
       // save default config
       if (!config.exists()) {
-        BedwarsRel.getInstance().saveDefaultConfig();
+        BedwarsRevol.getInstance().saveDefaultConfig();
       }
 
-      BedwarsRel.getInstance().loadConfigInUTF();
+      BedwarsRevol.getInstance().loadConfigInUTF();
 
-      BedwarsRel.getInstance().getConfig().options().copyDefaults(true);
-      BedwarsRel.getInstance().getConfig().options().copyHeader(true);
+      BedwarsRevol.getInstance().getConfig().options().copyDefaults(true);
+      BedwarsRevol.getInstance().getConfig().options().copyHeader(true);
 
-      ConfigUpdater configUpdater = new ConfigUpdater();
+      ConfigUpdaterNew configUpdater = new ConfigUpdaterNew();
       configUpdater.addConfigs();
-      BedwarsRel.getInstance().saveConfiguration();
-      BedwarsRel.getInstance().loadConfigInUTF();
-      BedwarsRel.getInstance().loadShop();
+      BedwarsRevol.getInstance().saveConfiguration();
+      BedwarsRevol.getInstance().loadConfigInUTF();
+      BedwarsRevol.getInstance().loadShop();
 
-      if (BedwarsRel.getInstance().isHologramsEnabled()
-          && BedwarsRel.getInstance().getHolographicInteractor() != null) {
-        BedwarsRel.getInstance().getHolographicInteractor().loadHolograms();
-      }
+//      if (BedwarsRevol.getInstance().isHologramsEnabled()
+//          && BedwarsRevol.getInstance().getHolographicInteractor() != null) {
+//        BedwarsRevol.getInstance().getHolographicInteractor().loadHolograms();
+//      }
 
-      BedwarsRel.getInstance().reloadLocalization();
-      BedwarsRel.getInstance().getGameManager().reloadGames();
+      BedwarsRevol.getInstance().reloadLocalization();
+      BedwarsRevol.getInstance().getGameManager().reloadGames();
     } else if (command.equalsIgnoreCase("shop")) {
-      BedwarsRel.getInstance().loadShop();
+      BedwarsRevol.getInstance().loadShop();
     } else if (command.equalsIgnoreCase("games")) {
-      BedwarsRel.getInstance().getGameManager().reloadGames();
-    } else if (command.equalsIgnoreCase("holo")) {
-      if (BedwarsRel.getInstance().isHologramsEnabled()) {
-        BedwarsRel.getInstance().getHolographicInteractor().loadHolograms();
-      }
+      BedwarsRevol.getInstance().getGameManager().reloadGames();
+//    } else if (command.equalsIgnoreCase("holo")) {
+//      if (BedwarsRevol.getInstance().isHologramsEnabled()) {
+//        BedwarsRevol.getInstance().getHolographicInteractor().loadHolograms();
+//      }
     } else if (command.equalsIgnoreCase("config")) {
       // save default config
       if (!config.exists()) {
-        BedwarsRel.getInstance().saveDefaultConfig();
+        BedwarsRevol.getInstance().saveDefaultConfig();
       }
 
-      BedwarsRel.getInstance().loadConfigInUTF();
+      BedwarsRevol.getInstance().loadConfigInUTF();
 
-      BedwarsRel.getInstance().getConfig().options().copyDefaults(true);
-      BedwarsRel.getInstance().getConfig().options().copyHeader(true);
+      BedwarsRevol.getInstance().getConfig().options().copyDefaults(true);
+      BedwarsRevol.getInstance().getConfig().options().copyHeader(true);
 
-      ConfigUpdater configUpdater = new ConfigUpdater();
+      ConfigUpdaterNew configUpdater = new ConfigUpdaterNew();
       configUpdater.addConfigs();
-      BedwarsRel.getInstance().saveConfiguration();
-      BedwarsRel.getInstance().loadConfigInUTF();
+      BedwarsRevol.getInstance().saveConfiguration();
+      BedwarsRevol.getInstance().loadConfigInUTF();
     } else if (command.equalsIgnoreCase("locale")) {
-      BedwarsRel.getInstance().reloadLocalization();
+      BedwarsRevol.getInstance().reloadLocalization();
     } else {
       return false;
     }
 
     sender.sendMessage(
-        ChatWriter.pluginMessage(ChatColor.GREEN + BedwarsRel._l(sender, "success.reloadconfig")));
+        ChatWriterNew.pluginMessage(ChatColor.GREEN + BedwarsRevol._l(sender, "success.reloadconfig")));
     return true;
   }
 
@@ -100,12 +99,12 @@ public class ReloadCommand extends BaseCommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.reload.desc");
+    return BedwarsRevol._l("commands.reload.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.reload.name");
+    return BedwarsRevol._l("commands.reload.name");
   }
 
   @Override

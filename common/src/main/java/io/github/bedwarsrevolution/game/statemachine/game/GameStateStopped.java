@@ -5,13 +5,14 @@ import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -23,7 +24,10 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.event.weather.WeatherChangeEvent;
 
 /**
  * Created by {maxos} 2017
@@ -40,8 +44,7 @@ public class GameStateStopped extends GameState {
   }
 
   @Override
-  public void onEventDamage(EntityDamageEvent event) {
-
+  public void onEventEntityDamage(EntityDamageEvent event) {
   }
 
   @Override
@@ -133,4 +136,25 @@ public class GameStateStopped extends GameState {
   public void onEventBlockPlace(BlockPlaceEvent event) {
   }
 
+  @Override
+  public void onEventPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+  }
+
+  @Override
+  public void onEventCreatureSpawn(CreatureSpawnEvent event) {
+  }
+
+  @Override
+  public void onEventEntityExplode(EntityExplodeEvent event) {
+  }
+
+  @Override
+  public void onEventServerListPing(ServerListPingEvent event) {
+    event.setMotd(motdReplacePlaceholder(ChatColor.translateAlternateColorCodes('&',
+        BedwarsRevol.getInstance().getConfig().getString("bungeecord.motds.stopped"))));
+  }
+
+  @Override
+  public void onEventWeatherChange(WeatherChangeEvent event) {
+  }
 }

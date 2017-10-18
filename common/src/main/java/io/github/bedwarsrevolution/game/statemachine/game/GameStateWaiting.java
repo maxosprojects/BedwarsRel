@@ -16,11 +16,12 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -31,9 +32,12 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -60,7 +64,7 @@ public class GameStateWaiting extends GameState {
   }
 
   @Override
-  public void onEventDamage(EntityDamageEvent event) {
+  public void onEventEntityDamage(EntityDamageEvent event) {
     event.setCancelled(true);
   }
 
@@ -581,6 +585,37 @@ public class GameStateWaiting extends GameState {
   public void onEventBlockPlace(BlockPlaceEvent event) {
     event.setCancelled(true);
     event.setBuild(false);
+  }
+
+  @Override
+  public void onEventEntityPickupItem(EntityPickupItemEvent event) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventPlayerPickupItem(PlayerPickupItemEvent event) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventEntityExplode(EntityExplodeEvent event) {
+    event.setYield(0);
+  }
+
+  @Override
+  public void onEventServerListPing(ServerListPingEvent event) {
+    if (this.ctx.isFull()) {
+      event.setMotd(motdReplacePlaceholder(ChatColor.translateAlternateColorCodes('&',
+          BedwarsRevol.getInstance().getConfig().getString("bungeecord.motds.full"))));
+    } else {
+      event.setMotd(motdReplacePlaceholder(ChatColor.translateAlternateColorCodes('&',
+          BedwarsRevol.getInstance().getConfig().getString("bungeecord.motds.lobby"))));
+    }
   }
 
   private void updateScoreboard() {

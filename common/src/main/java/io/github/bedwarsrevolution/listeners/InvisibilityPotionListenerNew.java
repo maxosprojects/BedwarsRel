@@ -13,14 +13,11 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.listener.BaseListener;
-import io.github.bedwarsrel.shop.CraftItemStack;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.shop.CraftItemStack;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -40,7 +37,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-public class InvisibilityPotionListenerNew extends BaseListener {
+public class InvisibilityPotionListenerNew extends BaseListenerNew {
   private Map<Player, BukkitTask> invisibilityTasks = new HashMap<>();
   // Maps "player that is hidden" to "from which player"
   private Multimap<Integer, Player> playerInvisibleTo = HashMultimap.create();

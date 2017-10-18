@@ -1,31 +1,22 @@
 package io.github.bedwarsrevolution.listeners.events;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.BungeeGameCycle;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.GameState;
-import io.github.bedwarsrel.listener.BaseListener;
+import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.listeners.BaseListenerNew;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 
-public class PlayerSwapHandItemsEventListenerNew extends BaseListener {
+public class PlayerSwapHandItemsEventListenerNew extends BaseListenerNew {
 
   @EventHandler
   public void onPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
     Player player = event.getPlayer();
-    Game game = BedwarsRel.getInstance().getGameManager().getGameOfPlayer(player);
-
-    if (game == null) {
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    if (ctx == null) {
       return;
     }
-
-    if (game.getState() == GameState.WAITING
-        || (game.getCycle() instanceof BungeeGameCycle && game.getCycle().isEndGameRunning()
-        && BedwarsRel.getInstance().getBooleanConfig("bungeecord.endgame-in-lobby", true))) {
-      event.setCancelled(true);
-      return;
-    }
+    ctx.getState().onEventPlayerSwapHandItems(event);
   }
 
 }

@@ -1,6 +1,6 @@
 package io.github.bedwarsrevolution.shop;
 
-import io.github.bedwarsrel.BedwarsRel;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import java.lang.reflect.Method;
 import org.bukkit.inventory.ItemStack;
 
@@ -11,12 +11,12 @@ public class CraftItemStack {
   private Object stack = null;
 
   public CraftItemStack(ItemStack stack) {
-    this.craftItemStack = BedwarsRel.getInstance().getCraftBukkitClass("inventory.CraftItemStack");
+    this.craftItemStack = BedwarsRevol.getInstance().getCraftBukkitClass("inventory.CraftItemStack");
     this.stack = stack;
   }
 
   public CraftItemStack(Object stack) {
-    this.craftItemStack = BedwarsRel.getInstance().getCraftBukkitClass("inventory.CraftItemStack");
+    this.craftItemStack = BedwarsRevol.getInstance().getCraftBukkitClass("inventory.CraftItemStack");
     this.stack = stack;
   }
 
@@ -28,7 +28,7 @@ public class CraftItemStack {
       m.setAccessible(true);
       return (ItemStack) m.invoke(null, new Object[]{this.stack});
     } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
       e.printStackTrace();
     }
     return null;
@@ -41,7 +41,7 @@ public class CraftItemStack {
       m.setAccessible(true);
       return m.invoke(null, new Object[]{this.stack});
     } catch (Exception e) {
-      BedwarsRel.getInstance().getBugsnag().notify(e);
+//      BedwarsRevol.getInstance().getBugsnag().notify(e);
       e.printStackTrace();
     }
     return null;

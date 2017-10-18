@@ -1,14 +1,11 @@
 package io.github.bedwarsrevolution.shop.upgrades;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.PlayerStorage;
-import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -89,8 +86,8 @@ public class UpgradeItem implements Upgrade {
           name = meta.getDisplayName();
         }
       }
-      player.sendMessage(ChatWriter.pluginMessage(
-          BedwarsRel._l(player, "success.itempurchased",
+      player.sendMessage(ChatWriterNew.pluginMessage(
+          BedwarsRevol._l(player, "success.itempurchased",
               ImmutableMap.of("item", name))));
     }
   }

@@ -1,12 +1,7 @@
 package io.github.bedwarsrevolution.commands;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.ResourceSpawner;
-import io.github.bedwarsrel.game.Team;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -86,12 +81,12 @@ public class SetSpawnerCommand extends BaseCommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.setspawner.desc");
+    return BedwarsRevol._l("commands.setspawner.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.setspawner.name");
+    return BedwarsRevol._l("commands.setspawner.name");
   }
 
   @Override
@@ -101,7 +96,7 @@ public class SetSpawnerCommand extends BaseCommand {
 
   private String[] getResources() {
     ConfigurationSection section =
-        BedwarsRel.getInstance().getConfig().getConfigurationSection("resource");
+        BedwarsRevol.getInstance().getConfig().getConfigurationSection("resource");
     if (section == null) {
       return new String[]{};
     }

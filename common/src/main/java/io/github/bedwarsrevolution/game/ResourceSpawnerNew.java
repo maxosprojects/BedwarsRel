@@ -1,9 +1,9 @@
 package io.github.bedwarsrevolution.game;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.shop.ItemStackParser;
-import io.github.bedwarsrel.utils.Utils;
+import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.shop.ItemStackParser;
+import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,10 +32,10 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
   private String team;
 
   public ResourceSpawnerNew(Map<String, Object> deserialize) {
-    this.location = Utils.locationDeserialize(deserialize.get("location"));
+    this.location = UtilsNew.locationDeserialize(deserialize.get("location"));
     this.name = deserialize.get("name").toString();
 
-    if (!BedwarsRel.getInstance().getConfig().contains("resource." + this.name)) {
+    if (!BedwarsRevol.getInstance().getConfig().contains("resource." + this.name)) {
       throw new IllegalArgumentException("Can't find resource " + this.name + " in config.yml");
     }
     parseResourceConfig(this.name);
@@ -43,15 +43,15 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
     if (deserialize.containsKey("interval")) {
       this.interval = Integer.parseInt(deserialize.get("interval").toString());
     } else {
-      this.interval =
-          BedwarsRel.getInstance().getIntConfig("resource." + name + ".spawn-interval", 1000);
+      this.interval = BedwarsRevol.getInstance()
+          .getIntConfig("resource." + name + ".spawn-interval", 1000);
     }
 
     if (deserialize.containsKey("spread")) {
       this.spread = Double.parseDouble(deserialize.get("spread").toString());
     } else {
-      this.spread =
-          BedwarsRel.getInstance().getConfig().getDouble("resource." + name + ".spread", 1.0);
+      this.spread = BedwarsRevol.getInstance().getConfig()
+          .getDouble("resource." + name + ".spread", 1.0);
     }
 
     if (deserialize.containsKey("team")) {
@@ -62,20 +62,20 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
   public ResourceSpawnerNew(GameContext ctx, String name, Location location) {
     this.ctx = ctx;
     this.name = name;
-    if (!BedwarsRel.getInstance().getConfig().contains("resource." + this.name)) {
+    if (!BedwarsRevol.getInstance().getConfig().contains("resource." + this.name)) {
       throw new IllegalArgumentException("Can't find resource " + this.name + " in config.yml");
     }
     parseResourceConfig(this.name);
-    this.interval =
-        BedwarsRel.getInstance().getIntConfig("resource." + name + ".spawn-interval", 1000);
+    this.interval = BedwarsRevol.getInstance()
+        .getIntConfig("resource." + name + ".spawn-interval", 1000);
     this.location = location;
-    this.spread =
-        BedwarsRel.getInstance().getConfig().getDouble("resource." + name + ".spread", 1.0);
+    this.spread = BedwarsRevol.getInstance().getConfig()
+        .getDouble("resource." + name + ".spread", 1.0);
   }
 
   private void parseResourceConfig(String name) {
     List<Object> resourceList =
-        (List<Object>) BedwarsRel.getInstance().getConfig().getList("resource." + name + ".item");
+        (List<Object>) BedwarsRevol.getInstance().getConfig().getList("resource." + name + ".item");
     for (Object resource : resourceList) {
       ItemStack itemStack = ItemStack.deserialize((Map<String, Object>) resource);
       if (itemStack != null) {
@@ -130,7 +130,7 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
 //
 //      item = resourceSpawnEvent.getResource();
 
-      if (BedwarsRel.getInstance().getBooleanConfig("spawn-resources-in-chest", true)) {
+      if (BedwarsRevol.getInstance().getBooleanConfig("spawn-resources-in-chest", true)) {
         BlockState blockState = dropLocation.getBlock().getState();
         if (blockState instanceof Chest) {
           Chest chest = (Chest) blockState;
@@ -149,7 +149,7 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
   @Override
   public Map<String, Object> serialize() {
     HashMap<String, Object> rs = new HashMap<>();
-    rs.put("location", Utils.locationSerialize(this.location));
+    rs.put("location", UtilsNew.locationSerialize(this.location));
     rs.put("name", this.name);
     rs.put("team", this.team);
     return rs;

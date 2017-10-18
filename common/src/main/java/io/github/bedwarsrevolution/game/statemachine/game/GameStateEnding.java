@@ -9,6 +9,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -20,7 +21,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 
 /**
  * Created by {maxos} 2017
@@ -37,7 +40,7 @@ public class GameStateEnding extends GameState {
   }
 
   @Override
-  public void onEventDamage(EntityDamageEvent event) {
+  public void onEventEntityDamage(EntityDamageEvent event) {
     event.setCancelled(true);
   }
 
@@ -126,6 +129,22 @@ public class GameStateEnding extends GameState {
   @Override
   public void onEventBlockPlace(BlockPlaceEvent event) {
     event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventPlayerSwapHandItems(PlayerSwapHandItemsEvent event) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventEntityExplode(EntityExplodeEvent event) {
+    event.setYield(0);
+  }
+
+  @Override
+  public void onEventServerListPing(ServerListPingEvent event) {
+    event.setMotd(motdReplacePlaceholder(ChatColor.translateAlternateColorCodes('&',
+        BedwarsRevol.getInstance().getConfig().getString("bungeecord.motds.running"))));
   }
 
 }

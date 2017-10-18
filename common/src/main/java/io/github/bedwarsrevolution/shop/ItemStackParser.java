@@ -1,7 +1,7 @@
 package io.github.bedwarsrevolution.shop;
 
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.utils.Utils;
+import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,7 +60,8 @@ public class ItemStackParser {
         amount = Integer.parseInt(this.linkedSection.get("amount").toString());
       }
     } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
+      ex.printStackTrace();
       amount = 1;
     }
 
@@ -73,7 +74,7 @@ public class ItemStackParser {
 
   private boolean isMetarizable() {
     return (!this.material.equals(Material.POTION)
-        && !(!BedwarsRel.getInstance().getCurrentVersion().startsWith("v1_8")
+        && !(!BedwarsRevol.getInstance().getCurrentVersion().startsWith("v1_8")
         && (this.material.equals(Material.valueOf("TIPPED_ARROW"))
         || this.material.equals(Material.valueOf("LINGERING_POTION"))
         || this.material.equals(Material.valueOf("SPLASH_POTION")))));
@@ -81,7 +82,7 @@ public class ItemStackParser {
 
   private boolean isPotion() {
     return (this.material.equals(Material.POTION)
-        || (!BedwarsRel.getInstance().getCurrentVersion().startsWith("v1_8"))
+        || (!BedwarsRevol.getInstance().getCurrentVersion().startsWith("v1_8"))
         && (this.material.equals(Material.valueOf("TIPPED_ARROW"))
         || this.material.equals(Material.valueOf("LINGERING_POTION"))
         || this.material.equals(Material.valueOf("SPLASH_POTION"))));
@@ -122,7 +123,7 @@ public class ItemStackParser {
       return this.finalStack;
 
     } catch (Exception ex) {
-      BedwarsRel.getInstance().getBugsnag().notify(ex);
+//      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       ex.printStackTrace();
     }
 
@@ -148,7 +149,7 @@ public class ItemStackParser {
       ConfigurationSection enchantSection = (ConfigurationSection) newSection.get("enchants");
 
       for (String key : enchantSection.getKeys(false)) {
-        if (Utils.isNumber(key)) {
+        if (UtilsNew.isNumber(key)) {
           en = Enchantment.getById(Integer.parseInt(key));
           level = Integer.parseInt(enchantSection.get(key).toString());
         } else {
@@ -183,7 +184,7 @@ public class ItemStackParser {
     Material material = null;
     String materialString = this.linkedSection.get("item").toString();
 
-    if (Utils.isNumber(materialString)) {
+    if (UtilsNew.isNumber(materialString)) {
       material = Material.getMaterial(Integer.parseInt(materialString));
     } else {
       material = Material.getMaterial(materialString);

@@ -1,12 +1,7 @@
 package io.github.bedwarsrevolution.commands;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.bedwarsrel.BedwarsRel;
-import io.github.bedwarsrel.game.Game;
-import io.github.bedwarsrel.game.Team;
-import io.github.bedwarsrel.game.TeamJoinMetaDataValue;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -102,12 +97,12 @@ public class AddTeamJoinCommand extends BaseCommand {
 
   @Override
   public String getDescription() {
-    return BedwarsRel._l("commands.addteamjoin.desc");
+    return BedwarsRevol._l("commands.addteamjoin.desc");
   }
 
   @Override
   public String getName() {
-    return BedwarsRel._l("commands.addteamjoin.name");
+    return BedwarsRevol._l("commands.addteamjoin.name");
   }
 
   @Override

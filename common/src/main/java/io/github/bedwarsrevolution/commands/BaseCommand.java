@@ -1,7 +1,7 @@
 package io.github.bedwarsrevolution.commands;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrel.utils.ChatWriter;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -37,12 +37,12 @@ public abstract class BaseCommand implements ICommand {
   @Override
   public boolean hasPermission(CommandSender sender) {
     if (!(sender instanceof Player)) {
-      sender.sendMessage(ChatWriter.pluginMessage("Only players should execute this command!"));
+      sender.sendMessage(ChatWriterNew.pluginMessage("Only players should execute this command!"));
       return false;
     }
 
     if (!sender.hasPermission("bw." + this.getPermission())) {
-      sender.sendMessage(ChatWriter
+      sender.sendMessage(ChatWriterNew
           .pluginMessage(ChatColor.RED + "You don't have permission to execute this command!"));
       return false;
     }
