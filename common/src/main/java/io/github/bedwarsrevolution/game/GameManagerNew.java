@@ -21,7 +21,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 public class GameManagerNew {
-  public static String gamesPath = "gamesContexts";
+  public static String gamesPath = "games";
   private Map<Player, GameContext> playerToGame = null;
   private List<GameContext> gamesContexts = null;
 

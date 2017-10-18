@@ -73,7 +73,7 @@ public class GameJoinSignNew {
       status = ChatColor.RED + BedwarsRevol._l("sign.gamestate.full");
     } else {
       status = BedwarsRevol._l("sign.gamestate."
-          + this.gameCtx.getState().toString().toLowerCase());
+          + this.gameCtx.getState().getTranslation());
     }
 
     return status;

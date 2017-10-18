@@ -49,6 +49,8 @@ import org.bukkit.scoreboard.Scoreboard;
  * Created by {maxos} 2017
  */
 public class GameStateWaiting extends GameState {
+  private static final String TRANSLATION = "waiting";
+
   private GameLobbyCountdownNew lobbyCountdown;
 
   public GameStateWaiting(GameContext ctx) {
@@ -315,7 +317,7 @@ public class GameStateWaiting extends GameState {
     if (team == null) {
       throw new IllegalStateException("No teams defined or no players joined");
     }
-    team.addPlayer(player);
+    team.addPlayer(playerCtx);
 //      if (!this.isAutobalanceEnabled()) {
 //        this.freePlayers.add(p);
 //      } else {
@@ -365,8 +367,8 @@ public class GameStateWaiting extends GameState {
   }
 
   private boolean isEnoughTeams() {
-    for (Collection<PlayerContext> players : this.ctx.getTeamsToPlayers().values()) {
-      if (players.isEmpty()) {
+    for (TeamNew team : this.ctx.getTeams().values()) {
+      if (team.getPlayers().isEmpty()) {
         return false;
       }
     }
@@ -380,11 +382,11 @@ public class GameStateWaiting extends GameState {
   private TeamNew getLowestTeam() {
     int lowestNum = Integer.MAX_VALUE;
     TeamNew lowestTeam = null;
-    for (Entry<TeamNew, Collection<PlayerContext>> entry : this.ctx.getTeamsToPlayers().entrySet()) {
-      int size = entry.getValue().size();
+    for (TeamNew team : this.ctx.getTeams().values()) {
+      int size = team.getPlayers().size();
       if (size < lowestNum) {
         lowestNum = size;
-        lowestTeam = entry.getKey();
+        lowestTeam = team;
       }
     }
     return lowestTeam;
@@ -616,6 +618,11 @@ public class GameStateWaiting extends GameState {
       event.setMotd(motdReplacePlaceholder(ChatColor.translateAlternateColorCodes('&',
           BedwarsRevol.getInstance().getConfig().getString("bungeecord.motds.lobby"))));
     }
+  }
+
+  @Override
+  public String getTranslation() {
+    return TRANSLATION;
   }
 
   private void updateScoreboard() {

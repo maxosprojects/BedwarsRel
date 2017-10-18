@@ -63,6 +63,8 @@ import org.bukkit.scoreboard.Scoreboard;
  * Created by {maxos} 2017
  */
 public class GameStateRunning extends GameState {
+  private static final String TRANSLATION = "running";
+
   private int timeLeft;
 
   public GameStateRunning(GameContext ctx) {
@@ -683,6 +685,11 @@ public class GameStateRunning extends GameState {
   public void onEventServerListPing(ServerListPingEvent event) {
     event.setMotd(motdReplacePlaceholder(ChatColor.translateAlternateColorCodes('&',
         BedwarsRevol.getInstance().getConfig().getString("bungeecord.motds.running"))));
+  }
+
+  @Override
+  public String getTranslation() {
+    return TRANSLATION;
   }
 
   private boolean handleDestroyTargetMaterial(PlayerContext playerCtx, Block block) {

@@ -39,6 +39,7 @@ public class TeamNew implements ConfigurationSerializable {
   private Location chestLoc;
   private Map<Class<? extends Upgrade>, Upgrade> upgrades = new HashMap<>();
   private GameContext gameCtx;
+  private List<PlayerContext> players = new ArrayList<>();
 
   public TeamNew(Map<String, Object> deserialize) {
     this.reset();
@@ -81,8 +82,7 @@ public class TeamNew implements ConfigurationSerializable {
     this.getChests().add(chestBlock);
   }
 
-  @SuppressWarnings("deprecation")
-  public boolean addPlayer(Player player) {
+  public boolean addPlayer(PlayerContext playerCtx) {
 
 //    BedwarsPlayerJoinTeamEvent playerJoinTeamEvent = new BedwarsPlayerJoinTeamEvent(this, player);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(playerJoinTeamEvent);
@@ -101,19 +101,19 @@ public class TeamNew implements ConfigurationSerializable {
       }
     }
 
-    String displayName = player.getDisplayName();
-    String playerListName = player.getPlayerListName();
-
-    if (BedwarsRevol.getInstance().getBooleanConfig("overwrite-names", false)) {
-      displayName = this.getChatColor() + ChatColor.stripColor(player.getName());
-      playerListName = this.getChatColor() + ChatColor.stripColor(player.getName());
-    }
-
-    if (BedwarsRevol.getInstance().getBooleanConfig("teamname-on-tab", true)) {
-      playerListName = this.getChatColor() + this.getName() + ChatColor.WHITE + " | "
-          + this.getChatColor() + ChatColor.stripColor(player.getDisplayName());
-    }
-
+//    String displayName = player.getDisplayName();
+//    String playerListName = player.getPlayerListName();
+//
+//    if (BedwarsRevol.getInstance().getBooleanConfig("overwrite-names", false)) {
+//      displayName = this.getChatColor() + ChatColor.stripColor(player.getName());
+//      playerListName = this.getChatColor() + ChatColor.stripColor(player.getName());
+//    }
+//
+//    if (BedwarsRevol.getInstance().getBooleanConfig("teamname-on-tab", true)) {
+//      playerListName = this.getChatColor() + this.getName() + ChatColor.WHITE + " | "
+//          + this.getChatColor() + ChatColor.stripColor(player.getDisplayName());
+//    }
+//
 //    BedwarsPlayerSetNameEvent playerSetNameEvent =
 //        new BedwarsPlayerSetNameEvent(this, displayName, playerListName, player);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(playerSetNameEvent);
@@ -123,6 +123,8 @@ public class TeamNew implements ConfigurationSerializable {
 //      player.setPlayerListName(playerSetNameEvent.getPlayerListName());
 //    }
 
+    this.players.add(playerCtx);
+    Player player = playerCtx.getPlayer();
     if (BedwarsRevol.getInstance().isSpigot()) {
       this.getScoreboardTeam().addEntry(player.getName());
     } else {
@@ -166,16 +168,6 @@ public class TeamNew implements ConfigurationSerializable {
     return this.getTargetHeadBlock().getBlock();
   }
 
-  public List<PlayerContext> getPlayers() {
-    List<PlayerContext> playerContexts = new ArrayList<>();
-    for (PlayerContext playerCtx : this.gameCtx.getPlayers()) {
-      if (playerCtx.getTeam() == this) {
-        playerContexts.add(playerCtx);
-      }
-    }
-    return playerContexts;
-  }
-
   public boolean isBedDestroyed() {
     Material targetMaterial = this.gameCtx.getTargetMaterial();
 
@@ -205,8 +197,9 @@ public class TeamNew implements ConfigurationSerializable {
     }
   }
 
-  @SuppressWarnings("deprecation")
-  public void removePlayer(Player player) {
+  public void removePlayer(PlayerContext playerCtx) {
+    Player player = playerCtx.getPlayer();
+    this.players.remove(playerCtx);
     if (BedwarsRevol.getInstance().isSpigot()) {
       if (this.getScoreboardTeam().hasEntry(player.getName())) {
         this.getScoreboardTeam().removeEntry(player.getName());

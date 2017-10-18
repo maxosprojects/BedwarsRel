@@ -183,6 +183,10 @@ public class GameContext {
 
   public void removePlayer(PlayerContext playerCtx) {
     this.playerContexts.remove(playerCtx.getPlayer());
+    TeamNew team = playerCtx.getTeam();
+    if (team != null) {
+      team.removePlayer(playerCtx);
+    }
   }
 
   public void updateSigns() {
@@ -236,14 +240,6 @@ public class GameContext {
           .sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
               ._l(BedwarsRevol.getInstance().getServer().getConsoleSender(), "errors.savesign")));
     }
-  }
-
-  public Map<TeamNew, Collection<PlayerContext>> getTeamsToPlayers() {
-    Multimap<TeamNew, PlayerContext> map = ArrayListMultimap.create();
-    for (PlayerContext playerCtx : this.playerContexts.values()) {
-      map.put(playerCtx.getTeam(), playerCtx);
-    }
-    return map.asMap();
   }
 
   public TeamNew getTeamOfEnderChest(Block chest) {
@@ -444,6 +440,8 @@ public class GameContext {
       return false;
     }
 
+    this.loadItemShopCategories();
+
     if (sender instanceof Player) {
       sender.sendMessage(
           ChatWriterNew.pluginMessage(ChatColor.GREEN + BedwarsRevol._l(sender, "success.gamerun")));
@@ -452,6 +450,10 @@ public class GameContext {
     this.state = new GameStateWaiting(this);
     this.updateSigns();
     return true;
+  }
+
+  public void loadItemShopCategories() {
+    this.shopCategories = MerchantCategory.loadCategories(BedwarsRevol.getInstance().getShopConfig());
   }
 
   public void addRunningTask(BukkitTask task) {

@@ -41,7 +41,7 @@ public class Shop {
     this.player = playerCtx.getPlayer();
     this.categories = categories;
     for (MerchantCategory cat : this.categories) {
-      categoryMap.put(cat.getName(), cat);
+      this.categoryMap.put(cat.getName(), cat);
     }
   }
 

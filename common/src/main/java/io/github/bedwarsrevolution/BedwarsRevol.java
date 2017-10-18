@@ -779,6 +779,8 @@ public class BedwarsRevol extends JavaPlugin {
     this.registerCommands();
     this.registerListeners();
 
+    this.gameManager = new GameManagerNew();
+
     // bungeecord
     if (BedwarsRevol.getInstance().isBungee()) {
       this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -791,7 +793,6 @@ public class BedwarsRevol extends JavaPlugin {
 
     // Loading
     this.scoreboardManager = Bukkit.getScoreboardManager();
-    this.gameManager = new GameManagerNew();
     this.gameManager.loadGames();
     this.startTimeListener();
 //    this.startMetricsIfEnabled();

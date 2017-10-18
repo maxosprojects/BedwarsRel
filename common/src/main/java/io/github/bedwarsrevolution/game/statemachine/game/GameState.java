@@ -149,6 +149,8 @@ public abstract class GameState {
     event.setCancelled(true);
   }
 
+  public abstract String getTranslation();
+
 //  private String getStatus(Game game) {
 //    String status = null;
 //    if (game.getState() == GameState.WAITING && game.isFull()) {

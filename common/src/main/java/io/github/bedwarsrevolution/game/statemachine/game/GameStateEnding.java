@@ -29,6 +29,7 @@ import org.bukkit.event.server.ServerListPingEvent;
  * Created by {maxos} 2017
  */
 public class GameStateEnding extends GameState {
+  private static final String TRANSLATION = "running";
 
   public GameStateEnding(GameContext ctx) {
     super(ctx);
@@ -145,6 +146,11 @@ public class GameStateEnding extends GameState {
   public void onEventServerListPing(ServerListPingEvent event) {
     event.setMotd(motdReplacePlaceholder(ChatColor.translateAlternateColorCodes('&',
         BedwarsRevol.getInstance().getConfig().getString("bungeecord.motds.running"))));
+  }
+
+  @Override
+  public String getTranslation() {
+    return TRANSLATION;
   }
 
 }
