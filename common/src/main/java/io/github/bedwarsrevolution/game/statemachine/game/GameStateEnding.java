@@ -95,6 +95,7 @@ public class GameStateEnding extends GameState {
     PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
     if (!playerCtx.isTeleporting()) {
       this.playerLeaves(playerCtx, false);
+      playerCtx.setTeleporting(false);
     }
   }
 

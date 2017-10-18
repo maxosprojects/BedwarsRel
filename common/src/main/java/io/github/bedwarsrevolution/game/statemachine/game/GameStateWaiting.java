@@ -5,6 +5,7 @@ import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.GameLobbyCountdownNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerStateWaitingGame;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.Collection;
@@ -195,6 +196,7 @@ public class GameStateWaiting extends GameState {
     PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
     if (!playerCtx.isTeleporting()) {
       this.playerLeaves(playerCtx, false);
+      playerCtx.setTeleporting(false);
     }
   }
 
@@ -274,8 +276,7 @@ public class GameStateWaiting extends GameState {
 //        final Location location = this.getPlayerTeleportLocation(p);
 //        if (!p.getLocation().equals(location)) {
 //          this.setTeleportingIfWorldChange(p, location);
-//          // TODO: Figure out what was this insane logic here for (not bungee outer if and
-//          // bungee inner if)
+//          // TODO: Figure out what was this insane logic here for (not bungee outer if and bungee inner if)
 //          if (BedwarsRel.getInstance().isBungee()) {
 //            new BukkitRunnable() {
 //
@@ -331,6 +332,12 @@ public class GameStateWaiting extends GameState {
 
 //    BedwarsPlayerJoinedEvent joinEvent = new BedwarsPlayerJoinedEvent(this, null, p);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(joinEvent);
+
+    playerCtx.setTeleportingIfWorldChange(this.ctx.getLobby());
+    player.teleport(this.ctx.getLobby());
+    playerCtx.setTeleporting(false);
+
+    playerCtx.setState(new PlayerStateWaitingGame());
 
     this.updateScoreboard();
     this.ctx.updateSigns();
@@ -621,8 +628,17 @@ public class GameStateWaiting extends GameState {
   }
 
   @Override
-  public String getTranslation() {
+  protected String getStatusKey() {
     return TRANSLATION;
+  }
+
+  @Override
+  public String getStatus() {
+    if (this.ctx.isFull()) {
+      return ChatColor.RED + BedwarsRevol._l("sign.gamestate.full");
+    } else {
+      return super.getStatus();
+    }
   }
 
   private void updateScoreboard() {

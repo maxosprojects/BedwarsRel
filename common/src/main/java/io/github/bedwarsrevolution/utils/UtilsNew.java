@@ -778,7 +778,7 @@ public final class UtilsNew {
   }
 
   public static String truncate(String text, int length) {
-    return text.substring(0, length);
+    return text.length() > length ? text.substring(0, length) : text;
   }
 
 }

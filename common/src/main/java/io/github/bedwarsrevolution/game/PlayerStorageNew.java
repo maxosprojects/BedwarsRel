@@ -59,11 +59,6 @@ public class PlayerStorageNew {
     this.player.setPlayerListName(this.listName);
     this.player.setDisplayName(this.displayName);
     this.player.updateInventory();
-    if (Boolean.TRUE == true) {
-      throw new RuntimeException(
-          "don't forget to set 'isTeleporting' and teleport the player back");
-    }
-//    this.player.teleport(this.location);
   }
 
   public void store() {

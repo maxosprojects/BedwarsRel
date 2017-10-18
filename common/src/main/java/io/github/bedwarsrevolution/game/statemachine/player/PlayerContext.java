@@ -30,6 +30,7 @@ public class PlayerContext {
   @Getter
   private Player player;
   @Getter
+  @Setter
   private PlayerState state = new PlayerStateWaitingGame();
   @Getter
   @Setter
@@ -141,6 +142,8 @@ public class PlayerContext {
 
   public void restoreInventory() {
     this.storage.restore();
+    this.teleporting = true;
+    this.player.teleport(this.storage.getLocation());
   }
 
   public void restoreLocation() {
@@ -162,7 +165,7 @@ public class PlayerContext {
     this.player.updateInventory();
   }
 
-  protected void setTeleportingIfWorldChange(Location location) {
+  public void setTeleportingIfWorldChange(Location location) {
     if (!this.player.getWorld().getName().equals(location.getWorld().getName())) {
       this.teleporting = true;
     }

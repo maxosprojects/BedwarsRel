@@ -130,8 +130,6 @@ public class TeamNew implements ConfigurationSerializable {
     } else {
       this.getScoreboardTeam().addPlayer(player);
     }
-    BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player).getPlayerContext(player)
-        .respawn();
 
     return true;
   }
