@@ -1,5 +1,7 @@
 package io.github.bedwarsrevolution.game.statemachine.player;
 
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -12,39 +14,51 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
  */
 public class PlayerStateWaitingRespawn extends PlayerState {
 
+  public PlayerStateWaitingRespawn(PlayerContext playerCtx) {
+    super(playerCtx);
+  }
+
   @Override
-  public void onDeath(PlayerContext playerCtx) {
+  public void onDeath() {
 
   }
 
   @Override
-  public void onDamage(PlayerContext playerCtx, EntityDamageEvent event) {
+  public void onDamage(EntityDamageEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onDrop(PlayerContext playerCtx, PlayerDropItemEvent event) {
+  public void onDrop(PlayerDropItemEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onFly(PlayerContext playerCtx, PlayerToggleFlightEvent event) {
+  public void onFly(PlayerToggleFlightEvent event) {
     event.setCancelled(false);
   }
 
   @Override
-  public void onBowShot(PlayerContext playerCtx, EntityShootBowEvent event) {
+  public void onBowShot(EntityShootBowEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onInteractEntity(PlayerContext playerCtx, PlayerInteractEntityEvent event) {
+  public void onInteractEntity(PlayerInteractEntityEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onInventoryClick(PlayerContext playerCtx, InventoryClickEvent event) {
+  public void onInventoryClick(InventoryClickEvent event) {
     event.setCancelled(true);
+  }
+
+  @Override
+  public void setGameMode() {
+    Player player = this.playerCtx.getPlayer();
+    player.setAllowFlight(true);
+    player.setFlying(true);
+    player.setGameMode(GameMode.SPECTATOR);
   }
 
 }

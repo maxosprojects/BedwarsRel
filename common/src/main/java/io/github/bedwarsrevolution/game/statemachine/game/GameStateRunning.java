@@ -96,7 +96,7 @@ public class GameStateRunning extends GameStateNew {
           player.getName()));
     }
 
-    playerCtx.getState().onDamage(playerCtx, event);
+    playerCtx.getState().onDamage(event);
 
     this.checkGameOver();
   }
@@ -104,25 +104,25 @@ public class GameStateRunning extends GameStateNew {
   @Override
   public void onEventDrop(PlayerDropItemEvent event) {
     PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
-    playerCtx.getState().onDrop(playerCtx, event);
+    playerCtx.getState().onDrop(event);
   }
 
   @Override
   public void onEventFly(PlayerToggleFlightEvent event) {
     PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
-    playerCtx.getState().onFly(playerCtx, event);
+    playerCtx.getState().onFly(event);
   }
 
   @Override
   public void onEventBowShot(EntityShootBowEvent event) {
     PlayerContext playerCtx = this.ctx.getPlayerContext((Player) event.getEntity());
-    playerCtx.getState().onBowShot(playerCtx, event);
+    playerCtx.getState().onBowShot(event);
   }
 
   @Override
   public void onEventInteractEntity(PlayerInteractEntityEvent event) {
     PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
-    playerCtx.getState().onInteractEntity(playerCtx, event);
+    playerCtx.getState().onInteractEntity(event);
   }
 
   @Override
@@ -138,7 +138,7 @@ public class GameStateRunning extends GameStateNew {
         playerCtx.getPlayer(), "ingame.shop.name"))) {
       return;
     }
-    playerCtx.getState().onInventoryClick(playerCtx, event);
+    playerCtx.getState().onInventoryClick(event);
   }
 
   @Override
@@ -328,15 +328,6 @@ public class GameStateRunning extends GameStateNew {
   }
 
   @Override
-  public void onEventPlayerChangeWorld(PlayerChangedWorldEvent event) {
-    PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
-    if (!playerCtx.isTeleporting()) {
-      this.playerLeaves(playerCtx, false);
-      playerCtx.setTeleporting(false);
-    }
-  }
-
-  @Override
   public void onEventInventoryOpen(InventoryOpenEvent event) {
     if (event.getInventory().getType() == InventoryType.ENCHANTING
         || event.getInventory().getType() == InventoryType.BREWING
@@ -388,7 +379,7 @@ public class GameStateRunning extends GameStateNew {
 
   @Override
   public void playerLeaves(PlayerContext playerCtx, boolean kicked) {
-    playerCtx.getState().leave(playerCtx, kicked);
+    playerCtx.getState().leave(kicked);
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
     this.ctx.removePlayer(playerCtx);
@@ -449,33 +440,33 @@ public class GameStateRunning extends GameStateNew {
         }
       }
 
-      if (brokenBlock.getType() == Material.ENDER_CHEST) {
-        for (TeamNew team : this.ctx.getTeams().values()) {
-          List<Block> teamChests = team.getChests();
-          if (teamChests.contains(brokenBlock)) {
-            team.removeChest(brokenBlock);
-            for (PlayerContext aPlayerCtx : team.getPlayers()) {
-              Player aPlayer = aPlayerCtx.getPlayer();
-              if (aPlayer.isOnline()) {
-                aPlayer.sendMessage(ChatWriterNew.pluginMessage(
-                    BedwarsRevol._l(aPlayer, "ingame.teamchestdestroy")));
-              }
-            }
-            break;
-          }
-        }
-
-        // Drop ender chest
-        ItemStack enderChest = new ItemStack(Material.ENDER_CHEST, 1);
-        ItemMeta meta = enderChest.getItemMeta();
-        meta.setDisplayName(BedwarsRevol._l("ingame.teamchest"));
-        enderChest.setItemMeta(meta);
-
-        event.setCancelled(true);
-        brokenBlock.getDrops().clear();
-        brokenBlock.setType(Material.AIR);
-        brokenBlock.getWorld().dropItemNaturally(brokenBlock.getLocation(), enderChest);
-      }
+//      if (brokenBlock.getType() == Material.ENDER_CHEST) {
+//        for (TeamNew team : this.ctx.getTeams().values()) {
+//          List<Block> teamChests = team.getChests();
+//          if (teamChests.contains(brokenBlock)) {
+//            team.removeChest(brokenBlock);
+//            for (PlayerContext aPlayerCtx : team.getPlayers()) {
+//              Player aPlayer = aPlayerCtx.getPlayer();
+//              if (aPlayer.isOnline()) {
+//                aPlayer.sendMessage(ChatWriterNew.pluginMessage(
+//                    BedwarsRevol._l(aPlayer, "ingame.teamchestdestroy")));
+//              }
+//            }
+//            break;
+//          }
+//        }
+//
+//        // Drop ender chest
+//        ItemStack enderChest = new ItemStack(Material.ENDER_CHEST, 1);
+//        ItemMeta meta = enderChest.getItemMeta();
+//        meta.setDisplayName(BedwarsRevol._l("ingame.teamchest"));
+//        enderChest.setItemMeta(meta);
+//
+//        event.setCancelled(true);
+//        brokenBlock.getDrops().clear();
+//        brokenBlock.setType(Material.AIR);
+//        brokenBlock.getWorld().dropItemNaturally(brokenBlock.getLocation(), enderChest);
+//      }
 
       for (ItemStack drop : brokenBlock.getDrops()) {
         if (!drop.getType().equals(brokenBlock.getType())) {

@@ -1,6 +1,7 @@
 package io.github.bedwarsrevolution.game.statemachine.player;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -15,39 +16,42 @@ import org.bukkit.inventory.meta.SkullMeta;
  * Created by {maxos} 2017
  */
 public class PlayerStateSpectator extends PlayerState {
+  public PlayerStateSpectator(PlayerContext playerCtx) {
+    super(playerCtx);
+  }
 
   @Override
-  public void onDeath(PlayerContext playerCtx) {
+  public void onDeath() {
 
   }
 
   @Override
-  public void onDamage(PlayerContext playerCtx, EntityDamageEvent event) {
+  public void onDamage(EntityDamageEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onDrop(PlayerContext playerCtx, PlayerDropItemEvent event) {
+  public void onDrop(PlayerDropItemEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onFly(PlayerContext playerCtx, PlayerToggleFlightEvent event) {
+  public void onFly(PlayerToggleFlightEvent event) {
     event.setCancelled(false);
   }
 
   @Override
-  public void onBowShot(PlayerContext playerCtx, EntityShootBowEvent event) {
+  public void onBowShot(EntityShootBowEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onInteractEntity(PlayerContext playerCtx, PlayerInteractEntityEvent event) {
+  public void onInteractEntity(PlayerInteractEntityEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onInventoryClick(PlayerContext playerCtx, InventoryClickEvent event) {
+  public void onInventoryClick(InventoryClickEvent event) {
 //    if (game.isSpectator(player)
 //        || (game.getCycle() instanceof BungeeGameCycle && game.getCycle().isEndGameRunning()
 //        && BedwarsRel.getInstance().getBooleanConfig("bungeecord.endgame-in-lobby", true))) {
@@ -60,7 +64,7 @@ public class PlayerStateSpectator extends PlayerState {
     event.setCancelled(true);
 
     if (!event.getInventory().getName().equals(
-        BedwarsRevol._l(playerCtx.getPlayer(), "ingame.spectator"))) {
+        BedwarsRevol._l(this.playerCtx.getPlayer(), "ingame.spectator"))) {
       return;
     }
 
@@ -68,29 +72,40 @@ public class PlayerStateSpectator extends PlayerState {
       case SKULL_ITEM:
         SkullMeta meta = (SkullMeta) clickedStack.getItemMeta();
         Player teleportTo = BedwarsRevol.getInstance().getServer().getPlayer(meta.getOwner());
-        if (playerCtx.getGameContext().getPlayerContext(teleportTo) == null) {
+        if (this.playerCtx.getGameContext().getPlayerContext(teleportTo) == null) {
           return;
         }
-        playerCtx.getPlayer().teleport(teleportTo);
-        playerCtx.getPlayer().closeInventory();
+        this.playerCtx.getPlayer().teleport(teleportTo);
+        this.playerCtx.getPlayer().closeInventory();
         break;
       case SLIME_BALL:
         // TODO: implement what was in Game.playerLeave
-        // playerCtx.leave(false);
+        // this.playerCtx.leave(false);
       case COMPASS:
         // TODO: implement what was in game.openSpectatorCompass();
-        // playerCtx.openSpectatorCompass(false);
+        // this.playerCtx.openSpectatorCompass(false);
     }
   }
 
   @Override
-  public void leave(PlayerContext playerCtx, boolean kicked) {
+  public void leave(boolean kicked) {
     // Override default behavior to not let anyone know
   }
 
   @Override
   public boolean isSpectator() {
     return true;
+  }
+
+  @Override
+  public void setGameMode() {
+//    if (this.playerCtx.getState().isSpectator()) {
+//        && !(this.getCycle() instanceof BungeeGameCycle && this.getCycle().isEndGameRunning()
+//        && BedwarsRel.getInstance().getBooleanConfig("bungeecord.endgame-in-lobby", true))) {
+    Player player = this.playerCtx.getPlayer();
+    player.setAllowFlight(true);
+    player.setFlying(true);
+    player.setGameMode(GameMode.SPECTATOR);
   }
 
 }

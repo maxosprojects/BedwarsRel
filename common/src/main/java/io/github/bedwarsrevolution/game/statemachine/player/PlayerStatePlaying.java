@@ -35,8 +35,12 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public class PlayerStatePlaying extends PlayerState {
 
+  public PlayerStatePlaying(PlayerContext playerCtx) {
+    super(playerCtx);
+  }
+
   @Override
-  public void onDeath(PlayerContext playerCtx) {
+  public void onDeath() {
 //    if (!BedwarsRel.getInstance().getBooleanConfig("player-drops", false)) {
 //      pde.getDrops().clear();
 //    }
@@ -65,14 +69,14 @@ public class PlayerStatePlaying extends PlayerState {
 //      }
 //    }
 
-    TeamNew team = playerCtx.getTeam();
-    DamageHolder damage = playerCtx.getLastDamagedBy();
+    TeamNew team = this.playerCtx.getTeam();
+    DamageHolder damage = this.playerCtx.getLastDamagedBy();
     boolean damageCausedRecently = damage.wasCausedRecently();
 
 //    PlayerStatistic diedPlayerStats = null;
 //    PlayerStatistic killerPlayerStats = null;
 //    if (BedwarsRevol.getInstance().statisticsEnabled()) {
-//      diedPlayerStats = BedwarsRevol.getInstance().getPlayerStatisticManager().getStatistic(playerCtx.getPlayer());
+//      diedPlayerStats = BedwarsRevol.getInstance().getPlayerStatisticManager().getStatistic(this.playerCtx.getPlayer());
 //      boolean onlyOnBedDestroyed = BedwarsRevol.getInstance()
 //          .getBooleanConfig("statistics.bed-destroyed-kills", false);
 //      boolean teamBedDestroyed = team.isBedDestroyed();
@@ -120,7 +124,7 @@ public class PlayerStatePlaying extends PlayerState {
         }
       }
 
-      GameContext ctx = playerCtx.getGameContext();
+      GameContext ctx = this.playerCtx.getGameContext();
       ctx.sendTeamDeadMessage(team);
       return;
     }
@@ -175,36 +179,37 @@ public class PlayerStatePlaying extends PlayerState {
 
 
 
-    if (!playerCtx.isVirtuallyAlive()) {
+    if (!this.playerCtx.isVirtuallyAlive()) {
       return;
     }
 
-    playerCtx.clear(false);
-    playerCtx.respawn();
+    this.playerCtx.clear(false);
+    this.playerCtx.respawn();
 
-    playerCtx.setVirtuallyAlive(false);
+    this.playerCtx.setVirtuallyAlive(false);
 
 //    if (this.getState() == GameStateOld.RUNNING && this.isStopping()) {
 //      String title = ChatColor.translateAlternateColorCodes('&',
 //          BedwarsRel._l(player, "ingame.title.youdied"));
 //      player.sendTitle(title, "", 0, 40, 10);
 //    }
-    Player player = playerCtx.getPlayer();
+    Player player = this.playerCtx.getPlayer();
     player.setGameMode(GameMode.SPECTATOR);
-    Location location = playerCtx.getGameContext().getTopMiddle();
-    playerCtx.setTeleportingIfWorldChange(location);
+    Location location = this.playerCtx.getGameContext().getTopMiddle();
+    this.playerCtx.setTeleportingIfWorldChange(location);
     player.teleport(location);
+    this.playerCtx.setTeleporting(false);
 
-    this.runWaitingRespawn(playerCtx);
+    this.runWaitingRespawn();
   }
 
-  private void runWaitingRespawn(final PlayerContext playerCtx) {
+  private void runWaitingRespawn() {
     // Task with countdown till respawn
     BukkitTask task = new BukkitRunnable() {
       private int respawnIn = 5;
       @Override
       public void run() {
-        Player player = playerCtx.getPlayer();
+        Player player = PlayerStatePlaying.this.playerCtx.getPlayer();
           String title = ChatColor.translateAlternateColorCodes('&',
               BedwarsRevol._l(player, "ingame.title.youdied"));
           String subtitle = ChatColor.translateAlternateColorCodes('&',
@@ -214,27 +219,28 @@ public class PlayerStatePlaying extends PlayerState {
         this.respawnIn--;
         if (this.respawnIn == 0) {
           this.cancel();
-          Location location = playerCtx.getTeam().getSpawnLocation();
-          playerCtx.setTeleportingIfWorldChange(location);
+          Location location = PlayerStatePlaying.this.playerCtx.getTeam().getSpawnLocation();
+          PlayerStatePlaying.this.playerCtx.setTeleportingIfWorldChange(location);
           player.teleport(location);
+          PlayerStatePlaying.this.playerCtx.setTeleporting(false);
           player.setGameMode(GameMode.SURVIVAL);
-          playerCtx.setVirtuallyAlive(true);
+          PlayerStatePlaying.this.playerCtx.setVirtuallyAlive(true);
         }
       }
     }.runTaskTimer(BedwarsRevol.getInstance(), 0, 20);
-    playerCtx.getGameContext().addWorker(task);
+    this.playerCtx.getGameContext().addWorker(task);
   }
 
   @Override
-  public void onDamage(PlayerContext playerCtx, EntityDamageEvent event) {
-    if (playerCtx.isProtectd() && event.getCause() != DamageCause.VOID) {
+  public void onDamage(EntityDamageEvent event) {
+    if (this.playerCtx.isProtectd() && event.getCause() != DamageCause.VOID) {
       event.setCancelled(true);
       return;
     }
 
     if (event.getCause() == DamageCause.VOID) {
       event.setCancelled(true);
-      this.onDeath(playerCtx);
+      this.onDeath();
       return;
     }
 
@@ -256,30 +262,30 @@ public class PlayerStatePlaying extends PlayerState {
     }
 
     if (damager != null) {
-      playerCtx.setDamager(damager);
+      this.playerCtx.setDamager(damager);
     }
 
-    if (event.getDamage() >= playerCtx.getPlayer().getHealth()) {
+    if (event.getDamage() >= this.playerCtx.getPlayer().getHealth()) {
       event.setCancelled(true);
-      this.onDeath(playerCtx);
+      this.onDeath();
     }
   }
 
   @Override
-  public void onDrop(PlayerContext playerCtx, PlayerDropItemEvent event) {
+  public void onDrop(PlayerDropItemEvent event) {
   }
 
   @Override
-  public void onFly(PlayerContext playerCtx, PlayerToggleFlightEvent event) {
+  public void onFly(PlayerToggleFlightEvent event) {
     event.setCancelled(true);
   }
 
   @Override
-  public void onBowShot(PlayerContext playerCtx, EntityShootBowEvent event) {
+  public void onBowShot(EntityShootBowEvent event) {
     ItemStack bow = event.getBow();
     // Take away one arrow from player if shot from a bow with "infinity" enchantment
     if (bow.hasItemMeta() && bow.getItemMeta().hasEnchant(Enchantment.ARROW_INFINITE)) {
-      Inventory inv = playerCtx.getPlayer().getInventory();
+      Inventory inv = this.playerCtx.getPlayer().getInventory();
       int slot = inv.first(Material.ARROW);
       ItemStack stack = inv.getItem(slot);
       stack.setAmount(stack.getAmount() - 1);
@@ -287,7 +293,7 @@ public class PlayerStatePlaying extends PlayerState {
   }
 
   @Override
-  public void onInteractEntity(PlayerContext playerCtx, PlayerInteractEntityEvent event) {
+  public void onInteractEntity(PlayerInteractEntityEvent event) {
 //    List<Material> preventClickEggs = Arrays.asList(
 //        Material.MONSTER_EGG,
 //        Material.MONSTER_EGGS,
@@ -325,19 +331,24 @@ public class PlayerStatePlaying extends PlayerState {
 //    }
 
     event.setCancelled(true);
-    Shop shop = playerCtx.getShop();
+    Shop shop = this.playerCtx.getShop();
     shop.resetCurrentCategory();
     shop.render();
   }
 
   @Override
-  public void onInventoryClick(PlayerContext playerCtx, InventoryClickEvent event) {
+  public void onInventoryClick(InventoryClickEvent event) {
     event.setCancelled(true);
     ItemStack clickedStack = event.getCurrentItem();
     if (clickedStack == null) {
       return;
     }
-    playerCtx.getShop().handleClick(event);
+    this.playerCtx.getShop().handleClick(event);
+  }
+
+  @Override
+  public void setGameMode() {
+    this.playerCtx.getPlayer().setGameMode(GameMode.SURVIVAL);
   }
 
 }

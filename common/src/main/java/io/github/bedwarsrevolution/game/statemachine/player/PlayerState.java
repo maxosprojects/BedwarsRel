@@ -17,23 +17,28 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
  * Created by {maxos} 2017
  */
 public abstract class PlayerState {
+  protected final PlayerContext playerCtx;
 
-  public abstract void onDeath(PlayerContext playerCtx);
+  public PlayerState(PlayerContext playerCtx) {
+    this.playerCtx = playerCtx;
+  }
 
-  public abstract void onDamage(PlayerContext playerCtx, EntityDamageEvent event);
+  public abstract void onDeath();
 
-  public abstract void onDrop(PlayerContext playerCtx, PlayerDropItemEvent event);
+  public abstract void onDamage(EntityDamageEvent event);
 
-  public abstract void onFly(PlayerContext playerCtx, PlayerToggleFlightEvent event);
+  public abstract void onDrop(PlayerDropItemEvent event);
 
-  public abstract void onBowShot(PlayerContext playerCtx, EntityShootBowEvent event);
+  public abstract void onFly(PlayerToggleFlightEvent event);
 
-  public abstract void onInteractEntity(PlayerContext playerCtx, PlayerInteractEntityEvent event);
+  public abstract void onBowShot(EntityShootBowEvent event);
 
-  public abstract void onInventoryClick(PlayerContext playerCtx, InventoryClickEvent event);
+  public abstract void onInteractEntity(PlayerInteractEntityEvent event);
 
-  public void leave(PlayerContext playerCtx, boolean kicked) {
-    for (PlayerContext aPlayerCtx : playerCtx.getGameContext().getPlayers()) {
+  public abstract void onInventoryClick(InventoryClickEvent event);
+
+  public void leave(boolean kicked) {
+    for (PlayerContext aPlayerCtx : this.playerCtx.getGameContext().getPlayers()) {
       Player aPlayer = aPlayerCtx.getPlayer();
       if (aPlayer.isOnline()) {
         String msgKey;
@@ -45,8 +50,8 @@ public abstract class PlayerState {
         aPlayer.sendMessage(
             ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
                 ._l(aPlayer, msgKey, ImmutableMap.of("player",
-                    UtilsNew.getPlayerWithTeamString(playerCtx.getPlayer(),
-                        playerCtx.getTeam(), ChatColor.RED) + ChatColor.RED))));
+                    UtilsNew.getPlayerWithTeamString(this.playerCtx.getPlayer(),
+                        this.playerCtx.getTeam(), ChatColor.RED) + ChatColor.RED))));
       }
     }
   }
@@ -55,4 +60,5 @@ public abstract class PlayerState {
     return false;
   }
 
+  public abstract void setGameMode();
 }

@@ -5,12 +5,17 @@ import io.github.bedwarsrevolution.game.GameCheckResult;
 import io.github.bedwarsrevolution.game.GameJoinSignNew;
 import io.github.bedwarsrevolution.game.GameLobbyCountdownNew;
 import io.github.bedwarsrevolution.game.GameManagerNew;
+import io.github.bedwarsrevolution.game.PlayerStorageNew;
 import io.github.bedwarsrevolution.game.RegionNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.RespawnProtectionRunnableNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.shop.MerchantCategory;
+import io.github.bedwarsrevolution.shop.upgrades.Upgrade;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeItem;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeRegistry;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeScope;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.io.File;
@@ -25,6 +30,7 @@ import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -33,9 +39,11 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.util.Vector;
 
 /**
  * Created by {maxos} 2017
@@ -423,7 +431,7 @@ public class GameContext {
     return GameCheckResult.OK;
   }
 
-  public boolean start(CommandSender sender) {
+  public boolean load(CommandSender sender) {
 //    if (this.state != GameState.STOPPED) {
 //      sender
 //          .sendMessage(
@@ -452,6 +460,180 @@ public class GameContext {
 
   public void loadItemShopCategories() {
     this.shopCategories = MerchantCategory.loadCategories(BedwarsRevol.getInstance().getShopConfig());
+  }
+
+  public boolean start(CommandSender sender) {
+//    if (this.state != GameState.WAITING) {
+//      sender.sendMessage(
+//          ChatWriter
+//              .pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.startoutofwaiting")));
+//      return false;
+//    }
+//
+//    BedwarsGameStartEvent startEvent = new BedwarsGameStartEvent(this);
+//    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(startEvent);
+//
+//    if (startEvent.isCancelled()) {
+//      return false;
+//    }
+
+//    this.isOver = false;
+    for (PlayerContext aPlayerCtx : this.getPlayers()) {
+      Player player = aPlayerCtx.getPlayer();
+      if (player.isOnline()) {
+        player.sendMessage(
+            ChatWriterNew.pluginMessage(
+                ChatColor.GREEN + BedwarsRevol._l(player, "ingame.gamestarting")));
+      }
+    }
+
+    // load shop categories again (if shop was changed)
+    this.loadItemShopCategories();
+
+    this.runningTasks.clear();
+    for (PlayerContext playerCtx : this.playerContexts.values()) {
+      playerCtx.clear(true);
+    }
+    this.preparePlayersForBattle();
+//    this.clearProtections();
+//    this.moveFreePlayersToTeam();
+    this.makeTeamsReady();
+
+//    this.cycle.onGameStart();
+    this.startResourceSpawners();
+
+    // Update world time before game starts
+    this.getRegion().getWorld().setTime(this.time);
+
+    this.teleportPlayersToTeamSpawn();
+
+//    this.state = GameState.RUNNING;
+    this.state = new GameStateRunning(this);
+
+    for (PlayerContext playerCtx : this.getPlayers()) {
+      playerCtx.getState().setGameMode();
+//      this.setPlayerGameMode(playerCtx);
+      this.setPlayerVisibility(playerCtx);
+    }
+
+    this.startActionBarRunnable();
+    this.updateScoreboard();
+
+    if (BedwarsRel.getInstance().getBooleanConfig("store-game-records", true)) {
+      this.displayRecord();
+    }
+
+    this.startTimerCountdown();
+
+    if (BedwarsRel.getInstance().getBooleanConfig("titles.map.enabled", false)) {
+      this.displayMapInfo();
+    }
+
+    this.updateSigns();
+
+    if (BedwarsRel.getInstance().getBooleanConfig("global-messages", true)) {
+      for (Player aPlayer : BedwarsRel.getInstance().getServer().getOnlinePlayers()) {
+        aPlayer.sendMessage(ChatWriter.pluginMessage(ChatColor.GREEN
+            + BedwarsRel._l(aPlayer, "ingame.gamestarted",
+            ImmutableMap.of("game", this.getRegion().getName()))));
+      }
+      BedwarsRel.getInstance().getServer().getConsoleSender()
+          .sendMessage(ChatWriter.pluginMessage(ChatColor.GREEN
+              + BedwarsRel
+              ._l(BedwarsRel.getInstance().getServer().getConsoleSender(), "ingame.gamestarted",
+                  ImmutableMap.of("game", this.getRegion().getName()))));
+    }
+
+    BedwarsGameStartedEvent startedEvent = new BedwarsGameStartedEvent(this);
+    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(startedEvent);
+
+    return true;
+  }
+
+  private void teleportPlayersToTeamSpawn() {
+    for (TeamNew team : this.teams.values()) {
+      for (PlayerContext playerCtx : team.getPlayers()) {
+        Player player = playerCtx.getPlayer();
+        player.setVelocity(new Vector(0, 0, 0));
+        player.setFallDistance(0.0F);
+        Location location = team.getSpawnLocation();
+        playerCtx.setTeleportingIfWorldChange(location);
+        player.teleport(location);
+        playerCtx.setTeleporting(false);
+//        if (!retainPlayerStorage && this.getPlayerStorage(player) != null) {
+//          this.getPlayerStorage(player).clean(true);
+//          this.getPlayerStorage(player).respawn();
+//        }
+      }
+    }
+  }
+
+  private void startResourceSpawners() {
+    for (ResourceSpawnerNew rs : this.getResourceSpawners()) {
+      rs.setCtx(this);
+      this.runningTasks.add(BedwarsRevol.getInstance().getServer().getScheduler().runTaskTimer(
+          BedwarsRevol.getInstance(), rs, Math.round((((double) rs.getInterval()) / 1000.0) * 20.0),
+          Math.round((((double) rs.getInterval()) / 1000.0) * 20.0)));
+    }
+  }
+
+  private void makeTeamsReady() {
+//    this.playingTeams.clear();
+    for (TeamNew team : this.teams.values()) {
+      team.getScoreboardTeam().setAllowFriendlyFire(
+          BedwarsRevol.getInstance().getConfig().getBoolean("friendlyfire"));
+//      if (team.getPlayers().size() == 0) {
+//        this.dropTargetBlock(team.getHeadTarget());
+//      } else {
+//        this.playingTeams.add(team);
+//      }
+      team.reset();
+      team.addChest(team.getChestLoc().getBlock());
+    }
+//    this.updateScoreboard();
+  }
+
+  private void preparePlayersForBattle() {
+    this.defaultUpgrades = (List<Map<String, Object>>) this.config.getList("default-player-inventory");
+    List<Upgrade> playerUpgrades = new ArrayList<>();
+    List<Upgrade> teamUpgrades = new ArrayList<>();
+    for (Map<String, Object> item : this.defaultUpgrades) {
+      Map<String, Object> elem = (Map<String, Object>) item.get("upgrade");
+      Upgrade upgrade = UpgradeRegistry.getUpgrade(
+          (String)elem.get("type"), (int)elem.get("level"));
+      if (upgrade instanceof UpgradeItem) {
+        UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);
+        temp.setItem(MerchantCategory.fixMeta(
+            ItemStack.deserialize((Map<String, Object>) item.get("item"))));
+        upgrade = temp;
+      }
+      if (elem.containsKey("permanent")) {
+        boolean permanent = (boolean) elem.get("permanent");
+        upgrade.setPermanent(permanent);
+      }
+      if (elem.containsKey("multiple")) {
+        boolean multiple = (boolean) elem.get("multiple");
+        upgrade.setMultiple(multiple);
+      }
+      if (upgrade.getScope() == UpgradeScope.PLAYER) {
+        playerUpgrades.add(upgrade);
+      } else {
+        teamUpgrades.add(upgrade);
+      }
+    }
+
+    for (PlayerContext playerCtx : this.getPlayers()) {
+      TeamNew team = playerCtx.getTeam();
+      for (Upgrade upgrade : playerUpgrades) {
+        playerCtx.addUpgrade(upgrade.create(this, team, playerCtx));
+      }
+       playerCtx.respawn();
+    }
+    for (TeamNew team : this.getTeams().values()) {
+      for (Upgrade upgrade : teamUpgrades) {
+        team.setUpgrade(upgrade.create(this, team, null));
+      }
+    }
   }
 
   public void addRunningTask(BukkitTask task) {

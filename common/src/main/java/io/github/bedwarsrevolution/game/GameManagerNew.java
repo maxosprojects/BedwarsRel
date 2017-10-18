@@ -307,7 +307,7 @@ public class GameManagerNew {
     }
 
     for (GameContext ctx : this.gamesContexts) {
-      if (ctx.start(BedwarsRevol.getInstance().getServer().getConsoleSender())) {
+      if (ctx.load(BedwarsRevol.getInstance().getServer().getConsoleSender())) {
 //        ctx.getCycle().onGameLoaded();
       } else {
         BedwarsRevol.getInstance().getServer().getConsoleSender()

@@ -97,7 +97,7 @@ public class GameStateWaiting extends GameStateNew {
       return;
     }
     PlayerContext playerCtx = this.ctx.getPlayerContext((Player) event.getWhoClicked());
-    playerCtx.getState().onInventoryClick(playerCtx, event);
+    playerCtx.getState().onInventoryClick(event);
   }
 
   @Override
@@ -159,7 +159,7 @@ public class GameStateWaiting extends GameStateNew {
   private void forceStart(Player player) {
     boolean enoughPlayers = this.isEnoughPlayers();
     if (player.isOp() || player.hasPermission("bw.setup")) {
-      this.ctx.setState(new GameStateRunning(this.ctx));
+      this.startGame();
     } else if (player.hasPermission("bw.vip.forcestart")) {
       if (enoughPlayers && this.isEnoughTeams()) {
         this.ctx.setState(new GameStateRunning(this.ctx));
@@ -175,6 +175,10 @@ public class GameStateWaiting extends GameStateNew {
       }
   }
 
+  private void startGame() {
+    this.ctx.setState(new GameStateRunning(this.ctx));
+  }
+
   @Override
   public void onEventPlayerRespawn(PlayerRespawnEvent event) {
     event.setRespawnLocation(this.ctx.getLobby());
@@ -188,15 +192,6 @@ public class GameStateWaiting extends GameStateNew {
   @Override
   public void onEventPlayerBedEnter(PlayerBedEnterEvent event) {
 
-  }
-
-  @Override
-  public void onEventPlayerChangeWorld(PlayerChangedWorldEvent event) {
-    PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
-    if (!playerCtx.isTeleporting()) {
-      this.playerLeaves(playerCtx, false);
-      playerCtx.setTeleporting(false);
-    }
   }
 
   @Override
@@ -336,7 +331,7 @@ public class GameStateWaiting extends GameStateNew {
     player.teleport(this.ctx.getLobby());
     playerCtx.setTeleporting(false);
 
-    playerCtx.setState(new PlayerStateWaitingGame());
+    playerCtx.setState(new PlayerStateWaitingGame(playerCtx));
 
     this.updateScoreboard();
     this.ctx.updateSigns();
@@ -521,7 +516,7 @@ public class GameStateWaiting extends GameStateNew {
 //      BedwarsRel.getInstance().getPlayerStatisticManager().unloadStatistic(p);
 //    }
 
-    playerCtx.getState().leave(playerCtx, kicked);
+    playerCtx.getState().leave(kicked);
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
 

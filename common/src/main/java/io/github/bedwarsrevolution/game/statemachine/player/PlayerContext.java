@@ -31,7 +31,7 @@ public class PlayerContext {
   private Player player;
   @Getter
   @Setter
-  private PlayerState state = new PlayerStateWaitingGame();
+  private PlayerState state = new PlayerStateWaitingGame(this);
   @Getter
   @Setter
   private boolean protectd;

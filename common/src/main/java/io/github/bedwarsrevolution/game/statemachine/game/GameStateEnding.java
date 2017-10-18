@@ -52,13 +52,13 @@ public class GameStateEnding extends GameStateNew {
   @Override
   public void onEventFly(PlayerToggleFlightEvent event) {
     PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
-    playerCtx.getState().onFly(playerCtx, event);
+    playerCtx.getState().onFly(event);
   }
 
   @Override
   public void onEventBowShot(EntityShootBowEvent event) {
     PlayerContext playerCtx = this.ctx.getPlayerContext((Player) event.getEntity());
-    playerCtx.getState().onBowShot(playerCtx, event);
+    playerCtx.getState().onBowShot(event);
   }
 
   @Override
@@ -91,15 +91,6 @@ public class GameStateEnding extends GameStateNew {
   }
 
   @Override
-  public void onEventPlayerChangeWorld(PlayerChangedWorldEvent event) {
-    PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
-    if (!playerCtx.isTeleporting()) {
-      this.playerLeaves(playerCtx, false);
-      playerCtx.setTeleporting(false);
-    }
-  }
-
-  @Override
   public void onEventInventoryOpen(InventoryOpenEvent event) {
     event.setCancelled(true);
   }
@@ -112,7 +103,7 @@ public class GameStateEnding extends GameStateNew {
 
   @Override
   public void playerLeaves(PlayerContext playerCtx, boolean kicked) {
-    playerCtx.getState().leave(playerCtx, kicked);
+    playerCtx.getState().leave(kicked);
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
     this.ctx.removePlayer(playerCtx);

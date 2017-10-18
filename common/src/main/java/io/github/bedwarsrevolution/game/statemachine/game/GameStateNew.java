@@ -68,7 +68,13 @@ public abstract class GameStateNew {
 
   public abstract void onEventPlayerBedEnter(PlayerBedEnterEvent event);
 
-  public abstract void onEventPlayerChangeWorld(PlayerChangedWorldEvent event);
+  public void onEventPlayerChangeWorld(PlayerChangedWorldEvent event) {
+    PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
+    if (!playerCtx.isTeleporting()) {
+      this.playerLeaves(playerCtx, false);
+      playerCtx.setTeleporting(false);
+    }
+  }
 
   public abstract void onEventInventoryOpen(InventoryOpenEvent event);
 

@@ -94,7 +94,6 @@ public class GameStateStopped extends GameStateNew {
 
   @Override
   public void onEventPlayerChangeWorld(PlayerChangedWorldEvent event) {
-
   }
 
   @Override

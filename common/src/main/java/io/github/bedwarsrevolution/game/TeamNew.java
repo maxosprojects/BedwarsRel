@@ -73,7 +73,9 @@ public class TeamNew implements ConfigurationSerializable {
   }
 
   public void reset() {
-    this.inventory = null;
+    Inventory inventory =
+        Bukkit.createInventory(null, InventoryType.ENDER_CHEST, BedwarsRevol._l("ingame.teamchest"));
+    this.setInventory(inventory);
     this.chests = new ArrayList<>();
     this.upgrades = new HashMap<>();
   }
@@ -134,12 +136,6 @@ public class TeamNew implements ConfigurationSerializable {
     return true;
   }
 
-  public void createTeamInventory() {
-    Inventory inventory =
-        Bukkit.createInventory(null, InventoryType.ENDER_CHEST, BedwarsRevol._l("ingame.teamchest"));
-    this.setInventory(inventory);
-  }
-
   public ChatColor getChatColor() {
     return this.getColor().getChatColor();
   }
@@ -188,12 +184,12 @@ public class TeamNew implements ConfigurationSerializable {
     }
   }
 
-  public void removeChest(Block chest) {
-    this.getChests().remove(chest);
-    if (this.getChests().size() == 0) {
-      this.setInventory(null);
-    }
-  }
+//  public void removeChest(Block chest) {
+//    this.getChests().remove(chest);
+//    if (this.getChests().size() == 0) {
+//      this.setInventory(null);
+//    }
+//  }
 
   public void removePlayer(PlayerContext playerCtx) {
     Player player = playerCtx.getPlayer();
