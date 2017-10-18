@@ -64,7 +64,7 @@ import org.bukkit.scoreboard.Scoreboard;
 /**
  * Created by {maxos} 2017
  */
-public class GameStateRunning extends GameState {
+public class GameStateRunning extends GameStateNew {
   private static final String TRANSLATION = "running";
 
   private int timeLeft;

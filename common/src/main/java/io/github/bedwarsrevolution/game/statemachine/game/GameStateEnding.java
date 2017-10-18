@@ -28,7 +28,7 @@ import org.bukkit.event.server.ServerListPingEvent;
 /**
  * Created by {maxos} 2017
  */
-public class GameStateEnding extends GameState {
+public class GameStateEnding extends GameStateNew {
   private static final String TRANSLATION = "running";
 
   public GameStateEnding(GameContext ctx) {

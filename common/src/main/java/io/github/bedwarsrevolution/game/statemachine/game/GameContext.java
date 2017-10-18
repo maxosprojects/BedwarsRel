@@ -1,7 +1,5 @@
 package io.github.bedwarsrevolution.game.statemachine.game;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.GameCheckResult;
 import io.github.bedwarsrevolution.game.GameJoinSignNew;
@@ -51,7 +49,7 @@ public class GameContext {
 
   @Getter
   @Setter
-  private GameState state = new GameStateWaiting(this);
+  private GameStateNew state = new GameStateWaiting(this);
   @Setter
   private boolean autobalance = false;
   @Setter

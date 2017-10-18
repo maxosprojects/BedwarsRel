@@ -10,7 +10,6 @@ import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -49,7 +48,7 @@ import org.bukkit.scoreboard.Scoreboard;
 /**
  * Created by {maxos} 2017
  */
-public class GameStateWaiting extends GameState {
+public class GameStateWaiting extends GameStateNew {
   private static final String TRANSLATION = "waiting";
 
   private GameLobbyCountdownNew lobbyCountdown;

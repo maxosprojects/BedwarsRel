@@ -21,7 +21,7 @@ public class GameJoinSignNew {
     int maxPlayers = this.gameCtx.getMaxPlayers();
     int currentPlayers = this.gameCtx.getPlayers().size();
 
-    String current = "0";
+    String current;
     if (currentPlayers >= maxPlayers) {
       current = ChatColor.RED + String.valueOf(currentPlayers) + ChatColor.WHITE;
     } else {
