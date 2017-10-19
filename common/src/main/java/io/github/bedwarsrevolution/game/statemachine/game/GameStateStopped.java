@@ -32,7 +32,7 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 /**
  * Created by {maxos} 2017
  */
-public class GameStateStopped extends GameStateNew {
+public class GameStateStopped extends GameState {
   private static final String TRANSLATION = "stopped";
 
   public GameStateStopped(GameContext ctx) {

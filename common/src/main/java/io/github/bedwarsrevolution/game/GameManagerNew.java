@@ -168,8 +168,9 @@ public class GameManagerNew {
         if (!(obj instanceof TeamNew)) {
           continue;
         }
-
-        ctx.addTeam((TeamNew) obj);
+        TeamNew team = (TeamNew) obj;
+        team.setGameCtx(ctx);
+        ctx.addTeam(team);
       }
 
       Location loc1 = UtilsNew.locationDeserialize(cfg.get("loc1"));
@@ -199,8 +200,8 @@ public class GameManagerNew {
         }
       }
 
-      ctx.setLoc(loc1, "loc1");
-      ctx.setLoc(loc2, "loc2");
+      ctx.setLoc1(loc1);
+      ctx.setLoc2(loc2);
       ctx.setLobby(UtilsNew.locationDeserialize(cfg.get("lobby")));
 
       String regionName = "";
@@ -360,11 +361,12 @@ public class GameManagerNew {
     this.gamesContexts.clear();
   }
 
-  public void playerJoined(Player player, GameContext ctx) {
-    if (this.playerToGame.containsKey(player)) {
-      this.playerToGame.remove(player);
-    }
+  public void playerJoins(Player player, GameContext ctx) {
     this.playerToGame.put(player, ctx);
+  }
+
+  public void playerLeaves(Player player) {
+    this.playerToGame.remove(player);
   }
 
 }

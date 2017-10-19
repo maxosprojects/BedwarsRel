@@ -28,7 +28,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -48,7 +47,7 @@ import org.bukkit.scoreboard.Scoreboard;
 /**
  * Created by {maxos} 2017
  */
-public class GameStateWaiting extends GameStateNew {
+public class GameStateWaiting extends GameState {
   private static final String TRANSLATION = "waiting";
 
   private GameLobbyCountdownNew lobbyCountdown;
@@ -159,7 +158,9 @@ public class GameStateWaiting extends GameStateNew {
   private void forceStart(Player player) {
     boolean enoughPlayers = this.isEnoughPlayers();
     if (player.isOp() || player.hasPermission("bw.setup")) {
-      this.startGame();
+      GameStateRunning newState = new GameStateRunning(this.ctx);
+      this.ctx.setState(newState);
+      newState.startGame();
     } else if (player.hasPermission("bw.vip.forcestart")) {
       if (enoughPlayers && this.isEnoughTeams()) {
         this.ctx.setState(new GameStateRunning(this.ctx));
@@ -171,12 +172,8 @@ public class GameStateWaiting extends GameStateNew {
               .pluginMessage(
                   ChatColor.RED + BedwarsRevol
                       ._l(player, "lobby.cancelstart.not_enough_teams")));
-        }
       }
-  }
-
-  private void startGame() {
-    this.ctx.setState(new GameStateRunning(this.ctx));
+    }
   }
 
   @Override
@@ -226,7 +223,7 @@ public class GameStateWaiting extends GameStateNew {
       }
     }
 
-    BedwarsRevol.getInstance().getGameManager().playerJoined(player, this.ctx);
+    BedwarsRevol.getInstance().getGameManager().playerJoins(player, this.ctx);
     PlayerContext playerCtx = this.ctx.addPlayer(player);
 
 //    BedwarsPlayerJoinEvent joiningEvent = new BedwarsPlayerJoinEvent(this, p);
@@ -313,6 +310,7 @@ public class GameStateWaiting extends GameStateNew {
       throw new IllegalStateException("No teams defined or no players joined");
     }
     team.addPlayer(playerCtx);
+    playerCtx.setTeam(team);
 //      if (!this.isAutobalanceEnabled()) {
 //        this.freePlayers.add(p);
 //      } else {

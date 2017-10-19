@@ -5,7 +5,6 @@ import io.github.bedwarsrevolution.game.GameCheckResult;
 import io.github.bedwarsrevolution.game.GameJoinSignNew;
 import io.github.bedwarsrevolution.game.GameLobbyCountdownNew;
 import io.github.bedwarsrevolution.game.GameManagerNew;
-import io.github.bedwarsrevolution.game.PlayerStorageNew;
 import io.github.bedwarsrevolution.game.RegionNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.RespawnProtectionRunnableNew;
@@ -30,7 +29,6 @@ import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.DyeColor;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -57,23 +55,25 @@ public class GameContext {
 
   @Getter
   @Setter
-  private GameStateNew state = new GameStateWaiting(this);
+  private GameState state = new GameStateWaiting(this);
   @Setter
   private boolean autobalance = false;
   @Setter
   private boolean hungerEnabled = false;
   @Setter
   private String builder = null;
+  @Getter
   @Setter
   private YamlConfiguration config = null;
   private GameLobbyCountdownNew gameLobbyCountdown = null;
   private Location hologramLocation = null;
   @Getter
   private Map<Location, GameJoinSignNew> joinSigns = new HashMap<>();
-  private int length = 0;
   @Getter
   private Location lobby = null;
+  @Setter
   private Location loc1 = null;
+  @Setter
   private Location loc2 = null;
   @Setter
   private Location mainLobby = null;
@@ -105,13 +105,14 @@ public class GameContext {
   @Getter
   @Setter
   private int time = 1000;
+  @Getter
+  @Setter
   private List<Map<String, Object>> defaultUpgrades;
 
   public GameContext(String name) {
     this.name = name;
     this.scoreboard = BedwarsRevol.getInstance().getScoreboardManager().getNewScoreboard();
     this.record = BedwarsRevol.getInstance().getMaxLength();
-    this.length = BedwarsRevol.getInstance().getMaxLength();
     this.autobalance = BedwarsRevol.getInstance().getBooleanConfig("global-autobalance", false);
 
     if (BedwarsRevol.getInstance().isBungee()) {
@@ -177,15 +178,15 @@ public class GameContext {
     return this.playerContexts.values();
   }
 
-  public TeamNew getLowestTeam() {
-    TeamNew lowest = this.teams.values().iterator().next();
-    for (TeamNew team : this.teams.values()) {
-      if (team.getPlayers().size() < lowest.getPlayers().size()) {
-        lowest = team;
-      }
-    }
-    return lowest;
-  }
+//  public TeamNew getLowestTeam() {
+//    TeamNew lowest = this.teams.values().iterator().next();
+//    for (TeamNew team : this.teams.values()) {
+//      if (team.getPlayers().size() < lowest.getPlayers().size()) {
+//        lowest = team;
+//      }
+//    }
+//    return lowest;
+//  }
 
   public void removePlayer(PlayerContext playerCtx) {
     this.playerContexts.remove(playerCtx.getPlayer());
@@ -273,43 +274,12 @@ public class GameContext {
     this.region.reset(this);
   }
 
-  public void stopWorkers() {
-    for (BukkitTask task : this.runningTasks) {
-      try {
-        task.cancel();
-      } catch (Exception ex) {
-//        BedwarsRevol.getInstance().getBugsnag().notify(ex);
-        ex.printStackTrace();
-        // already cancelled
-      }
-    }
-
-    this.runningTasks.clear();
-  }
-
-  public void sendTeamDeadMessage(TeamNew team) {
-//    if (deathTeam.getPlayers().size() == 1 && deathTeam.isBedDestroyed(this.getGame())) {
-//      for (Player aPlayer : this.getGame().getPlayers()) {
-//        if (aPlayer.isOnline()) {
-//          aPlayer.sendMessage(
-//              ChatWriter.pluginMessage(
-//                  BedwarsRevol._l(aPlayer, "ingame.team-dead", ImmutableMap.of("team",
-//                      deathTeam.getChatColor() + deathTeam.getDisplayName()))));
-//        }
-//      }
-//    }
-  }
-
   public Location getTopMiddle() {
     return this.region.getTopMiddle();
   }
 
-  public void addWorker(BukkitTask task) {
-    this.runningTasks.add(task);
-  }
-
   public void stop() {
-    this.stopWorkers();
+    this.stopRunningTasks();
 //    this.clearProtections();
 
 //    try {
@@ -345,13 +315,13 @@ public class GameContext {
     this.updateSignConfig();
   }
 
-  public void setLoc(Location loc, String type) {
-    if (type.equalsIgnoreCase("loc1")) {
-      this.loc1 = loc;
-    } else {
-      this.loc2 = loc;
-    }
-  }
+//  public void setLoc(Location loc, String type) {
+//    if (type.equalsIgnoreCase("loc1")) {
+//      this.loc1 = loc;
+//    } else {
+//      this.loc2 = loc;
+//    }
+//  }
 
   public void setLobby(Location lobby) {
     if (this.region != null) {
@@ -462,180 +432,6 @@ public class GameContext {
     this.shopCategories = MerchantCategory.loadCategories(BedwarsRevol.getInstance().getShopConfig());
   }
 
-  public boolean start(CommandSender sender) {
-//    if (this.state != GameState.WAITING) {
-//      sender.sendMessage(
-//          ChatWriter
-//              .pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.startoutofwaiting")));
-//      return false;
-//    }
-//
-//    BedwarsGameStartEvent startEvent = new BedwarsGameStartEvent(this);
-//    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(startEvent);
-//
-//    if (startEvent.isCancelled()) {
-//      return false;
-//    }
-
-//    this.isOver = false;
-    for (PlayerContext aPlayerCtx : this.getPlayers()) {
-      Player player = aPlayerCtx.getPlayer();
-      if (player.isOnline()) {
-        player.sendMessage(
-            ChatWriterNew.pluginMessage(
-                ChatColor.GREEN + BedwarsRevol._l(player, "ingame.gamestarting")));
-      }
-    }
-
-    // load shop categories again (if shop was changed)
-    this.loadItemShopCategories();
-
-    this.runningTasks.clear();
-    for (PlayerContext playerCtx : this.playerContexts.values()) {
-      playerCtx.clear(true);
-    }
-    this.preparePlayersForBattle();
-//    this.clearProtections();
-//    this.moveFreePlayersToTeam();
-    this.makeTeamsReady();
-
-//    this.cycle.onGameStart();
-    this.startResourceSpawners();
-
-    // Update world time before game starts
-    this.getRegion().getWorld().setTime(this.time);
-
-    this.teleportPlayersToTeamSpawn();
-
-//    this.state = GameState.RUNNING;
-    this.state = new GameStateRunning(this);
-
-    for (PlayerContext playerCtx : this.getPlayers()) {
-      playerCtx.getState().setGameMode();
-//      this.setPlayerGameMode(playerCtx);
-      this.setPlayerVisibility(playerCtx);
-    }
-
-    this.startActionBarRunnable();
-    this.updateScoreboard();
-
-    if (BedwarsRel.getInstance().getBooleanConfig("store-game-records", true)) {
-      this.displayRecord();
-    }
-
-    this.startTimerCountdown();
-
-    if (BedwarsRel.getInstance().getBooleanConfig("titles.map.enabled", false)) {
-      this.displayMapInfo();
-    }
-
-    this.updateSigns();
-
-    if (BedwarsRel.getInstance().getBooleanConfig("global-messages", true)) {
-      for (Player aPlayer : BedwarsRel.getInstance().getServer().getOnlinePlayers()) {
-        aPlayer.sendMessage(ChatWriter.pluginMessage(ChatColor.GREEN
-            + BedwarsRel._l(aPlayer, "ingame.gamestarted",
-            ImmutableMap.of("game", this.getRegion().getName()))));
-      }
-      BedwarsRel.getInstance().getServer().getConsoleSender()
-          .sendMessage(ChatWriter.pluginMessage(ChatColor.GREEN
-              + BedwarsRel
-              ._l(BedwarsRel.getInstance().getServer().getConsoleSender(), "ingame.gamestarted",
-                  ImmutableMap.of("game", this.getRegion().getName()))));
-    }
-
-    BedwarsGameStartedEvent startedEvent = new BedwarsGameStartedEvent(this);
-    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(startedEvent);
-
-    return true;
-  }
-
-  private void teleportPlayersToTeamSpawn() {
-    for (TeamNew team : this.teams.values()) {
-      for (PlayerContext playerCtx : team.getPlayers()) {
-        Player player = playerCtx.getPlayer();
-        player.setVelocity(new Vector(0, 0, 0));
-        player.setFallDistance(0.0F);
-        Location location = team.getSpawnLocation();
-        playerCtx.setTeleportingIfWorldChange(location);
-        player.teleport(location);
-        playerCtx.setTeleporting(false);
-//        if (!retainPlayerStorage && this.getPlayerStorage(player) != null) {
-//          this.getPlayerStorage(player).clean(true);
-//          this.getPlayerStorage(player).respawn();
-//        }
-      }
-    }
-  }
-
-  private void startResourceSpawners() {
-    for (ResourceSpawnerNew rs : this.getResourceSpawners()) {
-      rs.setCtx(this);
-      this.runningTasks.add(BedwarsRevol.getInstance().getServer().getScheduler().runTaskTimer(
-          BedwarsRevol.getInstance(), rs, Math.round((((double) rs.getInterval()) / 1000.0) * 20.0),
-          Math.round((((double) rs.getInterval()) / 1000.0) * 20.0)));
-    }
-  }
-
-  private void makeTeamsReady() {
-//    this.playingTeams.clear();
-    for (TeamNew team : this.teams.values()) {
-      team.getScoreboardTeam().setAllowFriendlyFire(
-          BedwarsRevol.getInstance().getConfig().getBoolean("friendlyfire"));
-//      if (team.getPlayers().size() == 0) {
-//        this.dropTargetBlock(team.getHeadTarget());
-//      } else {
-//        this.playingTeams.add(team);
-//      }
-      team.reset();
-      team.addChest(team.getChestLoc().getBlock());
-    }
-//    this.updateScoreboard();
-  }
-
-  private void preparePlayersForBattle() {
-    this.defaultUpgrades = (List<Map<String, Object>>) this.config.getList("default-player-inventory");
-    List<Upgrade> playerUpgrades = new ArrayList<>();
-    List<Upgrade> teamUpgrades = new ArrayList<>();
-    for (Map<String, Object> item : this.defaultUpgrades) {
-      Map<String, Object> elem = (Map<String, Object>) item.get("upgrade");
-      Upgrade upgrade = UpgradeRegistry.getUpgrade(
-          (String)elem.get("type"), (int)elem.get("level"));
-      if (upgrade instanceof UpgradeItem) {
-        UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);
-        temp.setItem(MerchantCategory.fixMeta(
-            ItemStack.deserialize((Map<String, Object>) item.get("item"))));
-        upgrade = temp;
-      }
-      if (elem.containsKey("permanent")) {
-        boolean permanent = (boolean) elem.get("permanent");
-        upgrade.setPermanent(permanent);
-      }
-      if (elem.containsKey("multiple")) {
-        boolean multiple = (boolean) elem.get("multiple");
-        upgrade.setMultiple(multiple);
-      }
-      if (upgrade.getScope() == UpgradeScope.PLAYER) {
-        playerUpgrades.add(upgrade);
-      } else {
-        teamUpgrades.add(upgrade);
-      }
-    }
-
-    for (PlayerContext playerCtx : this.getPlayers()) {
-      TeamNew team = playerCtx.getTeam();
-      for (Upgrade upgrade : playerUpgrades) {
-        playerCtx.addUpgrade(upgrade.create(this, team, playerCtx));
-      }
-       playerCtx.respawn();
-    }
-    for (TeamNew team : this.getTeams().values()) {
-      for (Upgrade upgrade : teamUpgrades) {
-        team.setUpgrade(upgrade.create(this, team, null));
-      }
-    }
-  }
-
   public void addRunningTask(BukkitTask task) {
     this.runningTasks.add(task);
   }
@@ -646,6 +442,19 @@ public class GameContext {
 
   public void removeRunningTask(BukkitRunnable bukkitRunnable) {
     this.runningTasks.remove(bukkitRunnable);
+  }
+
+  public void stopRunningTasks() {
+    for (BukkitTask task : this.runningTasks) {
+      try {
+        task.cancel();
+      } catch (Exception ex) {
+//        BedwarsRevol.getInstance().getBugsnag().notify(ex);
+        ex.printStackTrace();
+        // already cancelled
+      }
+    }
+    this.runningTasks.clear();
   }
 
   public void broadcastSound(Sound sound, float volume, float pitch) {

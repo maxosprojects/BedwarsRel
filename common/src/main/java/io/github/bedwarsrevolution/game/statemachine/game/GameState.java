@@ -39,10 +39,10 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 /**
  * Created by {maxos} 2017
  */
-public abstract class GameStateNew {
+public abstract class GameState {
   protected GameContext ctx;
 
-  public GameStateNew(GameContext ctx) {
+  public GameState(GameContext ctx) {
     this.ctx = ctx;
   }
 

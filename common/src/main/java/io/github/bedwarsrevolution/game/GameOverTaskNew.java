@@ -33,7 +33,7 @@ public class GameOverTaskNew extends BukkitRunnable {
                   ImmutableMap.of("team", this.winner.getDisplayName() + ChatColor.GOLD))));
         }
       }
-      this.ctx.stopWorkers();
+      this.ctx.stopRunningTasks();
     } else if (this.counter == this.counterStart && this.winner == null) {
       for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
         Player aPlayer = aPlayerCtx.getPlayer();

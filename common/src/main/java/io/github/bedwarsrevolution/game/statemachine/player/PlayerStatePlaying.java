@@ -71,7 +71,7 @@ public class PlayerStatePlaying extends PlayerState {
 
     TeamNew team = this.playerCtx.getTeam();
     DamageHolder damage = this.playerCtx.getLastDamagedBy();
-    boolean damageCausedRecently = damage.wasCausedRecently();
+    boolean damageCausedRecently = damage == null ? false : damage.wasCausedRecently();
 
 //    PlayerStatistic diedPlayerStats = null;
 //    PlayerStatistic killerPlayerStats = null;
@@ -125,7 +125,7 @@ public class PlayerStatePlaying extends PlayerState {
       }
 
       GameContext ctx = this.playerCtx.getGameContext();
-      ctx.sendTeamDeadMessage(team);
+      this.sendTeamDeadMessage(team);
       return;
     }
 
@@ -174,61 +174,9 @@ public class PlayerStatePlaying extends PlayerState {
 //    }
 //    this.sendTeamDeadMessage(team);
 
-
-
-
-
-
-    if (!this.playerCtx.isVirtuallyAlive()) {
-      return;
-    }
-
-    this.playerCtx.clear(false);
-    this.playerCtx.respawn();
-
-    this.playerCtx.setVirtuallyAlive(false);
-
-//    if (this.getState() == GameStateOld.RUNNING && this.isStopping()) {
-//      String title = ChatColor.translateAlternateColorCodes('&',
-//          BedwarsRel._l(player, "ingame.title.youdied"));
-//      player.sendTitle(title, "", 0, 40, 10);
-//    }
-    Player player = this.playerCtx.getPlayer();
-    player.setGameMode(GameMode.SPECTATOR);
-    Location location = this.playerCtx.getGameContext().getTopMiddle();
-    this.playerCtx.setTeleportingIfWorldChange(location);
-    player.teleport(location);
-    this.playerCtx.setTeleporting(false);
-
-    this.runWaitingRespawn();
-  }
-
-  private void runWaitingRespawn() {
-    // Task with countdown till respawn
-    BukkitTask task = new BukkitRunnable() {
-      private int respawnIn = 5;
-      @Override
-      public void run() {
-        Player player = PlayerStatePlaying.this.playerCtx.getPlayer();
-          String title = ChatColor.translateAlternateColorCodes('&',
-              BedwarsRevol._l(player, "ingame.title.youdied"));
-          String subtitle = ChatColor.translateAlternateColorCodes('&',
-              BedwarsRevol._l(player, "ingame.title.respawninseconds",
-                  ImmutableMap.of("time", Integer.toString(this.respawnIn))));
-          player.sendTitle(title, subtitle, 0, 20, 10);
-        this.respawnIn--;
-        if (this.respawnIn == 0) {
-          this.cancel();
-          Location location = PlayerStatePlaying.this.playerCtx.getTeam().getSpawnLocation();
-          PlayerStatePlaying.this.playerCtx.setTeleportingIfWorldChange(location);
-          player.teleport(location);
-          PlayerStatePlaying.this.playerCtx.setTeleporting(false);
-          player.setGameMode(GameMode.SURVIVAL);
-          PlayerStatePlaying.this.playerCtx.setVirtuallyAlive(true);
-        }
-      }
-    }.runTaskTimer(BedwarsRevol.getInstance(), 0, 20);
-    this.playerCtx.getGameContext().addWorker(task);
+    PlayerStateWaitingRespawn newState = new PlayerStateWaitingRespawn(this.playerCtx);
+    this.playerCtx.setState(newState);
+    newState.runWaitingRespawn();
   }
 
   @Override
@@ -349,6 +297,19 @@ public class PlayerStatePlaying extends PlayerState {
   @Override
   public void setGameMode() {
     this.playerCtx.getPlayer().setGameMode(GameMode.SURVIVAL);
+  }
+
+  public void sendTeamDeadMessage(TeamNew team) {
+//    if (deathTeam.getPlayers().size() == 1 && deathTeam.isBedDestroyed(this.getGame())) {
+//      for (Player aPlayer : this.getGame().getPlayers()) {
+//        if (aPlayer.isOnline()) {
+//          aPlayer.sendMessage(
+//              ChatWriter.pluginMessage(
+//                  BedwarsRevol._l(aPlayer, "ingame.team-dead", ImmutableMap.of("team",
+//                      deathTeam.getChatColor() + deathTeam.getDisplayName()))));
+//        }
+//      }
+//    }
   }
 
 }

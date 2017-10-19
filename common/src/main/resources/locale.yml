@@ -129,6 +129,7 @@ ingame:
     win-subtitle: "$team$&6 won in &e$time$"
     youdied: "&cYou died!"
     respawninseconds: "&9Respawn in &6$time$&9 sec"
+    respawn: "&6Respawn!"
   shop:
     name: "Itemshop"
     newshop: "Use new shop"

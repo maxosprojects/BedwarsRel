@@ -15,7 +15,6 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -28,7 +27,7 @@ import org.bukkit.event.server.ServerListPingEvent;
 /**
  * Created by {maxos} 2017
  */
-public class GameStateEnding extends GameStateNew {
+public class GameStateEnding extends GameState {
   private static final String TRANSLATION = "running";
 
   public GameStateEnding(GameContext ctx) {
