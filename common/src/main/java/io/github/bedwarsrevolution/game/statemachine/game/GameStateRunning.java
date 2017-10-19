@@ -393,6 +393,7 @@ public class GameStateRunning extends GameState {
     playerCtx.restoreInventory();
     BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());
     this.ctx.removePlayer(playerCtx);
+    playerCtx.getTeam().removePlayer(playerCtx);
     playerCtx.getPlayer().setScoreboard(
         BedwarsRevol.getInstance().getScoreboardManager().getNewScoreboard());
     this.checkGameOver();

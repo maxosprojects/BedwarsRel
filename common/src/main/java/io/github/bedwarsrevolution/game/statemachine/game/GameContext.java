@@ -176,7 +176,7 @@ public class GameContext {
   }
 
   public Collection<PlayerContext> getPlayers() {
-    return this.playerContexts.values();
+    return new ArrayList<>(this.playerContexts.values());
   }
 
 //  public TeamNew getLowestTeam() {

@@ -264,4 +264,8 @@ public class TeamNew implements ConfigurationSerializable {
     this.upgrades.remove(upgrade.getClass());
   }
 
+  public List<PlayerContext> getPlayers() {
+    return new ArrayList<>(this.players);
+  }
+
 }
