@@ -134,7 +134,7 @@ public abstract class GameState {
 
   public abstract void onEventServerListPing(ServerListPingEvent event);
 
-  protected String motdReplacePlaceholder(String line) {
+  String motdReplacePlaceholder(String line) {
     String finalLine = line;
     finalLine = finalLine.replace("$title$", BedwarsRevol._l("sign.firstline"));
     finalLine = finalLine.replace("$gamename$", this.ctx.getName());

@@ -128,6 +128,14 @@ public class GameContext {
     return playerCtx;
   }
 
+  public void removePlayer(PlayerContext playerCtx) {
+    this.playerContexts.remove(playerCtx.getPlayer());
+    TeamNew team = playerCtx.getTeam();
+    if (team != null) {
+      team.removePlayer(playerCtx);
+    }
+  }
+
   public PlayerContext getPlayerContext(Player player) {
     return this.playerContexts.get(player);
   }
@@ -187,14 +195,6 @@ public class GameContext {
 //    }
 //    return lowest;
 //  }
-
-  public void removePlayer(PlayerContext playerCtx) {
-    this.playerContexts.remove(playerCtx.getPlayer());
-    TeamNew team = playerCtx.getTeam();
-    if (team != null) {
-      team.removePlayer(playerCtx);
-    }
-  }
 
   public void updateSigns() {
     boolean removedItem = false;

@@ -45,7 +45,7 @@ public class TeamNew implements ConfigurationSerializable {
     this.reset();
     this.setName(deserialize.get("name").toString());
     this.setMaxPlayers(Integer.parseInt(deserialize.get("maxplayers").toString()));
-    this.setColor(TeamColorNew.AQUA.valueOf(deserialize.get("color").toString().toUpperCase()));
+    this.setColor(TeamColorNew.valueOf(deserialize.get("color").toString().toUpperCase()));
     this.setSpawnLocation(UtilsNew.locationDeserialize(deserialize.get("spawn")));
     this.setChests(new ArrayList<Block>());
     this.setBaseLoc1(UtilsNew.locationDeserialize(deserialize.get("baseloc1")));
@@ -84,7 +84,7 @@ public class TeamNew implements ConfigurationSerializable {
     this.getChests().add(chestBlock);
   }
 
-  public boolean addPlayer(PlayerContext playerCtx) {
+  public void addPlayer(PlayerContext playerCtx) {
 
 //    BedwarsPlayerJoinTeamEvent playerJoinTeamEvent = new BedwarsPlayerJoinTeamEvent(this, player);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(playerJoinTeamEvent);
@@ -93,15 +93,15 @@ public class TeamNew implements ConfigurationSerializable {
 //      return false;
 //    }
 
-    if (BedwarsRevol.getInstance().isSpigot()) {
-      if (this.getScoreboardTeam().getEntries().size() >= this.getMaxPlayers()) {
-        return false;
-      }
-    } else {
-      if (this.getScoreboardTeam().getPlayers().size() >= this.getMaxPlayers()) {
-        return false;
-      }
-    }
+//    if (BedwarsRevol.getInstance().isSpigot()) {
+//      if (this.getScoreboardTeam().getEntries().size() >= this.getMaxPlayers()) {
+//        return false;
+//      }
+//    } else {
+//      if (this.getScoreboardTeam().getPlayers().size() >= this.getMaxPlayers()) {
+//        return false;
+//      }
+//    }
 
 //    String displayName = player.getDisplayName();
 //    String playerListName = player.getPlayerListName();
@@ -132,8 +132,8 @@ public class TeamNew implements ConfigurationSerializable {
     } else {
       this.getScoreboardTeam().addPlayer(player);
     }
-
-    return true;
+//
+//    return true;
   }
 
   public ChatColor getChatColor() {

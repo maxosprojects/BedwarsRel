@@ -2,6 +2,8 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerStateSpectator;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerStateWaitingRespawn;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -9,6 +11,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
@@ -42,6 +45,15 @@ public class GameStateEnding extends GameState {
   @Override
   public void onEventEntityDamage(EntityDamageEvent event) {
     event.setCancelled(true);
+    if (event.getCause() != DamageCause.VOID || !(event.getEntity() instanceof Player)) {
+      return;
+    }
+    Player player = (Player) event.getEntity();
+    PlayerContext playerCtx = this.ctx.getPlayerContext(player);
+    PlayerStateWaitingRespawn newState = new PlayerStateWaitingRespawn(playerCtx);
+    playerCtx.setState(newState);
+    newState.runWaitingRespawn(false);
+    playerCtx.setState(new PlayerStateSpectator(playerCtx));
   }
 
   @Override
@@ -105,6 +117,7 @@ public class GameStateEnding extends GameState {
     playerCtx.getState().leave(kicked);
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
+    BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());
     this.ctx.removePlayer(playerCtx);
   }
 

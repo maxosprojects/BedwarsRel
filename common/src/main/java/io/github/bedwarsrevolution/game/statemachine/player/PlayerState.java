@@ -54,6 +54,7 @@ public abstract class PlayerState {
                         this.playerCtx.getTeam(), ChatColor.RED) + ChatColor.RED))));
       }
     }
+
   }
 
   public boolean isSpectator() {

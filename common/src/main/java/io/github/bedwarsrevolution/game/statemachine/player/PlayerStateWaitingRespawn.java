@@ -66,7 +66,7 @@ public class PlayerStateWaitingRespawn extends PlayerState {
     player.setGameMode(GameMode.SPECTATOR);
   }
 
-  public void runWaitingRespawn() {
+    public void runWaitingRespawn(boolean withCountdown) {
     if (!this.playerCtx.isVirtuallyAlive()) {
       return;
     }
@@ -88,7 +88,12 @@ public class PlayerStateWaitingRespawn extends PlayerState {
     player.teleport(location);
     this.playerCtx.setTeleporting(false);
 
-    // Task with countdown till respawn
+    if (withCountdown) {
+      this.runCountdown();
+    }
+  }
+
+  private void runCountdown() {
     BukkitTask task = new BukkitRunnable() {
       private int respawnIn = 5;
       @Override

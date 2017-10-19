@@ -130,21 +130,22 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
   private void hideArmor(Player player, Method method)
       throws InvocationTargetException, IllegalAccessException {
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
-    if (ctx != null && !ctx.getPlayerContext(player).getState().isSpectator()) {
-      int entityId = player.getEntityId();
-      PlayerContext playerCtx = ctx.getPlayerContext(player);
-      TeamNew playerTeam = playerCtx.getTeam();
-      for (PlayerContext otherPlayerCtx : ctx.getPlayers()) {
-        // Hide from all players on all other teams
-        if (otherPlayerCtx.getTeam() != playerTeam) {
-          for (Parts part : Parts.values()) {
-            method.invoke(null, entityId, otherPlayerCtx, part.ordinal());
-            this.tableLock.lock();
-            Player otherPlayer = otherPlayerCtx.getPlayer();
-            playerInvisibleTo.put(entityId, otherPlayer);
-            toInvisiblePlayer.put(otherPlayer, entityId);
-            this.tableLock.unlock();
-          }
+    if (ctx == null || ctx.getPlayerContext(player).getState().isSpectator()) {
+      return;
+    }
+    int entityId = player.getEntityId();
+    PlayerContext playerCtx = ctx.getPlayerContext(player);
+    TeamNew playerTeam = playerCtx.getTeam();
+    for (PlayerContext otherPlayerCtx : ctx.getPlayers()) {
+      // Hide from all players on all other teams
+      if (otherPlayerCtx.getTeam() != playerTeam) {
+        for (Parts part : Parts.values()) {
+          method.invoke(null, entityId, otherPlayerCtx, part.ordinal());
+          this.tableLock.lock();
+          Player otherPlayer = otherPlayerCtx.getPlayer();
+          playerInvisibleTo.put(entityId, otherPlayer);
+          toInvisiblePlayer.put(otherPlayer, entityId);
+          this.tableLock.unlock();
         }
       }
     }
@@ -153,6 +154,9 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
   private void unhideArmor(Player player, Method method)
       throws InvocationTargetException, IllegalAccessException {
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    if (ctx == null) {
+      return;
+    }
     boolean makeVisible = player.isOnline()
         && !ctx.getPlayerContext(player).getState().isSpectator();
     int entityId = player.getEntityId();

@@ -223,8 +223,8 @@ public class GameStateWaiting extends GameState {
       }
     }
 
-    BedwarsRevol.getInstance().getGameManager().playerJoins(player, this.ctx);
     PlayerContext playerCtx = this.ctx.addPlayer(player);
+    BedwarsRevol.getInstance().getGameManager().addPlayer(player, this.ctx);
 
 //    BedwarsPlayerJoinEvent joiningEvent = new BedwarsPlayerJoinEvent(this, p);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(joiningEvent);
@@ -488,7 +488,7 @@ public class GameStateWaiting extends GameState {
 //
 //    this.playerDamages.remove(p);
 
-    BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx);
+    BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());
 
 //    if (this.freePlayers.contains(p)) {
 //      this.freePlayers.remove(p);

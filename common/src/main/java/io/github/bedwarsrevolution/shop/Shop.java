@@ -61,6 +61,9 @@ public class Shop {
         ._l(this.player, "ingame.shop.name"));
 
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(this.player);
+    if (ctx == null) {
+      return;
+    }
 
     this.renderCategories(inventory, ctx);
 

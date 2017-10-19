@@ -22,7 +22,6 @@ public class PlayerStateSpectator extends PlayerState {
 
   @Override
   public void onDeath() {
-
   }
 
   @Override
@@ -89,7 +88,7 @@ public class PlayerStateSpectator extends PlayerState {
 
   @Override
   public void leave(boolean kicked) {
-    // Override default behavior to not let anyone know
+    // Overrides default behavior to not let anyone know
   }
 
   @Override

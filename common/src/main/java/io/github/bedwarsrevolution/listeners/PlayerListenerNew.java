@@ -270,9 +270,14 @@ public class PlayerListenerNew extends BaseListenerNew {
       if (eventByEntity.getDamager() == null || !(eventByEntity.getDamager() instanceof Player)) {
         return;
       }
-      player = (Player) eventByEntity.getDamager();
+    }
+    if (player == null) {
+      return;
     }
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    if (ctx == null) {
+      return;
+    }
     ctx.getState().onEventEntityDamage(event);
   }
 

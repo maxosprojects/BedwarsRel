@@ -341,11 +341,6 @@ public class GameManagerNew {
     this.gamesContexts.remove(game);
   }
 
-  public void removePlayer(PlayerContext playerCtx) {
-    GameContext ctx = this.playerToGame.remove(playerCtx.getPlayer());
-    ctx.removePlayer(playerCtx);
-  }
-
   public void stopGames() {
     for (GameContext ctx : this.gamesContexts) {
       ctx.stop();
@@ -361,11 +356,11 @@ public class GameManagerNew {
     this.gamesContexts.clear();
   }
 
-  public void playerJoins(Player player, GameContext ctx) {
+  public void addPlayer(Player player, GameContext ctx) {
     this.playerToGame.put(player, ctx);
   }
 
-  public void playerLeaves(Player player) {
+  public void removePlayer(Player player) {
     this.playerToGame.remove(player);
   }
 

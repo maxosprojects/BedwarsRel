@@ -108,7 +108,6 @@ public class GameStateRunning extends GameState {
     }
 
     playerCtx.getState().onDamage(event);
-
     this.checkGameOver();
   }
 
@@ -393,11 +392,12 @@ public class GameStateRunning extends GameState {
     playerCtx.getState().leave(kicked);
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
+    BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());
     this.ctx.removePlayer(playerCtx);
-    BedwarsRevol.getInstance().getGameManager().playerLeaves(playerCtx.getPlayer());
-    if (!playerCtx.getState().isSpectator()) {
-      this.checkGameOver();
-    }
+    playerCtx.getPlayer().setScoreboard(
+        BedwarsRevol.getInstance().getScoreboardManager().getNewScoreboard());
+    this.checkGameOver();
+    this.ctx.updateSigns();
   }
 
   @Override
@@ -818,6 +818,7 @@ public class GameStateRunning extends GameState {
             .getStringConfig("bed-sound", "ENDERDRAGON_GROWL").toUpperCase()),
         30.0F, 10.0F);
     this.updateScoreboard();
+    this.checkGameOver();
     return true;
   }
 
@@ -906,31 +907,36 @@ public class GameStateRunning extends GameState {
     if (!BedwarsRevol.getInstance().isEnabled()) {
       return;
     }
+    // Did all players leave the game?
     if (this.ctx.getPlayers().size() == 0) {
-      this.ctx.setState(new GameStateWaiting(this.ctx));
-      return;
+      this.runGameOver(null, true);
     }
+    // Find teams with unharmed beds or players still operational
     Set<TeamNew> notLostTeams = new HashSet<>();
-    for (PlayerContext playerCtx : this.ctx.getPlayers()) {
-      if (playerCtx.getState().isSpectator()) {
-        continue;
-      }
-      TeamNew team = playerCtx.getTeam();
-      if (!team.isBedDestroyed() || playerCtx.isVirtuallyAlive()) {
+    for (TeamNew team : this.ctx.getTeams().values()) {
+      if (team.isBedDestroyed()) {
+        boolean somePlayersOperational = false;
+        for (PlayerContext playerCtx : team.getPlayers()) {
+          if (!playerCtx.getState().isSpectator() && playerCtx.isVirtuallyAlive()) {
+            somePlayersOperational = true;
+          }
+        }
+        if (somePlayersOperational) {
+          notLostTeams.add(team);
+        }
+      } else if (team.getPlayers().size() > 0) {
         notLostTeams.add(team);
       }
     }
-    if (notLostTeams.size() > 0) {
-      return;
-    }
+    // If only one team is left then we got the winner
     if (notLostTeams.size() == 1) {
-      this.runGameOver(notLostTeams.iterator().next());
-    } else {
-      this.runGameOver(null);
+      this.runGameOver(notLostTeams.iterator().next(), false);
+    } else if (this.timeLeft <= 0){
+      this.runGameOver(null, false);
     }
   }
 
-  private void runGameOver(TeamNew winner) {
+  private void runGameOver(TeamNew winner, boolean skipCountdown) {
 //    BedwarsGameOverEvent overEvent = new BedwarsGameOverEvent(this.getGame(), winner);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(overEvent);
 //
@@ -957,7 +963,12 @@ public class GameStateRunning extends GameState {
 
     this.ctx.setState(new GameStateEnding(this.ctx));
     GameOverTaskNew gameOver = new GameOverTaskNew(this.ctx, delay, winner);
-    this.ctx.addRunningTask(gameOver.runTaskTimer(BedwarsRevol.getInstance(), 0L, 20L));
+    gameOver.init();
+    if (skipCountdown) {
+      gameOver.onGameEnds();
+    } else {
+      this.ctx.addRunningTask(gameOver.runTaskTimer(BedwarsRevol.getInstance(), 0L, 20L));
+    }
   }
 
   void startGame() {

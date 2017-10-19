@@ -3,6 +3,7 @@ package io.github.bedwarsrevolution.game;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.game.statemachine.game.GameStateWaiting;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import org.bukkit.ChatColor;
@@ -10,44 +11,40 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class GameOverTaskNew extends BukkitRunnable {
+
   private final GameContext ctx;
   private int counter = 10;
-  private int counterStart = 10;
   private TeamNew winner = null;
 
   public GameOverTaskNew(GameContext ctx, int counter, TeamNew winner) {
     this.ctx = ctx;
-    this.counterStart = counter;
     this.counter = counter;
     this.winner = winner;
   }
 
-  @Override
-  public void run() {
-    if (this.counter == this.counterStart && this.winner != null) {
-      for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
-        Player aPlayer = aPlayerCtx.getPlayer();
-        if (aPlayer.isOnline()) {
-          aPlayer.sendMessage(
-              ChatWriterNew.pluginMessage(ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.teamwon",
-                  ImmutableMap.of("team", this.winner.getDisplayName() + ChatColor.GOLD))));
+  public void init() {
+    for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
+      Player aPlayer = aPlayerCtx.getPlayer();
+      if (aPlayer.isOnline()) {
+        String msg;
+        if (winner == null) {
+          msg = ChatWriterNew.pluginMessage(
+              ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.draw"));
+        } else {
+          msg = ChatWriterNew.pluginMessage(
+              ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.teamwon",
+                  ImmutableMap.of("team", this.winner.getDisplayName() + ChatColor.GOLD)));
         }
-      }
-      this.ctx.stopRunningTasks();
-    } else if (this.counter == this.counterStart && this.winner == null) {
-      for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
-        Player aPlayer = aPlayerCtx.getPlayer();
-        if (aPlayer.isOnline()) {
-          aPlayer.sendMessage(
-              ChatWriterNew.pluginMessage(ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.draw")));
-        }
+        aPlayer.sendMessage(msg);
       }
     }
+  }
 
+  @Override
+  public void run() {
     if (this.ctx.getPlayers().size() == 0 || this.counter == 0) {
 //      BedwarsGameEndEvent endEvent = new BedwarsGameEndEvent(this.getGame());
 //      BedwarsRel.getInstance().getServer().getPluginManager().callEvent(endEvent);
-
       this.onGameEnds();
       this.cancel();
     } else {
@@ -62,7 +59,6 @@ public class GameOverTaskNew extends BukkitRunnable {
         }
       }
     }
-
     this.counter--;
   }
 
@@ -71,6 +67,8 @@ public class GameOverTaskNew extends BukkitRunnable {
       this.ctx.getState().playerLeaves(aPlayerCtx, false);
     }
     this.ctx.reset();
+    this.ctx.setState(new GameStateWaiting(this.ctx));
+    this.ctx.updateSigns();
 
 //    // Reset scoreboard first
 //    this.ctx.resetScoreboard();

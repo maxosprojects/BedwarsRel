@@ -26,11 +26,11 @@ import org.bukkit.material.Redstone;
 
 public class RegionNew {
   public final static int CHUNK_SIZE = 16;
-  private HashMap<Block, Byte> breakedBlockData = null;
-  private HashMap<Block, BlockFace> breakedBlockFace = null;
-  private HashMap<Block, Boolean> breakedBlockPower = null;
-  private HashMap<Block, Integer> breakedBlockTypes = null;
-  private List<Block> breakedBlocks = null;
+  private HashMap<Block, Byte> brokenBlockData = null;
+  private HashMap<Block, BlockFace> brokenBlockFace = null;
+  private HashMap<Block, Boolean> brokenBlockPower = null;
+  private HashMap<Block, Integer> brokendBlockTypes = null;
+  private List<Block> brokenBlocks = null;
   private List<Inventory> inventories = null;
   private Location maxCorner = null;
   private Location minCorner = null;
@@ -52,12 +52,12 @@ public class RegionNew {
     this.world = pos1.getWorld();
     this.setMinMax(pos1, pos2);
     this.placedBlocks = new ArrayList<>();
-    this.breakedBlocks = new ArrayList<>();
-    this.breakedBlockTypes = new HashMap<>();
-    this.breakedBlockData = new HashMap<>();
-    this.breakedBlockFace = new HashMap<>();
+    this.brokenBlocks = new ArrayList<>();
+    this.brokendBlockTypes = new HashMap<>();
+    this.brokenBlockData = new HashMap<>();
+    this.brokenBlockFace = new HashMap<>();
     this.placedUnbreakableBlocks = new ArrayList<>();
-    this.breakedBlockPower = new HashMap<>();
+    this.brokenBlockPower = new HashMap<>();
     this.inventories = new ArrayList<>();
     this.removingEntities = new ArrayList<>();
 
@@ -70,18 +70,18 @@ public class RegionNew {
 
   public void addBrokenBlock(Block brokenBlock) {
     if (brokenBlock.getState().getData() instanceof Directional) {
-      this.breakedBlockFace.put(brokenBlock,
+      this.brokenBlockFace.put(brokenBlock,
           ((Directional) brokenBlock.getState().getData()).getFacing());
     }
 
-    this.breakedBlockTypes.put(brokenBlock, brokenBlock.getTypeId());
-    this.breakedBlockData.put(brokenBlock, brokenBlock.getData());
+    this.brokendBlockTypes.put(brokenBlock, brokenBlock.getTypeId());
+    this.brokenBlockData.put(brokenBlock, brokenBlock.getData());
 
     if (brokenBlock.getState().getData() instanceof Redstone) {
-      this.breakedBlockPower.put(brokenBlock, ((Redstone) brokenBlock.getState().getData()).isPowered());
+      this.brokenBlockPower.put(brokenBlock, ((Redstone) brokenBlock.getState().getData()).isPowered());
     }
 
-    this.breakedBlocks.add(brokenBlock);
+    this.brokenBlocks.add(brokenBlock);
   }
 
   public void addInventory(Inventory inventory) {
@@ -93,14 +93,14 @@ public class RegionNew {
     this.placedBlocks.add(placeBlock);
     if (replacedBlock != null) {
       if (replacedBlock.getData() instanceof Directional) {
-        this.breakedBlockFace.put(replacedBlock.getBlock(),
+        this.brokenBlockFace.put(replacedBlock.getBlock(),
             ((Directional) replacedBlock.getData()).getFacing());
       }
 
-      this.breakedBlockTypes.put(replacedBlock.getBlock(), replacedBlock.getTypeId());
-      this.breakedBlockData.put(replacedBlock.getBlock(), replacedBlock.getData().getData());
+      this.brokendBlockTypes.put(replacedBlock.getBlock(), replacedBlock.getTypeId());
+      this.brokenBlockData.put(replacedBlock.getBlock(), replacedBlock.getData().getData());
 
-      this.breakedBlocks.add(replacedBlock.getBlock());
+      this.brokenBlocks.add(replacedBlock.getBlock());
     }
   }
 
@@ -109,16 +109,16 @@ public class RegionNew {
     this.placedUnbreakableBlocks.add(placed);
     if (replaced != null) {
       if (replaced.getData() instanceof Directional) {
-        this.breakedBlockFace.put(replaced.getBlock(),
+        this.brokenBlockFace.put(replaced.getBlock(),
             ((Directional) replaced.getData()).getFacing());
       }
 
-      this.breakedBlockTypes.put(replaced.getBlock(), replaced.getTypeId());
-      this.breakedBlockData.put(replaced.getBlock(), replaced.getData().getData());
-      this.breakedBlocks.add(replaced.getBlock());
+      this.brokendBlockTypes.put(replaced.getBlock(), replaced.getTypeId());
+      this.brokenBlockData.put(replaced.getBlock(), replaced.getData().getData());
+      this.brokenBlocks.add(replaced.getBlock());
 
       if (replaced.getData() instanceof Redstone) {
-        this.breakedBlockPower.put(placed, ((Redstone) replaced.getData()).isPowered());
+        this.brokenBlockPower.put(placed, ((Redstone) replaced.getData()).isPowered());
       }
     }
   }
@@ -250,15 +250,15 @@ public class RegionNew {
 
     this.placedUnbreakableBlocks.clear();
 
-    for (Block block : this.breakedBlocks) {
+    for (Block block : this.brokenBlocks) {
       Block theBlock = this.getWorld().getBlockAt(block.getLocation());
-      theBlock.setTypeId(this.breakedBlockTypes.get(block));
-      theBlock.setData(this.breakedBlockData.get(block));
+      theBlock.setTypeId(this.brokendBlockTypes.get(block));
+      theBlock.setData(this.brokenBlockData.get(block));
 
-      if (this.breakedBlockFace.containsKey(theBlock)) {
+      if (this.brokenBlockFace.containsKey(theBlock)) {
         MaterialData data = theBlock.getState().getData();
         if (data instanceof Directional) {
-          ((Directional) data).setFacingDirection(this.breakedBlockFace.get(block));
+          ((Directional) data).setFacingDirection(this.brokenBlockFace.get(block));
           theBlock.getState().setData(data);
         }
       }
@@ -267,7 +267,7 @@ public class RegionNew {
         Lever attach = (Lever) theBlock.getState().getData();
         BlockState supportState = theBlock.getState();
         BlockState initalState = theBlock.getState();
-        attach.setPowered(this.breakedBlockPower.get(block));
+        attach.setPowered(this.brokenBlockPower.get(block));
         theBlock.getState().setData(attach);
 
         supportState.setType(Material.AIR);
@@ -278,7 +278,7 @@ public class RegionNew {
       }
     }
 
-    this.breakedBlocks.clear();
+    this.brokenBlocks.clear();
 
     Material targetMaterial = ctx.getTargetMaterial();
     for (TeamNew team : ctx.getTeams().values()) {

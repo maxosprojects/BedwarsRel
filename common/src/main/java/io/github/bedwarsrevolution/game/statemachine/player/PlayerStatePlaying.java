@@ -71,7 +71,7 @@ public class PlayerStatePlaying extends PlayerState {
 
     TeamNew team = this.playerCtx.getTeam();
     DamageHolder damage = this.playerCtx.getLastDamagedBy();
-    boolean damageCausedRecently = damage == null ? false : damage.wasCausedRecently();
+    boolean damageCausedRecently = (damage != null && damage.wasCausedRecently());
 
 //    PlayerStatistic diedPlayerStats = null;
 //    PlayerStatistic killerPlayerStats = null;
@@ -123,8 +123,6 @@ public class PlayerStatePlaying extends PlayerState {
                           UtilsNew.getPlayerWithTeamString(aPlayer, team, ChatColor.GOLD)))));
         }
       }
-
-      GameContext ctx = this.playerCtx.getGameContext();
       this.sendTeamDeadMessage(team);
       return;
     }
@@ -174,9 +172,14 @@ public class PlayerStatePlaying extends PlayerState {
 //    }
 //    this.sendTeamDeadMessage(team);
 
-    PlayerStateWaitingRespawn newState = new PlayerStateWaitingRespawn(this.playerCtx);
-    this.playerCtx.setState(newState);
-    newState.runWaitingRespawn();
+    if (this.playerCtx.getTeam().isBedDestroyed()) {
+      PlayerStateSpectator newState = new PlayerStateSpectator(this.playerCtx);
+      this.playerCtx.setState(newState);
+    } else {
+      PlayerStateWaitingRespawn newState = new PlayerStateWaitingRespawn(this.playerCtx);
+      this.playerCtx.setState(newState);
+      newState.runWaitingRespawn(true);
+    }
   }
 
   @Override
@@ -279,6 +282,9 @@ public class PlayerStatePlaying extends PlayerState {
 //    }
 
     event.setCancelled(true);
+    if (event.getRightClicked().getType() != EntityType.VILLAGER) {
+      return;
+    }
     Shop shop = this.playerCtx.getShop();
     shop.resetCurrentCategory();
     shop.render();
