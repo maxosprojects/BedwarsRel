@@ -2,7 +2,6 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrevolution.game.GameLobbyCountdownNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerStateWaitingGame;
@@ -158,6 +157,10 @@ public class GameStateWaiting extends GameState {
   private void forceStart(Player player) {
     boolean enoughPlayers = this.isEnoughPlayers();
     if (player.isOp() || player.hasPermission("bw.setup")) {
+      if (this.lobbyCountdown != null) {
+        this.lobbyCountdown.cancel();
+        this.lobbyCountdown = null;
+      }
       GameStateRunning newState = new GameStateRunning(this.ctx);
       this.ctx.setState(newState);
       newState.startGame();
@@ -340,7 +343,7 @@ public class GameStateWaiting extends GameState {
     boolean enoughPlayers = this.isEnoughPlayers();
     if (enoughPlayers && this.isEnoughTeams()) {
       if (this.lobbyCountdown == null) {
-        this.lobbyCountdown = new GameLobbyCountdownNew(this.ctx, this);
+        this.lobbyCountdown = new GameLobbyCountdownNew(this.ctx);
         this.lobbyCountdown.runTaskTimer(BedwarsRevol.getInstance(), 20L, 20L);
       }
     } else if (!enoughPlayers) {
@@ -488,7 +491,8 @@ public class GameStateWaiting extends GameState {
 //
 //    this.playerDamages.remove(p);
 
-    BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());
+//    BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());
+//    playerCtx.getGameContext().removePlayer(playerCtx);
 
 //    if (this.freePlayers.contains(p)) {
 //      this.freePlayers.remove(p);
@@ -517,10 +521,21 @@ public class GameStateWaiting extends GameState {
     playerCtx.getState().leave(kicked);
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
+    BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());
+    this.ctx.removePlayer(playerCtx);
+    playerCtx.getPlayer().setScoreboard(
+        BedwarsRevol.getInstance().getScoreboardManager().getNewScoreboard());
+    this.ctx.updateSigns();
 
+    if (!this.isEnoughPlayers() || !this.isEnoughTeams()) {
+      if (this.lobbyCountdown != null) {
+        this.lobbyCountdown.cancel();
+        this.lobbyCountdown = null;
+      }
+    }
     this.updateScoreboard();
 
-//    try {
+    //    try {
 //      p.setScoreboard(BedwarsRel.getInstance().getScoreboardManager().getMainScoreboard());
 //    } catch (Exception e) {
 //      BedwarsRel.getInstance().getBugsnag().notify(e);
@@ -560,7 +575,7 @@ public class GameStateWaiting extends GameState {
 //      player.teleport(storage.getLeft());
 //    }
 
-    this.ctx.updateSigns();
+//    this.ctx.updateSigns();
   }
 
   @Override

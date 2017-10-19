@@ -1,7 +1,8 @@
-package io.github.bedwarsrevolution.game;
+package io.github.bedwarsrevolution.game.statemachine.game;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.game.GameStateWaiting;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
