@@ -6,7 +6,12 @@ import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
@@ -261,24 +266,52 @@ public class PlayerListenerNew extends BaseListenerNew {
   }
 
   @EventHandler
-  public void onDamage(EntityDamageEvent event) {
+  public void onEntityDamage(EntityDamageEvent event) {
+    Entity entity = event.getEntity();
     Player player = null;
-    if (event.getEntity() instanceof Player) {
-      player = (Player) event.getEntity();
+    Player damager;
+    if (entity instanceof Player) {
+      player = (Player) entity;
     } else if (event instanceof EntityDamageByEntityEvent) {
       EntityDamageByEntityEvent eventByEntity = (EntityDamageByEntityEvent) event;
-      if (eventByEntity.getDamager() == null || !(eventByEntity.getDamager() instanceof Player)) {
+      if (eventByEntity.getDamager() == null) {
         return;
       }
     }
-    if (player == null) {
-      return;
+    damager = getDamager(event);
+
+    if (player != null) {
+      GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+      if (ctx != null) {
+        ctx.getState().onEventEntityDamageToPlayer(event, damager);
+      }
+    } else if (damager != null) {
+      GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(damager);
+      if (ctx != null) {
+        ctx.getState().onEventEntityDamageByPlayer(event, damager);
+      }
     }
-    GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
-    if (ctx == null) {
-      return;
+  }
+
+  private static Player getDamager(EntityDamageEvent event) {
+    if (!(event instanceof EntityDamageByEntityEvent)) {
+      return null;
     }
-    ctx.getState().onEventEntityDamage(event);
+    EntityDamageByEntityEvent eventByEntity = (EntityDamageByEntityEvent) event;
+    Player damager = null;
+    EntityType damagerType = eventByEntity.getDamager().getType();
+    if (eventByEntity.getDamager() instanceof Player) {
+      damager = (Player) eventByEntity.getDamager();
+    } else if (damagerType == EntityType.ARROW) {
+      Arrow arrow = (Arrow) eventByEntity.getDamager();
+      if (arrow.getShooter() instanceof Player) {
+        damager = (Player) arrow.getShooter();
+      }
+    } else if (damagerType == EntityType.PRIMED_TNT) {
+      TNTPrimed tnt = (TNTPrimed) eventByEntity.getDamager();
+      damager = (Player) tnt.getSource();
+    }
+    return damager;
   }
 
   @EventHandler

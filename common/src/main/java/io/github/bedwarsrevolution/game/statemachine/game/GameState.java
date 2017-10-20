@@ -2,7 +2,6 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -48,7 +47,22 @@ public abstract class GameState {
 
   public abstract void onEventCraft(CraftItemEvent event);
 
-  public abstract void onEventEntityDamage(EntityDamageEvent event);
+  /**
+   * Called only when the damaged entity is a {@link Player}
+   * @param event
+   * @param damager is only null if damage was caused to a player in the game and damager
+   *        couldn't be established, see
+   *        {@link io.github.bedwarsrevolution.listeners.PlayerListenerNew#onEntityDamage(EntityDamageEvent)}
+   *        for implementation details
+   */
+  public abstract void onEventEntityDamageToPlayer(EntityDamageEvent event, Player damager);
+
+  /**
+   * Called only when the damaged entity was not a {@link Player}
+   * @param event
+   * @param damager is the player in the game that caused the damage
+   */
+  public abstract void onEventEntityDamageByPlayer(EntityDamageEvent event, Player damager);
 
   public abstract void onEventDrop(PlayerDropItemEvent event);
 

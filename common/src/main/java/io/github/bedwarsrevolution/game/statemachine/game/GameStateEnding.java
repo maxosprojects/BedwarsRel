@@ -43,7 +43,7 @@ public class GameStateEnding extends GameState {
   }
 
   @Override
-  public void onEventEntityDamage(EntityDamageEvent event) {
+  public void onEventEntityDamageToPlayer(EntityDamageEvent event, Player damager) {
     event.setCancelled(true);
     if (event.getCause() != DamageCause.VOID || !(event.getEntity() instanceof Player)) {
       return;
@@ -54,6 +54,11 @@ public class GameStateEnding extends GameState {
     playerCtx.setState(newState);
     newState.runWaitingRespawn(false);
     playerCtx.setState(new PlayerStateSpectator(playerCtx));
+  }
+
+  @Override
+  public void onEventEntityDamageByPlayer(EntityDamageEvent event, Player damager) {
+    event.setCancelled(true);
   }
 
   @Override
@@ -114,7 +119,7 @@ public class GameStateEnding extends GameState {
 
   @Override
   public void playerLeaves(PlayerContext playerCtx, boolean kicked) {
-    playerCtx.getState().leave(kicked);
+//    playerCtx.getState().leave(kicked);
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
     BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());

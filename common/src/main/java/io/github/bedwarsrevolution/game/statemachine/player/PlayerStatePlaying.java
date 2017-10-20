@@ -4,19 +4,18 @@ import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.DamageHolder;
 import io.github.bedwarsrevolution.game.TeamNew;
-import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.shop.Shop;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -27,8 +26,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 /**
  * Created by {maxos} 2017
@@ -40,7 +37,7 @@ public class PlayerStatePlaying extends PlayerState {
   }
 
   @Override
-  public void onDeath() {
+  public void onDeath(boolean byVoid) {
 //    if (!BedwarsRel.getInstance().getBooleanConfig("player-drops", false)) {
 //      pde.getDrops().clear();
 //    }
@@ -69,7 +66,6 @@ public class PlayerStatePlaying extends PlayerState {
 //      }
 //    }
 
-    TeamNew team = this.playerCtx.getTeam();
     DamageHolder damage = this.playerCtx.getLastDamagedBy();
     boolean damageCausedRecently = (damage != null && damage.wasCausedRecently());
 
@@ -112,20 +108,23 @@ public class PlayerStatePlaying extends PlayerState {
 //      }
 //    }
 
-    if (damageCausedRecently) {
-      for (PlayerContext aPlayerCtx : playerCtx.getGameContext().getPlayers()) {
-        Player aPlayer = aPlayerCtx.getPlayer();
-        if (aPlayer.isOnline()) {
-          aPlayer.sendMessage(
-              ChatWriterNew.pluginMessage(
-                  ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.player.died", ImmutableMap
-                      .of("player",
-                          UtilsNew.getPlayerWithTeamString(aPlayer, team, ChatColor.GOLD)))));
+    for (PlayerContext aPlayerCtx : this.playerCtx.getGameContext().getPlayers()) {
+      Player aPlayer = aPlayerCtx.getPlayer();
+      if (byVoid) {
+        if (damageCausedRecently) {
+          this.tellPlayerKilled(aPlayer, damage.getDamager(), "knockedinvoid");
+        } else {
+          this.tellPlayerDied(aPlayer, "fellinvoid");
+        }
+      } else {
+        if (damageCausedRecently) {
+          this.tellPlayerKilled(aPlayer, damage.getDamager(), "killed");
+        } else {
+          this.tellPlayerDied(aPlayer, "died");
         }
       }
-      this.sendTeamDeadMessage(team);
-      return;
     }
+//    this.sendTeamDeadMessage(team);
 
 //    Team killerTeam = this.getGame().getPlayerTeam(killer);
 //    if (killerTeam == null) {
@@ -182,8 +181,34 @@ public class PlayerStatePlaying extends PlayerState {
     }
   }
 
+  private void tellPlayerDied(Player recipient, String translationKey) {
+    Player player = this.playerCtx.getPlayer();
+    TeamNew team = this.playerCtx.getTeam();
+    String msg = ChatWriterNew.pluginMessage(
+        ChatColor.GOLD + BedwarsRevol._l(recipient, "ingame.player." + translationKey,
+            ImmutableMap.of("player",
+                UtilsNew.getPlayerWithTeamString(player, team, ChatColor.GOLD))));
+    recipient.sendMessage(msg);
+  }
+
+  private void tellPlayerKilled(Player recipient, Player killer, String translationKey) {
+    Player player = this.playerCtx.getPlayer();
+    TeamNew team = this.playerCtx.getTeam();
+    PlayerContext killerCtx = this.playerCtx.getGameContext().getPlayerContext(killer);
+    String killerStr = killer.getDisplayName() + ChatColor.GOLD;
+    if (killerCtx != null) {
+      killerStr = UtilsNew.getPlayerWithTeamString(killer, killerCtx.getTeam(), ChatColor.GOLD);
+    }
+    String msg = ChatWriterNew.pluginMessage(
+        ChatColor.GOLD + BedwarsRevol._l(recipient, "ingame.player." + translationKey,
+            ImmutableMap.of("player",
+                UtilsNew.getPlayerWithTeamString(player, team, ChatColor.GOLD),
+                "killer", killerStr)));
+    recipient.sendMessage(msg);
+  }
+
   @Override
-  public void onDamage(EntityDamageEvent event) {
+  public void onDamageToPlayer(EntityDamageEvent event, Player damager) {
     if (this.playerCtx.isProtectd() && event.getCause() != DamageCause.VOID) {
       event.setCancelled(true);
       return;
@@ -191,25 +216,8 @@ public class PlayerStatePlaying extends PlayerState {
 
     if (event.getCause() == DamageCause.VOID) {
       event.setCancelled(true);
-      this.onDeath();
+      this.onDeath(true);
       return;
-    }
-
-    Player damager = null;
-    if (event instanceof EntityDamageByEntityEvent) {
-      EntityDamageByEntityEvent eventByentity = (EntityDamageByEntityEvent) event;
-      EntityType damagerType = eventByentity.getDamager().getType();
-      if (eventByentity.getDamager() instanceof Player) {
-        damager = (Player) eventByentity.getDamager();
-      } else if (damagerType == EntityType.ARROW) {
-        Arrow arrow = (Arrow) eventByentity.getDamager();
-        if (arrow.getShooter() instanceof Player) {
-          damager = (Player) arrow.getShooter();
-        }
-      } else if (damagerType == EntityType.PRIMED_TNT) {
-        TNTPrimed tnt = (TNTPrimed) eventByentity.getDamager();
-        damager = (Player) tnt.getSource();
-      }
     }
 
     if (damager != null) {
@@ -218,8 +226,13 @@ public class PlayerStatePlaying extends PlayerState {
 
     if (event.getDamage() >= this.playerCtx.getPlayer().getHealth()) {
       event.setCancelled(true);
-      this.onDeath();
+      this.onDeath(false);
     }
+  }
+
+  @Override
+  public void onDamageByPlayer(EntityDamageEvent event) {
+    event.setCancelled(true);
   }
 
   @Override
@@ -305,7 +318,7 @@ public class PlayerStatePlaying extends PlayerState {
     this.playerCtx.getPlayer().setGameMode(GameMode.SURVIVAL);
   }
 
-  public void sendTeamDeadMessage(TeamNew team) {
+//  public void sendTeamDeadMessage(TeamNew team) {
 //    if (deathTeam.getPlayers().size() == 1 && deathTeam.isBedDestroyed(this.getGame())) {
 //      for (Player aPlayer : this.getGame().getPlayers()) {
 //        if (aPlayer.isOnline()) {
@@ -316,6 +329,6 @@ public class PlayerStatePlaying extends PlayerState {
 //        }
 //      }
 //    }
-  }
+//  }
 
 }

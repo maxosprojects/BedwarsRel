@@ -45,7 +45,11 @@ public class GameStateStopped extends GameState {
   }
 
   @Override
-  public void onEventEntityDamage(EntityDamageEvent event) {
+  public void onEventEntityDamageToPlayer(EntityDamageEvent event, Player damager) {
+  }
+
+  @Override
+  public void onEventEntityDamageByPlayer(EntityDamageEvent event, Player damager) {
   }
 
   @Override

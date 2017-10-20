@@ -23,9 +23,24 @@ public abstract class PlayerState {
     this.playerCtx = playerCtx;
   }
 
-  public abstract void onDeath();
+  public abstract void onDeath(boolean byVoid);
 
-  public abstract void onDamage(EntityDamageEvent event);
+  /**
+   * Called only when the damaged entity is is the one in context
+   * @param event
+   * @param damager is only null if damage was caused to the player in context and damager
+   *        couldn't be established, see
+   *        {@link io.github.bedwarsrevolution.listeners.PlayerListenerNew#onEntityDamage(EntityDamageEvent)}
+   *        for implementation details
+   */
+  public abstract void onDamageToPlayer(EntityDamageEvent event, Player damager);
+
+  /**
+   * Called only when the damage was caused to a non-player entity and the damager is
+   * the player in context
+   * @param event
+   */
+  public abstract void onDamageByPlayer(EntityDamageEvent event);
 
   public abstract void onDrop(PlayerDropItemEvent event);
 
@@ -40,7 +55,7 @@ public abstract class PlayerState {
   public void leave(boolean kicked) {
     for (PlayerContext aPlayerCtx : this.playerCtx.getGameContext().getPlayers()) {
       Player aPlayer = aPlayerCtx.getPlayer();
-      if (aPlayer.isOnline()) {
+      if (aPlayer != this.playerCtx && aPlayer.isOnline()) {
         String msgKey;
         if (kicked) {
           msgKey = "ingame.player.kicked";

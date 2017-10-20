@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockGrowEvent;
@@ -28,6 +29,11 @@ public class BlockListenerNew extends BaseListenerNew {
       return;
     }
     event.setCancelled(true);
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+  public void onBlockEvent(BlockExplodeEvent event) {
+    System.out.println(event);
   }
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)

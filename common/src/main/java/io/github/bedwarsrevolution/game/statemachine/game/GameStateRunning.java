@@ -17,6 +17,7 @@ import io.github.bedwarsrevolution.shop.upgrades.UpgradeScope;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.TitleWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,6 +74,7 @@ import org.bukkit.util.Vector;
  * Created by {maxos} 2017
  */
 public class GameStateRunning extends GameState {
+
   private static final String TRANSLATION = "running";
 
   private int timeLeft;
@@ -93,20 +95,16 @@ public class GameStateRunning extends GameState {
   }
 
   @Override
-  public void onEventEntityDamage(EntityDamageEvent event) {
-    if (!(event.getEntity() instanceof Player)) {
-      return;
-    }
+  public void onEventEntityDamageToPlayer(EntityDamageEvent event, Player damager) {
+    PlayerContext playerCtx = this.ctx.getPlayerContext((Player) event.getEntity());
+    playerCtx.getState().onDamageToPlayer(event, damager);
+    this.checkGameOver();
+  }
 
-    Player player = (Player) event.getEntity();
-    PlayerContext playerCtx = this.ctx.getPlayerContext(player);
-    if (playerCtx == null) {
-      throw new IllegalStateException(String.format(
-          "Damage event was processed by game that doesn't know the damaged player: %s",
-          player.getName()));
-    }
-
-    playerCtx.getState().onDamage(event);
+  @Override
+  public void onEventEntityDamageByPlayer(EntityDamageEvent event, Player damager) {
+    PlayerContext playerCtx = this.ctx.getPlayerContext(damager);
+    playerCtx.getState().onDamageByPlayer(event);
     this.checkGameOver();
   }
 
@@ -402,7 +400,7 @@ public class GameStateRunning extends GameState {
 
   @Override
   public void onEventBlockBreak(BlockBreakEvent event) {
-    event.setCancelled(true);
+//    event.setCancelled(true);
 
     Player player = event.getPlayer();
     PlayerContext playerCtx = this.ctx.getPlayerContext(player);
@@ -412,45 +410,51 @@ public class GameStateRunning extends GameState {
       return;
     }
 
+    Block brokenBlock = event.getBlock();
+
     Material targetMaterial = this.ctx.getTargetMaterial();
-    if (event.getBlock().getType() == targetMaterial) {
+    if (brokenBlock.getType() == targetMaterial) {
       event.setCancelled(true);
-      this.handleDestroyTargetMaterial(playerCtx, event.getBlock());
+      this.handleDestroyTargetMaterial(playerCtx, brokenBlock);
       return;
     }
 
-    Block brokenBlock = event.getBlock();
-
     if (!this.ctx.getRegion().isPlacedBlock(brokenBlock)) {
-      if (brokenBlock == null) {
-        event.setCancelled(true);
-        return;
-      }
-
-      if (BedwarsRevol.getInstance().isBreakableType(brokenBlock.getType())) {
-        this.ctx.getRegion().addBrokenBlock(brokenBlock);
-        event.setCancelled(false);
-        return;
-      }
-
       event.setCancelled(true);
-    } else {
-      if (!BedwarsRevol.getInstance().getBooleanConfig("friendlybreak", true)) {
-        TeamNew playerTeam = this.ctx.getPlayerContext(player).getTeam();
-        for (PlayerContext aPlayerCtx : playerTeam.getPlayers()) {
-          Player aPlayer = aPlayerCtx.getPlayer();
-          if (player == aPlayer) {
-            continue;
-          }
+      return;
+    }
 
-          if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).equals(brokenBlock)) {
-            player.sendMessage(ChatWriterNew.pluginMessage(
-                ChatColor.RED + BedwarsRevol._l(player, "ingame.no-friendlybreak")));
-            event.setCancelled(true);
-            return;
-          }
+//    if (!this.ctx.getRegion().isPlacedBlock(brokenBlock)) {
+//      if (brokenBlock == null) {
+//        event.setCancelled(true);
+//        return;
+//      }
+//
+//      if (BedwarsRevol.getInstance().isBreakableType(brokenBlock.getType())) {
+//        this.ctx.getRegion().addBrokenBlock(brokenBlock);
+//        event.setCancelled(false);
+//        return;
+//      }
+//
+//      event.setCancelled(true);
+//    } else {
+
+    if (!BedwarsRevol.getInstance().getBooleanConfig("friendlybreak", true)) {
+      TeamNew playerTeam = this.ctx.getPlayerContext(player).getTeam();
+      for (PlayerContext aPlayerCtx : playerTeam.getPlayers()) {
+        Player aPlayer = aPlayerCtx.getPlayer();
+        if (player == aPlayer) {
+          continue;
+        }
+
+        if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).equals(brokenBlock)) {
+          player.sendMessage(ChatWriterNew.pluginMessage(
+              ChatColor.RED + BedwarsRevol._l(player, "ingame.no-friendlybreak")));
+          event.setCancelled(true);
+          return;
         }
       }
+    }
 
 //      if (brokenBlock.getType() == Material.ENDER_CHEST) {
 //        for (TeamNew team : this.ctx.getTeams().values()) {
@@ -480,16 +484,14 @@ public class GameStateRunning extends GameState {
 //        brokenBlock.getWorld().dropItemNaturally(brokenBlock.getLocation(), enderChest);
 //      }
 
-      for (ItemStack drop : brokenBlock.getDrops()) {
-        if (!drop.getType().equals(brokenBlock.getType())) {
-          brokenBlock.getDrops().remove(drop);
-          brokenBlock.setType(Material.AIR);
-          break;
-        }
+    for (ItemStack drop : brokenBlock.getDrops()) {
+      if (!drop.getType().equals(brokenBlock.getType())) {
+        brokenBlock.getDrops().remove(drop);
+        brokenBlock.setType(Material.AIR);
+        break;
       }
-
-      this.ctx.getRegion().removePlacedBlock(brokenBlock);
     }
+    this.ctx.getRegion().removePlacedBlock(brokenBlock);
   }
 
   @Override
@@ -575,7 +577,15 @@ public class GameStateRunning extends GameState {
     if (block.getType() == Material.TNT) {
       event.setCancelled(true);
       Location loc = block.getLocation().add(0.5D, 0.0D, 0.5D);
-      block.getWorld().spawnEntity(loc, EntityType.PRIMED_TNT);
+      TNTPrimed tnt = (TNTPrimed) block.getWorld().spawnEntity(loc, EntityType.PRIMED_TNT);
+      try {
+        Class<?> TntSourceClass = BedwarsRevol.getInstance().getVersionRelatedClass("TntSource");
+        final Method methodSetSource = TntSourceClass.getMethod(
+            "setSource", Player.class, TNTPrimed.class);
+        methodSetSource.invoke(null, player, tnt);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
       new BukkitRunnable() {
         public void run() {
 //          player.getInventory().removeItem(new ItemStack[]{new ItemStack(Material.TNT, 1)});
@@ -632,10 +642,10 @@ public class GameStateRunning extends GameState {
         continue;
       }
       if ((!tntDestroyEnabled
-              && !tntDestroyBeds)
+          && !tntDestroyBeds)
           || (!tntDestroyEnabled
-              && exploding.getType() != Material.BED_BLOCK
-              && exploding.getType() != Material.BED)) {
+          && exploding.getType() != Material.BED_BLOCK
+          && exploding.getType() != Material.BED)) {
         if (!this.ctx.getRegion().isPlacedBlock(exploding)) {
           if (BedwarsRevol.getInstance().isBreakableType(exploding.getType())) {
             this.ctx.getRegion().addBrokenBlock(exploding);
@@ -853,7 +863,7 @@ public class GameStateRunning extends GameState {
 
   private String formatScoreboardTitle() {
     String format = BedwarsRevol.getInstance()
-            .getStringConfig("scoreboard.format-title", "&e$region$&f - $time$");
+        .getStringConfig("scoreboard.format-title", "&e$region$&f - $time$");
     format = format.replace("$region$", this.ctx.getRegion().getName());
     format = format.replace("$game$", this.ctx.getName());
     format = format.replace("$time$", this.getFormattedTimeLeft());
@@ -868,7 +878,7 @@ public class GameStateRunning extends GameState {
       format = BedwarsRevol.getInstance().getStringConfig("scoreboard.format-bed-destroyed",
           "&c$status$ $team$");
     } else {
-      format =BedwarsRevol.getInstance().getStringConfig(
+      format = BedwarsRevol.getInstance().getStringConfig(
           "scoreboard.format-bed-alive", "&a$status$ $team$");
     }
     format = format.replace("$status$", (bedDestroyed) ?
@@ -931,7 +941,7 @@ public class GameStateRunning extends GameState {
     // If only one team is left then we got the winner
     if (notLostTeams.size() == 1) {
       this.runGameOver(notLostTeams.iterator().next(), false);
-    } else if (this.timeLeft <= 0){
+    } else if (this.timeLeft <= 0) {
       this.runGameOver(null, false);
     }
   }
@@ -1145,7 +1155,7 @@ public class GameStateRunning extends GameState {
     for (Map<String, Object> item : this.ctx.getDefaultUpgrades()) {
       Map<String, Object> elem = (Map<String, Object>) item.get("upgrade");
       Upgrade upgrade = UpgradeRegistry.getUpgrade(
-          (String)elem.get("type"), (int)elem.get("level"));
+          (String) elem.get("type"), (int) elem.get("level"));
       if (upgrade instanceof UpgradeItem) {
         // Make a copy to run fixMeta on
         UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);

@@ -21,11 +21,16 @@ public class PlayerStateSpectator extends PlayerState {
   }
 
   @Override
-  public void onDeath() {
+  public void onDeath(boolean byVoid) {
   }
 
   @Override
-  public void onDamage(EntityDamageEvent event) {
+  public void onDamageToPlayer(EntityDamageEvent event, Player damager) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onDamageByPlayer(EntityDamageEvent event) {
     event.setCancelled(true);
   }
 

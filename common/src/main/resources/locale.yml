@@ -139,6 +139,8 @@ ingame:
   player:
     left: "Player $player$ has left the game!"
     died: "$player$ died!"
+    fellinvoid: "$player$ fell into void"
+    knockedinvoid: "$killer$ knocked $player$ into void"
     killed: "$killer$ killed $player$!"
     kicked: "$player$ was kicked!"
     waskicked: "You were kicked from the game!"

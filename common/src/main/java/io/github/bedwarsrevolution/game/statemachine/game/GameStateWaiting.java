@@ -64,7 +64,12 @@ public class GameStateWaiting extends GameState {
   }
 
   @Override
-  public void onEventEntityDamage(EntityDamageEvent event) {
+  public void onEventEntityDamageToPlayer(EntityDamageEvent event, Player damager) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onEventEntityDamageByPlayer(EntityDamageEvent event, Player damager) {
     event.setCancelled(true);
   }
 

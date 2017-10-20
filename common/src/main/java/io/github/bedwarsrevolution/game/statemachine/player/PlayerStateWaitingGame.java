@@ -2,6 +2,7 @@ package io.github.bedwarsrevolution.game.statemachine.player;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -19,12 +20,17 @@ public class PlayerStateWaitingGame extends PlayerState {
   }
 
   @Override
-  public void onDeath() {
+  public void onDeath(boolean byVoid) {
     // TODO: "how did they do that?"... "scratching head"...
   }
 
   @Override
-  public void onDamage(EntityDamageEvent event) {
+  public void onDamageToPlayer(EntityDamageEvent event, Player damager) {
+    event.setCancelled(true);
+  }
+
+  @Override
+  public void onDamageByPlayer(EntityDamageEvent event) {
     event.setCancelled(true);
   }
 
