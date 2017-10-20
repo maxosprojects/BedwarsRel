@@ -9,6 +9,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.Villager;
@@ -310,6 +311,11 @@ public class PlayerListenerNew extends BaseListenerNew {
     } else if (damagerType == EntityType.PRIMED_TNT) {
       TNTPrimed tnt = (TNTPrimed) eventByEntity.getDamager();
       damager = (Player) tnt.getSource();
+    } else if (damagerType == EntityType.FIREBALL) {
+      Fireball ball = (Fireball) eventByEntity.getDamager();
+      if (ball.getShooter() instanceof Player) {
+        damager = (Player) ball.getShooter();
+      }
     }
     return damager;
   }

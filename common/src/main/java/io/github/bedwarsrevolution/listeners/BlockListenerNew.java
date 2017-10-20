@@ -31,10 +31,10 @@ public class BlockListenerNew extends BaseListenerNew {
     event.setCancelled(true);
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-  public void onBlockEvent(BlockExplodeEvent event) {
-    System.out.println(event);
-  }
+//  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+//  public void onBlockEvent(BlockExplodeEvent event) {
+//    System.out.println(event);
+//  }
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void onBlockBreak(BlockBreakEvent event) {

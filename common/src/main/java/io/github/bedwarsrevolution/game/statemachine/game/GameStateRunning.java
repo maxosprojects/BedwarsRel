@@ -32,6 +32,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
@@ -60,6 +61,7 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Bed;
@@ -210,7 +212,8 @@ public class GameStateRunning extends GameState {
 //      }
 //    }
 
-    PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
+    Player player = event.getPlayer();
+    PlayerContext playerCtx = this.ctx.getPlayerContext(player);
     if (clickedBlock != null
         && (clickedBlock.getType() == Material.ENDER_CHEST
         || clickedBlock.getType() == Material.CHEST)
@@ -222,7 +225,6 @@ public class GameStateRunning extends GameState {
       if (chestTeam == null) {
         return;
       }
-      Player player = playerCtx.getPlayer();
       if (chestTeam == playerTeam) {
         player.openInventory(chestTeam.getInventory());
       } else {
@@ -230,6 +232,22 @@ public class GameStateRunning extends GameState {
             ChatWriterNew
                 .pluginMessage(ChatColor.RED + BedwarsRevol._l(player, "ingame.noturteamchest")));
       }
+    }
+
+    if (event.getItem() != null && event.getItem().getType() == Material.FIREBALL) {
+      event.setCancelled(true);
+      // Take one fireball from the player
+      Inventory inv = player.getInventory();
+      int slot = inv.first(Material.FIREBALL);
+      ItemStack stack = inv.getItem(slot);
+      stack.setAmount(stack.getAmount() - 1);
+      // Launch fireball
+      Vector vec = player.getLocation().getDirection();
+      Fireball ball = player.launchProjectile(Fireball.class);
+      // Setting incendiary to false disables explosion damage oO
+//      ball.setIsIncendiary(false);
+//      ball.setYield(2);
+      ball.setVelocity(vec);
     }
   }
 
@@ -496,8 +514,11 @@ public class GameStateRunning extends GameState {
 
   @Override
   public void onEventBlockIgnite(BlockIgniteEvent event) {
-    if (event.getCause() == IgniteCause.ENDER_CRYSTAL || event.getCause() == IgniteCause.LIGHTNING
-        || event.getCause() == IgniteCause.SPREAD) {
+    IgniteCause cause = event.getCause();
+    if (cause == IgniteCause.ENDER_CRYSTAL
+        || cause == IgniteCause.LIGHTNING
+        || cause == IgniteCause.SPREAD
+        || cause == IgniteCause.EXPLOSION) {
       event.setCancelled(true);
       return;
     }
