@@ -147,6 +147,7 @@ ingame:
     killed: "&6&l$killer$&6&l killed $player$&6&l!"
     kicked: "&c$player$&c was kicked!"
     waskicked: "You were kicked from the game!"
+    gotresources: "&6&lGot $resources$&6&l from $victim$&6&l"
   blocks:
     ownbeddestroy: "You can't destroy your own bed!"
     beddestroyed:

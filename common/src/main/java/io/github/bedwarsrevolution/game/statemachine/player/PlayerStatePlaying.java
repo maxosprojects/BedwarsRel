@@ -1,12 +1,21 @@
 package io.github.bedwarsrevolution.game.statemachine.player;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.DamageHolder;
+import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.shop.Shop;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -22,6 +31,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 /**
  * Created by {maxos} 2017
@@ -122,6 +132,14 @@ public class PlayerStatePlaying extends PlayerState {
     }
 //    this.sendTeamDeadMessage(team);
 
+    if (damageCausedRecently) {
+      Player damager = damage.getDamager();
+      PlayerContext damagerCtx = this.playerCtx.getGameContext().getPlayerContext(damager);
+      if (damagerCtx != null) {
+        this.transferResources(damagerCtx);
+      }
+    }
+
 //    Team killerTeam = this.getGame().getPlayerTeam(killer);
 //    if (killerTeam == null) {
 //      for (Player aPlayer : this.getGame().getPlayers()) {
@@ -175,6 +193,51 @@ public class PlayerStatePlaying extends PlayerState {
       PlayerStateWaitingRespawn newState = new PlayerStateWaitingRespawn(this.playerCtx);
       this.playerCtx.setState(newState);
       newState.runWaitingRespawn(true);
+    }
+  }
+
+  private void transferResources(PlayerContext to) {
+    List<ResourceSpawnerNew> spawners = this.playerCtx.getGameContext().getResourceSpawners();
+    Set<Material> types = new HashSet<>();
+    PlayerInventory destInv = to.getPlayer().getInventory();
+    Multimap<Material, ItemStack> map = ArrayListMultimap.create();
+    for (ResourceSpawnerNew spawner : spawners) {
+      List<ItemStack> resources = spawner.getResources();
+      for (ItemStack resource : resources) {
+        types.add(resource.getType());
+      }
+    }
+    // Collect resources into map
+    for (ItemStack item : this.playerCtx.getPlayer().getInventory().getContents()) {
+      if (item != null && types.contains(item.getType())) {
+        map.put(item.getType(), item);
+      }
+    }
+    // Pack items into smallest possible number of itemstacks
+    for (Collection<ItemStack> toPack : map.asMap().values()) {
+      ItemStack[] stacks = packItems(toPack);
+      destInv.addItem(stacks);
+    }
+  }
+
+  ItemStack[] packItems(Collection<ItemStack> toPack) {
+    List<ItemStack> res = new ArrayList<>();
+    Iterator<ItemStack> iter = toPack.iterator();
+    ItemStack item = iter.next();
+    int maxSize = item.getMaxStackSize();
+    res.add(item);
+    while (iter.hasNext()) {
+      ItemStack nextItem = iter.next();
+      int left = item.getAmount() + nextItem.getAmount() - maxSize;
+      if (left > 0) {
+        item.setAmount(maxSize);
+        // Make a new stack with leftovers
+        item = item.clone();
+        res.add(item);
+        item.setAmount(left);
+      } else {
+        item.setAmount(item.getAmount() + nextItem.getAmount());
+      }
     }
   }
 
