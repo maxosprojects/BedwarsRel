@@ -12,10 +12,13 @@ import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -32,6 +35,7 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * Created by {maxos} 2017
@@ -136,7 +140,11 @@ public class PlayerStatePlaying extends PlayerState {
       Player damager = damage.getDamager();
       PlayerContext damagerCtx = this.playerCtx.getGameContext().getPlayerContext(damager);
       if (damagerCtx != null) {
-        this.transferResources(damagerCtx);
+        String resources = this.transferResources(damagerCtx);
+        damager.sendMessage(ChatWriterNew.pluginMessage(BedwarsRevol._l(
+            damager, "ingame.player.gotresources",
+            ImmutableMap.of("resources", resources,
+                "victim", this.playerCtx.getPlayer().getDisplayName()))));
       }
     }
 
@@ -196,7 +204,7 @@ public class PlayerStatePlaying extends PlayerState {
     }
   }
 
-  private void transferResources(PlayerContext to) {
+  private String transferResources(PlayerContext to) {
     List<ResourceSpawnerNew> spawners = this.playerCtx.getGameContext().getResourceSpawners();
     Set<Material> types = new HashSet<>();
     PlayerInventory destInv = to.getPlayer().getInventory();
@@ -213,11 +221,31 @@ public class PlayerStatePlaying extends PlayerState {
         map.put(item.getType(), item);
       }
     }
+    List<String> counts = new ArrayList<>();
     // Pack items into smallest possible number of itemstacks
     for (Collection<ItemStack> toPack : map.asMap().values()) {
       ItemStack[] stacks = packItems(toPack);
       destInv.addItem(stacks);
+      ItemStack item = toPack.iterator().next();
+      ItemMeta meta = item.getItemMeta();
+      String name;
+      if (meta.hasDisplayName()) {
+        name = meta.getDisplayName();
+      } else {
+        name = StringUtils.capitalize(item.getType().toString().toLowerCase());
+      }
+      counts.add(BedwarsRevol._l(to.getPlayer(), "ingame.player.resource",
+          ImmutableMap.of("resource", name, "amount", countItems(toPack).toString())));
     }
+    return StringUtils.join(counts, ", ");
+  }
+
+  private Integer countItems(Collection<ItemStack> toPack) {
+    int count = 0;
+    for (ItemStack item : toPack) {
+      count += item.getAmount();
+    }
+    return count;
   }
 
   ItemStack[] packItems(Collection<ItemStack> toPack) {
@@ -239,6 +267,7 @@ public class PlayerStatePlaying extends PlayerState {
         item.setAmount(item.getAmount() + nextItem.getAmount());
       }
     }
+    return res.toArray(new ItemStack[0]);
   }
 
   private void tellPlayerDied(Player recipient, String translationKey) {
