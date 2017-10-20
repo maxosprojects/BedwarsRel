@@ -737,7 +737,7 @@ public class GameStateRunning extends GameState {
   private boolean handleDestroyTargetMaterial(PlayerContext playerCtx, Block block) {
     Player player = playerCtx.getPlayer();
     TeamNew team = playerCtx.getTeam();
-    TeamNew bedDestroyTeam = null;
+    TeamNew teamOfDestroyedBed = null;
     Block bedBlock = team.getHeadTarget();
 
     if (block.getType() == Material.BED_BLOCK) {
@@ -758,8 +758,8 @@ public class GameStateRunning extends GameState {
         return false;
       }
 
-      bedDestroyTeam = this.ctx.getTeamOfBed(breakBlock);
-      if (bedDestroyTeam == null) {
+      teamOfDestroyedBed = this.ctx.getTeamOfBed(breakBlock);
+      if (teamOfDestroyedBed == null) {
         return false;
       }
       this.dropTargetBlock(block);
@@ -771,8 +771,8 @@ public class GameStateRunning extends GameState {
         return false;
       }
 
-      bedDestroyTeam = this.ctx.getTeamOfBed(block);
-      if (bedDestroyTeam == null) {
+      teamOfDestroyedBed = this.ctx.getTeamOfBed(block);
+      if (teamOfDestroyedBed == null) {
         return false;
       }
 
@@ -806,20 +806,18 @@ public class GameStateRunning extends GameState {
     for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
       Player aPlayer = aPlayerCtx.getPlayer();
       if (aPlayer.isOnline()) {
-        ChatColor chatColor = ChatColor.GOLD;
-        if (bedDestroyTeam.isInTeam(aPlayer)) {
-          String titleMsg = TitleWriterNew.pluginMessage(ChatColor.RED
-              + BedwarsRevol._l(aPlayer, "ingame.blocks.beddestroyedtitle"));
+        String transSuffix = "others";
+        if (teamOfDestroyedBed.isInTeam(aPlayer)) {
+          String titleMsg = TitleWriterNew.pluginMessage(
+              BedwarsRevol._l(aPlayer, "ingame.blocks.beddestroyedtitle"));
           aPlayer.sendTitle(titleMsg, null, 10, 70, 20);
-          chatColor = ChatColor.RED;
+          transSuffix = "team";
         }
-        String chatMsg = ChatWriterNew.pluginMessage(chatColor.toString() + ChatColor.BOLD
-            + BedwarsRevol._l(aPlayer, "ingame.blocks.beddestroyed",
-            ImmutableMap.of("team", bedDestroyTeam.getChatColor() + ChatColor.BOLD.toString()
-                    + bedDestroyTeam.getName() + chatColor.toString(),
-                "player",
-                ChatColor.BOLD.toString() + UtilsNew.getPlayerWithTeamString(
-                    player, team, bedDestroyTeam.getChatColor()))));
+        String chatMsg = ChatWriterNew.pluginMessage(
+            BedwarsRevol._l(aPlayer, "ingame.blocks.beddestroyed." + transSuffix,
+            ImmutableMap.of("team", teamOfDestroyedBed.getChatColor().toString()
+                      + teamOfDestroyedBed.getName(),
+                "player", UtilsNew.getPlayerWithTeamString(playerCtx))));
         aPlayer.sendMessage(chatMsg);
       }
     }
@@ -919,14 +917,11 @@ public class GameStateRunning extends GameState {
     Set<TeamNew> notLostTeams = new HashSet<>();
     for (TeamNew team : this.ctx.getTeams().values()) {
       if (team.isBedDestroyed()) {
-        boolean somePlayersOperational = false;
         for (PlayerContext playerCtx : team.getPlayers()) {
-          if (!playerCtx.getState().isSpectator() && playerCtx.isVirtuallyAlive()) {
-            somePlayersOperational = true;
+          if (!playerCtx.getState().isSpectator()) {
+            notLostTeams.add(team);
+            break;
           }
-        }
-        if (somePlayersOperational) {
-          notLostTeams.add(team);
         }
       } else if (team.getPlayers().size() > 0) {
         notLostTeams.add(team);
@@ -980,7 +975,7 @@ public class GameStateRunning extends GameState {
         String msg;
         if (winner == null) {
           msg = ChatWriterNew.pluginMessage(
-              ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.draw"));
+              BedwarsRevol._l(aPlayer, "ingame.draw"));
           title = TitleWriterNew.pluginMessage(
               BedwarsRevol._l(aPlayer, "ingame.title.draw-title"));
         } else {
@@ -998,10 +993,10 @@ public class GameStateRunning extends GameState {
                   ImmutableMap.of("team", winner.getChatColor() + winner.getDisplayName(),
                       "time", formattedTime)));
           msg = ChatWriterNew.pluginMessage(
-              ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.win",
+              BedwarsRevol._l(aPlayer, "ingame.win",
                   ImmutableMap.of("team", winner.getChatColor() + winner.getDisplayName())));
         }
-        aPlayer.sendTitle(title, subtitle, 0, 40, 20);
+        aPlayer.sendTitle(title, subtitle, 0, 70, 20);
         aPlayer.sendMessage(msg);
       }
     }

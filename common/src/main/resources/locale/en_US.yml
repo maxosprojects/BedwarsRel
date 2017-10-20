@@ -140,17 +140,19 @@ ingame:
     fullstackpershift: "Multiple stacks per shift click"
     onestackpershift: "One stack per shift click"
   player:
-    left: "Player $player$ has left the game!"
-    died: "$player$ died!"
-    fellinvoid: "$player$ fell into void"
-    knockedinvoid: "$killer$ knocked $player$ into void"
-    killed: "$killer$ killed $player$!"
-    kicked: "$player$ was kicked!"
+    left: "&cPlayer $player$&c has left the game!"
+    died: "&6&l$player$&6 died!"
+    fellintovoid: "&6&l$player$&6 fell into void"
+    knockedintovoid: "&6&l$killer$&6 knocked $player$&6 into void"
+    killed: "&6&l$killer$&6 killed $player$!"
+    kicked: "&c$player$&c was kicked!"
     waskicked: "You were kicked from the game!"
   blocks:
     ownbeddestroy: "You can't destroy your own bed!"
-    beddestroyed: "Team $team$ bed was destroyed by $player$!"
-    beddestroyedtitle: "Bed destroyed!"
+    beddestroyed:
+      team: "&c&lYour bed was destroyed by $player$!"
+      others: "&6&lTeam $team$&6's bed was destroyed by $player$!"
+    beddestroyedtitle: "&cBed destroyed!"
   specials:
     rescue-platform:
       left: "There are &c$time$&f second(s) left until you can use the next rescue platform!"

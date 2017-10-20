@@ -11,12 +11,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TNTPrimed;
-import org.bukkit.entity.Villager;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -112,9 +108,9 @@ public class PlayerStatePlaying extends PlayerState {
       Player aPlayer = aPlayerCtx.getPlayer();
       if (byVoid) {
         if (damageCausedRecently) {
-          this.tellPlayerKilled(aPlayer, damage.getDamager(), "knockedinvoid");
+          this.tellPlayerKilled(aPlayer, damage.getDamager(), "knockedintovoid");
         } else {
-          this.tellPlayerDied(aPlayer, "fellinvoid");
+          this.tellPlayerDied(aPlayer, "fellintovoid");
         }
       } else {
         if (damageCausedRecently) {
@@ -182,28 +178,22 @@ public class PlayerStatePlaying extends PlayerState {
   }
 
   private void tellPlayerDied(Player recipient, String translationKey) {
-    Player player = this.playerCtx.getPlayer();
-    TeamNew team = this.playerCtx.getTeam();
     String msg = ChatWriterNew.pluginMessage(
-        ChatColor.GOLD + BedwarsRevol._l(recipient, "ingame.player." + translationKey,
-            ImmutableMap.of("player",
-                UtilsNew.getPlayerWithTeamString(player, team, ChatColor.GOLD))));
+        BedwarsRevol._l(recipient, "ingame.player." + translationKey,
+            ImmutableMap.of("player", UtilsNew.getPlayerWithTeamString(this.playerCtx))));
     recipient.sendMessage(msg);
   }
 
   private void tellPlayerKilled(Player recipient, Player killer, String translationKey) {
-    Player player = this.playerCtx.getPlayer();
-    TeamNew team = this.playerCtx.getTeam();
     PlayerContext killerCtx = this.playerCtx.getGameContext().getPlayerContext(killer);
-    String killerStr = killer.getDisplayName() + ChatColor.GOLD;
+    String killerName = killer.getDisplayName();
     if (killerCtx != null) {
-      killerStr = UtilsNew.getPlayerWithTeamString(killer, killerCtx.getTeam(), ChatColor.GOLD);
+      killerName = UtilsNew.getPlayerWithTeamString(killerCtx);
     }
     String msg = ChatWriterNew.pluginMessage(
-        ChatColor.GOLD + BedwarsRevol._l(recipient, "ingame.player." + translationKey,
-            ImmutableMap.of("player",
-                UtilsNew.getPlayerWithTeamString(player, team, ChatColor.GOLD),
-                "killer", killerStr)));
+        BedwarsRevol._l(recipient, "ingame.player." + translationKey,
+            ImmutableMap.of("player", UtilsNew.getPlayerWithTeamString(this.playerCtx),
+                "killer", killerName)));
     recipient.sendMessage(msg);
   }
 

@@ -63,10 +63,9 @@ public abstract class PlayerState {
           msgKey = "ingame.player.left";
         }
         aPlayer.sendMessage(
-            ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
-                ._l(aPlayer, msgKey, ImmutableMap.of("player",
-                    UtilsNew.getPlayerWithTeamString(this.playerCtx.getPlayer(),
-                        this.playerCtx.getTeam(), ChatColor.RED) + ChatColor.RED))));
+            ChatWriterNew.pluginMessage(BedwarsRevol._l(aPlayer, msgKey,
+                ImmutableMap.of("player",
+                    UtilsNew.getPlayerWithTeamString(this.playerCtx)))));
       }
     }
 

@@ -2,10 +2,10 @@ package io.github.bedwarsrevolution.utils;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.TeamNew;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -13,13 +13,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,11 +27,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public final class UtilsNew {
 
@@ -747,22 +741,23 @@ public final class UtilsNew {
     return sb.toString();
   }
 
-  public static String getPlayerWithTeamString(Player player, TeamNew team, ChatColor before) {
+  public static String getPlayerWithTeamString(PlayerContext playerCtx) {
+    TeamNew team = playerCtx.getTeam();
     if (BedwarsRevol.getInstance().getBooleanConfig("teamname-in-chat", true)) {
-      return player.getDisplayName() + before + " (" + team.getChatColor() + team.getDisplayName()
-          + before + ")";
+      return team.getChatColor().toString() + playerCtx.getPlayer().getDisplayName() + "("
+          + team.getDisplayName() + ")";
     }
-    return player.getDisplayName() + before;
+    return team.getChatColor().toString() + playerCtx.getPlayer().getDisplayName();
   }
 
-  public static String getPlayerWithTeamString(Player player, TeamNew team, ChatColor before,
-      String playerAdding) {
-    if (BedwarsRevol.getInstance().getBooleanConfig("teamname-in-chat", true)) {
-      return player.getDisplayName() + before + playerAdding + before + " (" + team.getChatColor()
-          + team.getDisplayName() + before + ")";
-    }
-    return player.getDisplayName() + before + playerAdding + before;
-  }
+//  public static String getPlayerWithTeamString(Player player, TeamNew team, ChatColor before,
+//      String playerAdding) {
+//    if (BedwarsRevol.getInstance().getBooleanConfig("teamname-in-chat", true)) {
+//      return player.getDisplayName() + before + playerAdding + before + " (" + team.getChatColor()
+//          + team.getDisplayName() + before + ")";
+//    }
+//    return player.getDisplayName() + before + playerAdding + before;
+//  }
 
   public static String truncate(String text, int length) {
     return text.length() > length ? text.substring(0, length) : text;
