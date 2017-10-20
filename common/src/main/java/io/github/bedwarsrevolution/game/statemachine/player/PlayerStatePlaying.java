@@ -9,6 +9,7 @@ import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.shop.Shop;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.SoundMachineNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +26,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -310,6 +312,22 @@ public class PlayerStatePlaying extends PlayerState {
     if (event.getDamage() >= this.playerCtx.getPlayer().getHealth()) {
       event.setCancelled(true);
       this.onDeath(false);
+      return;
+    }
+
+    if (damager != null && event instanceof EntityDamageByEntityEvent) {
+      EntityDamageByEntityEvent eventByEntity = (EntityDamageByEntityEvent) event;
+      if (eventByEntity.getDamager().getType() == EntityType.ARROW) {
+        damager.playSound(damager.getLocation(), SoundMachineNew.get(
+            "SUCCESSFUL_HIT", "ENTITY_ARROW_HIT_PLAYER"),
+            Float.valueOf("1.0"), Float.valueOf("1.0"));
+        double healthLeft = this.playerCtx.getPlayer().getHealth() - event.getDamage();
+        damager.sendMessage(ChatWriterNew.pluginMessage(
+            BedwarsRevol._l(damager, "ingame.player.hit",
+                ImmutableMap.of("player", UtilsNew.getPlayerWithTeamString(this.playerCtx),
+                    "health", String.valueOf(
+                        UtilsNew.formatHealth(healthLeft))))));
+      }
     }
   }
 

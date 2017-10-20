@@ -763,4 +763,8 @@ public final class UtilsNew {
     return text.length() > length ? text.substring(0, length) : text;
   }
 
+  public static String formatHealth(double health) {
+    return String.format("%.1f", health);
+  }
+
 }

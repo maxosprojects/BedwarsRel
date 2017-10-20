@@ -52,6 +52,7 @@ import io.github.bedwarsrevolution.listeners.PlayerListenerNew;
 import io.github.bedwarsrevolution.listeners.PlayerSpigotListenerNew;
 import io.github.bedwarsrevolution.listeners.ServerListenerNew;
 import io.github.bedwarsrevolution.listeners.SignListenerNew;
+import io.github.bedwarsrevolution.listeners.SoundListenerNew;
 import io.github.bedwarsrevolution.listeners.WeatherListenerNew;
 import io.github.bedwarsrevolution.listeners.events.EntityPickupItemEventListenerNew;
 import io.github.bedwarsrevolution.listeners.events.PlayerPickUpItemEventListenerNew;
@@ -888,6 +889,7 @@ public class BedwarsRevol extends JavaPlugin {
     new SignListenerNew();
     new ChunkListenerNew();
     new InvisibilityPotionListenerNew().registerInterceptor();
+    new SoundListenerNew().registerInterceptor();
 
     if (this.isSpigot()) {
       new PlayerSpigotListenerNew();
