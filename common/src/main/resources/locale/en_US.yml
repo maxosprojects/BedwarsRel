@@ -109,7 +109,7 @@ ingame:
   record-with-holders: '&aThe record on this map is &e$record$&a and is held by: $holders$'
   newrecord: '&aTeam $team$&a set a new record: &6$record$'
   record-nobeddestroy: "&cRecord won't be saved, because no bed was destroyed!"
-  win: "&6Team $team$ &6won!"
+  win: "&6Team $team$&6 won!"
   draw: "&6The game ends with a draw!"
   serverrestart: "Server restart in $sec$ second(s)!"
   gamestarting: "Game starting ..."
@@ -141,17 +141,17 @@ ingame:
     onestackpershift: "One stack per shift click"
   player:
     left: "&cPlayer $player$&c has left the game!"
-    died: "&6&l$player$&6 died!"
-    fellintovoid: "&6&l$player$&6 fell into void"
-    knockedintovoid: "&6&l$killer$&6 knocked $player$&6 into void"
-    killed: "&6&l$killer$&6 killed $player$!"
+    died: "&6&l$player$&6&l died!"
+    fellintovoid: "&6&l$player$&6&l fell into void"
+    knockedintovoid: "&6&l$killer$&6&l knocked $player$&6&l into void"
+    killed: "&6&l$killer$&6&l killed $player$&6&l!"
     kicked: "&c$player$&c was kicked!"
     waskicked: "You were kicked from the game!"
   blocks:
     ownbeddestroy: "You can't destroy your own bed!"
     beddestroyed:
-      team: "&c&lYour bed was destroyed by $player$!"
-      others: "&6&lTeam $team$&6's bed was destroyed by $player$!"
+      team: "&c&lYour bed was destroyed by $player$&c&l!"
+      others: "&6&lTeam $team$&6&l's bed was destroyed by $player$&6&l!"
     beddestroyedtitle: "&cBed destroyed!"
   specials:
     rescue-platform:

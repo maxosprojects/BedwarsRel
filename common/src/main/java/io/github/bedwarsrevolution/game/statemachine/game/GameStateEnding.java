@@ -125,6 +125,9 @@ public class GameStateEnding extends GameState {
     BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());
     this.ctx.removePlayer(playerCtx);
     playerCtx.getTeam().removePlayer(playerCtx);
+    playerCtx.getPlayer().setScoreboard(
+        BedwarsRevol.getInstance().getScoreboardManager().getNewScoreboard());
+    this.ctx.updateSigns();
   }
 
   @Override

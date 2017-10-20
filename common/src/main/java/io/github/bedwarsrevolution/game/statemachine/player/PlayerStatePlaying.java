@@ -170,6 +170,7 @@ public class PlayerStatePlaying extends PlayerState {
     if (this.playerCtx.getTeam().isBedDestroyed()) {
       PlayerStateSpectator newState = new PlayerStateSpectator(this.playerCtx);
       this.playerCtx.setState(newState);
+      newState.moveToTopCenter();
     } else {
       PlayerStateWaitingRespawn newState = new PlayerStateWaitingRespawn(this.playerCtx);
       this.playerCtx.setState(newState);

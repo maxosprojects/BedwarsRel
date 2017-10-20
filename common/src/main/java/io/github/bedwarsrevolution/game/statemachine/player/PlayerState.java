@@ -5,6 +5,7 @@ import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -76,4 +77,24 @@ public abstract class PlayerState {
   }
 
   public abstract void setGameMode();
+
+  void moveToTopCenter() {
+    this.playerCtx.clear(false);
+    this.playerCtx.respawn();
+
+    this.playerCtx.setVirtuallyAlive(false);
+
+//    if (this.getState() == GameStateOld.RUNNING && this.isStopping()) {
+//      String title = ChatColor.translateAlternateColorCodes('&',
+//          BedwarsRel._l(player, "ingame.title.youdied"));
+//      player.sendTitle(title, "", 0, 40, 10);
+//    }
+    this.setGameMode();
+    Player player = this.playerCtx.getPlayer();
+    Location location = this.playerCtx.getGameContext().getTopMiddle();
+    this.playerCtx.setTeleportingIfWorldChange(location);
+    player.teleport(location);
+    this.playerCtx.setTeleporting(false);
+  }
+
 }

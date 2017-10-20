@@ -71,27 +71,12 @@ public class PlayerStateWaitingRespawn extends PlayerState {
     player.setGameMode(GameMode.SPECTATOR);
   }
 
-    public void runWaitingRespawn(boolean withCountdown) {
+  public void runWaitingRespawn(boolean withCountdown) {
     if (!this.playerCtx.isVirtuallyAlive()) {
       return;
     }
 
-    this.playerCtx.clear(false);
-    this.playerCtx.respawn();
-
-    this.playerCtx.setVirtuallyAlive(false);
-
-//    if (this.getState() == GameStateOld.RUNNING && this.isStopping()) {
-//      String title = ChatColor.translateAlternateColorCodes('&',
-//          BedwarsRel._l(player, "ingame.title.youdied"));
-//      player.sendTitle(title, "", 0, 40, 10);
-//    }
-    this.setGameMode();
-    Player player = this.playerCtx.getPlayer();
-    Location location = this.playerCtx.getGameContext().getTopMiddle();
-    this.playerCtx.setTeleportingIfWorldChange(location);
-    player.teleport(location);
-    this.playerCtx.setTeleporting(false);
+    this.moveToTopCenter();
 
     if (withCountdown) {
       this.runCountdown();
