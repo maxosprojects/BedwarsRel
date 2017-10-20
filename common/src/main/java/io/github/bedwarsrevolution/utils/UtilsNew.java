@@ -179,22 +179,9 @@ public final class UtilsNew {
   }
 
   public static String getFormattedTime(int time) {
-    int hr = 0;
-    int min = 0;
-    int sec = 0;
-    String minStr = "";
-    String secStr = "";
-    String hrStr = "";
-
-    hr = (int) Math.floor((time / 60) / 60);
-    min = ((int) Math.floor((time / 60)) - (hr * 60));
-    sec = time % 60;
-
-    hrStr = (hr < 10) ? "0" + String.valueOf(hr) : String.valueOf(hr);
-    minStr = (min < 10) ? "0" + String.valueOf(min) : String.valueOf(min);
-    secStr = (sec < 10) ? "0" + String.valueOf(sec) : String.valueOf(sec);
-
-    return hrStr + ":" + minStr + ":" + secStr;
+    int min = time / 60;
+    int sec = time % 60;
+    return String.format("%02d:%02d", min, sec);
   }
 
 //  public static Class<?> getGenericTypeOfParameter(Class<?> clazz, String method,

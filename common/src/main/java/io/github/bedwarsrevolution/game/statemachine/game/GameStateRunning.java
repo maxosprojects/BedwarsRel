@@ -855,18 +855,12 @@ public class GameStateRunning extends GameState {
     }
   }
 
-  private String getFormattedTimeLeft() {
-    int min = this.timeLeft / 60;
-    int sec = this.timeLeft % 60;
-    return String.format("%2d:%02d", min, sec);
-  }
-
   private String formatScoreboardTitle() {
     String format = BedwarsRevol.getInstance()
         .getStringConfig("scoreboard.format-title", "&e$region$&f - $time$");
     format = format.replace("$region$", this.ctx.getRegion().getName());
     format = format.replace("$game$", this.ctx.getName());
-    format = format.replace("$time$", this.getFormattedTimeLeft());
+    format = format.replace("$time$", UtilsNew.getFormattedTime(this.timeLeft));
 
     format = ChatColor.translateAlternateColorCodes('&', format);
     return UtilsNew.truncate(format, GameContext.MAX_OBJECTIVE_DISPLAY_LENGTH);
@@ -972,13 +966,47 @@ public class GameStateRunning extends GameState {
 //    this.getGame().getPlayingTeams().clear();
 
     this.ctx.setState(new GameStateEnding(this.ctx));
-    GameOverTaskNew gameOver = new GameOverTaskNew(this.ctx, delay, winner);
-    gameOver.init();
+    GameOverTaskNew gameOver = new GameOverTaskNew(this.ctx, delay);
     if (skipCountdown) {
       gameOver.onGameEnds();
-    } else {
-      this.ctx.addRunningTask(gameOver.runTaskTimer(BedwarsRevol.getInstance(), 0L, 20L));
+      return;
     }
+
+    for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
+      Player aPlayer = aPlayerCtx.getPlayer();
+      if (aPlayer.isOnline()) {
+        String title;
+        String subtitle = "";
+        String msg;
+        if (winner == null) {
+          msg = ChatWriterNew.pluginMessage(
+              ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.draw"));
+          title = TitleWriterNew.pluginMessage(
+              BedwarsRevol._l(aPlayer, "ingame.title.draw-title"));
+        } else {
+          int playTime = this.length - this.timeLeft;
+          String formattedTime = UtilsNew.getFormattedTime(playTime);
+          if (aPlayerCtx.getTeam() == winner) {
+            title = TitleWriterNew.pluginMessage(
+                BedwarsRevol._l(aPlayer, "ingame.title.won-title"));
+          } else {
+            title = TitleWriterNew.pluginMessage(
+                BedwarsRevol._l(aPlayer, "ingame.title.lost-title"));
+          }
+          subtitle = TitleWriterNew.pluginMessage(
+              BedwarsRevol._l(aPlayer, "ingame.title.won-subtitle",
+                  ImmutableMap.of("team", winner.getChatColor() + winner.getDisplayName(),
+                      "time", formattedTime)));
+          msg = ChatWriterNew.pluginMessage(
+              ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.win",
+                  ImmutableMap.of("team", winner.getChatColor() + winner.getDisplayName())));
+        }
+        aPlayer.sendTitle(title, subtitle, 0, 40, 20);
+        aPlayer.sendMessage(msg);
+      }
+    }
+
+    this.ctx.addRunningTask(gameOver.runTaskTimer(BedwarsRevol.getInstance(), 0L, 20L));
   }
 
   void startGame() {
@@ -1014,10 +1042,9 @@ public class GameStateRunning extends GameState {
     for (PlayerContext playerCtx : this.ctx.getPlayers()) {
       playerCtx.clear(true);
     }
-    this.preparePlayersForBattle();
+    this.preparePlayersAndTeams();
 //    this.clearProtections();
 //    this.moveFreePlayersToTeam();
-    this.makeTeamsReady();
 
 //    this.cycle.onGameStart();
     this.startResourceSpawners();
@@ -1131,7 +1158,7 @@ public class GameStateRunning extends GameState {
     }
   }
 
-  private void makeTeamsReady() {
+  private void preparePlayersAndTeams() {
 //    this.playingTeams.clear();
     for (TeamNew team : this.ctx.getTeams().values()) {
       team.getScoreboardTeam().setAllowFriendlyFire(
@@ -1145,9 +1172,6 @@ public class GameStateRunning extends GameState {
       team.addChest(team.getChestLoc().getBlock());
     }
 //    this.updateScoreboard();
-  }
-
-  private void preparePlayersForBattle() {
     this.ctx.setDefaultUpgrades(
         (List<Map<String, Object>>) this.ctx.getConfig().getList("default-player-inventory"));
     List<Upgrade> playerUpgrades = new ArrayList<>();

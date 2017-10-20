@@ -15,30 +15,10 @@ public class GameOverTaskNew extends BukkitRunnable {
 
   private final GameContext ctx;
   private int counter = 10;
-  private TeamNew winner = null;
 
-  public GameOverTaskNew(GameContext ctx, int counter, TeamNew winner) {
+  public GameOverTaskNew(GameContext ctx, int counter) {
     this.ctx = ctx;
     this.counter = counter;
-    this.winner = winner;
-  }
-
-  public void init() {
-    for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
-      Player aPlayer = aPlayerCtx.getPlayer();
-      if (aPlayer.isOnline()) {
-        String msg;
-        if (winner == null) {
-          msg = ChatWriterNew.pluginMessage(
-              ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.draw"));
-        } else {
-          msg = ChatWriterNew.pluginMessage(
-              ChatColor.GOLD + BedwarsRevol._l(aPlayer, "ingame.teamwon",
-                  ImmutableMap.of("team", this.winner.getDisplayName() + ChatColor.GOLD)));
-        }
-        aPlayer.sendMessage(msg);
-      }
-    }
   }
 
   @Override
