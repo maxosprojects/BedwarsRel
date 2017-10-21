@@ -1,5 +1,6 @@
 package io.github.bedwarsrevolution.game.statemachine.player;
 
+import io.github.bedwarsrevolution.game.Cooldown;
 import io.github.bedwarsrevolution.game.DamageHolder;
 import io.github.bedwarsrevolution.game.PlayerStorageNew;
 import io.github.bedwarsrevolution.game.TeamNew;
@@ -202,12 +203,39 @@ public class PlayerContext {
     list.add(upgrade);
   }
 
-  public Long getLastUsed(String itemName) {
-    return this.itemsLastUsed.get(itemName);
+  /**
+   * Returns true when item can be used, false otherwise
+   * @param item
+   * @return
+   */
+  public boolean useItem(String item) {
+    Cooldown cooldown = this.gameContext.getCooldown(item);
+    if (cooldown == null) {
+      return true;
+    }
+    Long lastUsed;
+    switch (cooldown.getScope()) {
+      case PLAYER:
+        lastUsed = this.itemsLastUsed.get(item);
+        if (canBeUsed(lastUsed, cooldown.getWait())) {
+          this.itemsLastUsed.put(item, System.currentTimeMillis());
+          return true;
+        } else {
+          return false;
+        }
+      case TEAM:
+        lastUsed = this.team.getItemLastUsed(item);
+        if (canBeUsed(lastUsed, cooldown.getWait())) {
+          this.team.setItemUsed(item);
+          return true;
+        } else {
+          return false;
+        }
+    }
+    return true;
   }
 
-  public void setLastUsed(String itemName, Long time) {
-    this.itemsLastUsed.put(itemName, time);
+  private boolean canBeUsed(Long lastUsed, int wait) {
+    return lastUsed == null || lastUsed + wait < System.currentTimeMillis();
   }
-
 }

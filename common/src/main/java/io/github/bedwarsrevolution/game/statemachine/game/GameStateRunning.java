@@ -2,6 +2,8 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.Cooldown;
+import io.github.bedwarsrevolution.game.Cooldown.Scope;
 import io.github.bedwarsrevolution.game.RegionNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.TeamNew;
@@ -237,10 +239,7 @@ public class GameStateRunning extends GameState {
 
     if (event.getItem() != null && event.getItem().getType() == Material.FIREBALL) {
       event.setCancelled(true);
-      Long lastUsed = playerCtx.getLastUsed("FIREBALL");
-      if (lastUsed == null || lastUsed + 500 < System.currentTimeMillis()) {
-        playerCtx.setLastUsed("FIREBALL", System.currentTimeMillis());
-      } else {
+      if (!playerCtx.useItem(Material.FIREBALL.name())) {
         return;
       }
       // Take one fireball from the player

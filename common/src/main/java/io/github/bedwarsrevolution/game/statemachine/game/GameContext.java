@@ -1,6 +1,7 @@
 package io.github.bedwarsrevolution.game.statemachine.game;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.Cooldown;
 import io.github.bedwarsrevolution.game.GameCheckResult;
 import io.github.bedwarsrevolution.game.GameJoinSignNew;
 import io.github.bedwarsrevolution.game.GameManagerNew;
@@ -101,6 +102,7 @@ public class GameContext {
   @Getter
   @Setter
   private List<Map<String, Object>> defaultUpgrades;
+  private Map<String, Cooldown> cooldowns = new HashMap<>();
 
   public GameContext(String name) {
     this.name = name;
@@ -485,4 +487,11 @@ public class GameContext {
     return null;
   }
 
+  public void addCooldown(String item, Cooldown cooldown) {
+    this.cooldowns.put(item, cooldown);
+  }
+
+  public Cooldown getCooldown(String item) {
+    return this.cooldowns.get(item);
+  }
 }

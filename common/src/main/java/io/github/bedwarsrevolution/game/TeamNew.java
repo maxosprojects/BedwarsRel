@@ -40,6 +40,7 @@ public class TeamNew implements ConfigurationSerializable {
   private Map<Class<? extends Upgrade>, Upgrade> upgrades = new HashMap<>();
   private GameContext gameCtx;
   private List<PlayerContext> players = new ArrayList<>();
+  private Map<String, Long> itemsLastUsed = new HashMap<>();
 
   public TeamNew(Map<String, Object> deserialize) {
     this.reset();
@@ -268,4 +269,11 @@ public class TeamNew implements ConfigurationSerializable {
     return new ArrayList<>(this.players);
   }
 
+  public Long getItemLastUsed(String itemName) {
+    return this.itemsLastUsed.get(itemName);
+  }
+
+  public void setItemUsed(String itemName) {
+    this.itemsLastUsed.put(itemName, System.currentTimeMillis());
+  }
 }

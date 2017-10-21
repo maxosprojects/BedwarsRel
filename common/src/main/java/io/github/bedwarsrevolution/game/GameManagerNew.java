@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeScope;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.io.File;
@@ -118,7 +119,6 @@ public class GameManagerNew {
   @SuppressWarnings("unchecked")
   private void loadGame(File configFile) {
     try {
-
       YamlConfiguration cfg = YamlConfiguration.loadConfiguration(configFile);
       String name = cfg.get("name").toString();
       if (name.isEmpty()) {
@@ -131,14 +131,19 @@ public class GameManagerNew {
       Map<String, Object> teams = new HashMap<>();
       Map<String, Object> spawner = new HashMap<>();
       String targetMaterialObj = null;
+      List<Map<String, Object>> cooldowns = new ArrayList<>();
+
+      if (cfg.contains("cooldowns")) {
+        cooldowns = (List<Map<String, Object>>) cfg.getList("cooldowns");
+      }
 
       if (cfg.contains("teams")) {
         teams = cfg.getConfigurationSection("teams").getValues(false);
       }
 
-      if (cfg.contains("spawner")) {
-        if (cfg.isConfigurationSection("spawner")) {
-          spawner = cfg.getConfigurationSection("spawner").getValues(false);
+      if (cfg.contains("spawners")) {
+        if (cfg.isConfigurationSection("spawners")) {
+          spawner = cfg.getConfigurationSection("spawners").getValues(false);
 
           for (Object obj : spawner.values()) {
             if (!(obj instanceof ResourceSpawnerNew)) {
@@ -151,8 +156,8 @@ public class GameManagerNew {
           }
         }
 
-        if (cfg.isList("spawner")) {
-          for (Object rs : cfg.getList("spawner")) {
+        if (cfg.isList("spawners")) {
+          for (Object rs : cfg.getList("spawners")) {
             if (!(rs instanceof ResourceSpawnerNew)) {
               continue;
             }
@@ -162,6 +167,13 @@ public class GameManagerNew {
             ctx.addResourceSpawner(rsp);
           }
         }
+      }
+
+      for (Map<String, Object> map : cooldowns) {
+        String item = (String) map.get("item");
+        Cooldown.Scope scope = Cooldown.Scope.valueOf((String) map.get("scope"));
+        int time = (int) map.get("cooldown");
+        ctx.addCooldown(item, new Cooldown(scope, time));
       }
 
       for (Object obj : teams.values()) {
@@ -268,6 +280,7 @@ public class GameManagerNew {
               ._l(BedwarsRevol.getInstance().getServer().getConsoleSender(), "success.gameloaded",
                   ImmutableMap.of("game", ctx.getRegion().getName()))));
     } catch (Exception ex) {
+      ex.printStackTrace();
 //      BedwarsRevol.getInstance().getBugsnag().notify(ex);
       BedwarsRevol.getInstance().getServer().getConsoleSender()
           .sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
