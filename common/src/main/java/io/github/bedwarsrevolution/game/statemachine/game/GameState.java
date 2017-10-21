@@ -17,6 +17,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -180,6 +181,9 @@ public abstract class GameState {
   }
 
   public void onEventPlayerMove(PlayerMoveEvent event) {
+  }
+
+  public void onEventExplosionPrime(ExplosionPrimeEvent event) {
   }
 
 //  private String getStatus(Game game) {

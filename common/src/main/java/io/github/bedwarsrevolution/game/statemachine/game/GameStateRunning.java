@@ -46,6 +46,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -236,6 +237,12 @@ public class GameStateRunning extends GameState {
 
     if (event.getItem() != null && event.getItem().getType() == Material.FIREBALL) {
       event.setCancelled(true);
+      Long lastUsed = playerCtx.getLastUsed("FIREBALL");
+      if (lastUsed == null || lastUsed + 500 < System.currentTimeMillis()) {
+        playerCtx.setLastUsed("FIREBALL", System.currentTimeMillis());
+      } else {
+        return;
+      }
       // Take one fireball from the player
       Inventory inv = player.getInventory();
       int slot = inv.first(Material.FIREBALL);
@@ -602,8 +609,8 @@ public class GameStateRunning extends GameState {
       Location loc = block.getLocation().add(0.5D, 0.0D, 0.5D);
       TNTPrimed tnt = (TNTPrimed) block.getWorld().spawnEntity(loc, EntityType.PRIMED_TNT);
       try {
-        Class<?> TntSourceClass = BedwarsRevol.getInstance().getVersionRelatedClass("TntSource");
-        final Method methodSetSource = TntSourceClass.getMethod(
+        Class<?> tntSourceClass = BedwarsRevol.getInstance().getVersionRelatedClass("TntSource");
+        final Method methodSetSource = tntSourceClass.getMethod(
             "setSource", Player.class, TNTPrimed.class);
         methodSetSource.invoke(null, player, tnt);
       } catch (Exception ex) {
@@ -643,6 +650,13 @@ public class GameStateRunning extends GameState {
   @Override
   public void onEventChunkUnload(ChunkUnloadEvent event) {
     event.setCancelled(true);
+  }
+
+  public void onEventExplosionPrime(ExplosionPrimeEvent event) {
+    if (event.getEntityType() == EntityType.PRIMED_TNT) {
+      System.out.println("reduced tnt radius");
+      event.setRadius(2);
+    }
   }
 
   @Override
@@ -697,22 +711,6 @@ public class GameStateRunning extends GameState {
         continue;
       }
 
-      if (this.ctx.getRegion().isPlacedBlock(explodingBlock)) {
-        this.ctx.getRegion().removePlacedBlock(explodingBlock);
-      } else {
-        if (tntDestroyWorldEnabled) {
-          if (BedwarsRevol.getInstance().isBreakableType(explodingType)) {
-            this.ctx.getRegion().addBrokenBlock(explodingBlock);
-          } else {
-            explodingBlocksIter.remove();
-            continue;
-          }
-        } else {
-          explodingBlocksIter.remove();
-          continue;
-        }
-      }
-
       // Blocks can be destroyed only by explosions from TNT and Fireballs
       if (entityType != EntityType.PRIMED_TNT
           && entityType != EntityType.MINECART_TNT
@@ -721,10 +719,27 @@ public class GameStateRunning extends GameState {
         continue;
       }
 
-      if (entityType == EntityType.FIREBALL) {
-        if (explodingType != Material.WOOL
-            && explodingType != Material.WOOD) {
+      // Fireballs can only destroy wool and wood
+      if (entityType == EntityType.FIREBALL
+          && explodingType != Material.WOOL
+          && explodingType != Material.WOOD) {
+        explodingBlocksIter.remove();
+        continue;
+      }
+
+      if (this.ctx.getRegion().isPlacedBlock(explodingBlock)) {
+        this.ctx.getRegion().removePlacedBlock(explodingBlock);
+      } else {
+        if (tntDestroyWorldEnabled) {
+          if (BedwarsRevol.getInstance().isBreakableType(explodingType)) {
+            this.ctx.getRegion().addBrokenBlock(explodingBlock);
+          } else {
+            explodingBlocksIter.remove();
+//            continue;
+          }
+        } else {
           explodingBlocksIter.remove();
+//          continue;
         }
       }
     }

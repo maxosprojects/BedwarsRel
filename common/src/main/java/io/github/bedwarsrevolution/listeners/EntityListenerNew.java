@@ -98,10 +98,21 @@ public class EntityListenerNew extends BaseListenerNew {
     ctx.getState().onEventCreatureSpawn(event);
   }
 
-//  @EventHandler(priority = EventPriority.HIGHEST)
-//  public void onEntityExplosionPrime(ExplosionPrimeEvent event) {
-//    System.out.println(event);
-//  }
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onEntityExplosionPrime(ExplosionPrimeEvent event) {
+    if (event.getEntity() == null) {
+      return;
+    }
+    if (event.getEntity().getWorld() == null) {
+      return;
+    }
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager()
+        .getGameByLocation(event.getEntity().getLocation());
+    if (ctx == null) {
+      return;
+    }
+    ctx.getState().onEventExplosionPrime(event);
+  }
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onEntityExplode(EntityExplodeEvent event) {

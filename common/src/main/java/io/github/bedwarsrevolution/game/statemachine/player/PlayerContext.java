@@ -53,6 +53,7 @@ public class PlayerContext {
   @Getter
   @Setter
   private boolean oneStackPerShift = true;
+  private Map<String, Long> itemsLastUsed = new HashMap<>();
 
   public PlayerContext(Player player, GameContext gameContext) {
     this.player = player;
@@ -199,6 +200,14 @@ public class PlayerContext {
       this.upgrades.put(upgrade.getClass(), list);
     }
     list.add(upgrade);
+  }
+
+  public Long getLastUsed(String itemName) {
+    return this.itemsLastUsed.get(itemName);
+  }
+
+  public void setLastUsed(String itemName, Long time) {
+    this.itemsLastUsed.put(itemName, time);
   }
 
 }
