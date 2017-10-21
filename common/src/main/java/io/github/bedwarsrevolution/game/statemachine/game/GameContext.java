@@ -474,15 +474,12 @@ public class GameContext {
   }
 
   public TeamNew getTeamOfBed(Block bed) {
+    if (bed == null) {
+      return null;
+    }
     for (TeamNew team : this.getTeams().values()) {
-      if (team.getFeetTarget() == null) {
-        if (team.getHeadTarget().equals(bed)) {
-          return team;
-        }
-      } else {
-        if (team.getHeadTarget().equals(bed) || team.getFeetTarget().equals(bed)) {
-          return team;
-        }
+      if (bed.equals(team.getHeadTarget()) || bed.equals(team.getFeetTarget())) {
+        return team;
       }
     }
     return null;

@@ -152,7 +152,7 @@ public class GameStateEnding extends GameState {
 
   @Override
   public void onEventEntityExplode(EntityExplodeEvent event) {
-    event.setYield(0);
+    event.setCancelled(true);
   }
 
   @Override

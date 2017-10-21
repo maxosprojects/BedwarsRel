@@ -143,10 +143,12 @@ public class PlayerStatePlaying extends PlayerState {
       PlayerContext damagerCtx = this.playerCtx.getGameContext().getPlayerContext(damager);
       if (damagerCtx != null) {
         String resources = this.transferResources(damagerCtx);
-        damager.sendMessage(ChatWriterNew.pluginMessage(BedwarsRevol._l(
-            damager, "ingame.player.gotresources",
-            ImmutableMap.of("resources", resources,
-                "victim", this.playerCtx.getPlayer().getDisplayName()))));
+        if (!resources.isEmpty()) {
+          damager.sendMessage(ChatWriterNew.pluginMessage(BedwarsRevol._l(
+              damager, "ingame.player.gotresources",
+              ImmutableMap.of("resources", resources,
+                  "victim", this.playerCtx.getPlayer().getDisplayName()))));
+        }
       }
     }
 

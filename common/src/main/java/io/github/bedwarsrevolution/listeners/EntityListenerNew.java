@@ -22,6 +22,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.metadata.MetadataValue;
 
@@ -97,8 +98,13 @@ public class EntityListenerNew extends BaseListenerNew {
     ctx.getState().onEventCreatureSpawn(event);
   }
 
+//  @EventHandler(priority = EventPriority.HIGHEST)
+//  public void onEntityExplosionPrime(ExplosionPrimeEvent event) {
+//    System.out.println(event);
+//  }
+
   @EventHandler(priority = EventPriority.HIGHEST)
-  public void onExplodeDestroy(EntityExplodeEvent event) {
+  public void onEntityExplode(EntityExplodeEvent event) {
     if (event.isCancelled()) {
       return;
     }

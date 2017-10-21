@@ -429,9 +429,10 @@ public class GameStateRunning extends GameState {
     }
 
     Block brokenBlock = event.getBlock();
+    Material brokenBlockType = brokenBlock.getType();
 
     Material targetMaterial = this.ctx.getTargetMaterial();
-    if (brokenBlock.getType() == targetMaterial) {
+    if (brokenBlockType == targetMaterial) {
       event.setCancelled(true);
       this.handleDestroyTargetMaterial(playerCtx, brokenBlock);
       return;
@@ -502,8 +503,9 @@ public class GameStateRunning extends GameState {
 //        brokenBlock.getWorld().dropItemNaturally(brokenBlock.getLocation(), enderChest);
 //      }
 
+    // Prevent drops of type that is not the broken block
     for (ItemStack drop : brokenBlock.getDrops()) {
-      if (!drop.getType().equals(brokenBlock.getType())) {
+      if (drop.getType() != brokenBlock.getType()) {
         brokenBlock.getDrops().remove(drop);
         brokenBlock.setType(Material.AIR);
         break;
@@ -645,66 +647,85 @@ public class GameStateRunning extends GameState {
 
   @Override
   public void onEventEntityExplode(EntityExplodeEvent event) {
-    Iterator<Block> explodeBlocks = event.blockList().iterator();
-    boolean tntDestroyEnabled = BedwarsRevol.getInstance()
+    Iterator<Block> explodingBlocksIter = event.blockList().iterator();
+    boolean tntDestroyWorldEnabled = BedwarsRevol.getInstance()
         .getBooleanConfig("explodes.destroy-worldblocks", false);
-    boolean tntDestroyBeds = BedwarsRevol.getInstance()
+    boolean tntDestroyBedsEnabled = BedwarsRevol.getInstance()
         .getBooleanConfig("explodes.destroy-beds", false);
-
-    if (!BedwarsRevol.getInstance().getBooleanConfig("explodes.drop-blocks", false)) {
+    EntityType entityType = event.getEntityType();
+    if (!BedwarsRevol.getInstance().getBooleanConfig("explodes.block-drops", false)) {
       event.setYield(0F);
     }
 
+    // Establish the player that initiated explosion
+    Player player = null;
+    if (entityType == EntityType.PRIMED_TNT
+        || entityType == EntityType.MINECART_TNT) {
+      TNTPrimed tnt = (TNTPrimed) event.getEntity();
+      if (tnt.getSource() instanceof Player) {
+        player = (Player) tnt.getSource();
+      }
+    } else if (entityType == EntityType.FIREBALL) {
+      Fireball ball = (Fireball) event.getEntity();
+      if (ball.getShooter() instanceof Player) {
+        player = (Player) ball.getShooter();
+      }
+    }
+
     Material targetMaterial = this.ctx.getTargetMaterial();
-    while (explodeBlocks.hasNext()) {
-      Block exploding = explodeBlocks.next();
-      if (!this.ctx.getRegion().isInRegion(exploding.getLocation())) {
-        explodeBlocks.remove();
+    while (explodingBlocksIter.hasNext()) {
+      Block explodingBlock = explodingBlocksIter.next();
+      Material explodingType = explodingBlock.getType();
+      // Skip any block that isn't in game's region
+      if (!this.ctx.getRegion().isInRegion(explodingBlock.getLocation())) {
+        explodingBlocksIter.remove();
         continue;
       }
-      if ((!tntDestroyEnabled
-          && !tntDestroyBeds)
-          || (!tntDestroyEnabled
-          && exploding.getType() != Material.BED_BLOCK
-          && exploding.getType() != Material.BED)) {
-        if (!this.ctx.getRegion().isPlacedBlock(exploding)) {
-          if (BedwarsRevol.getInstance().isBreakableType(exploding.getType())) {
-            this.ctx.getRegion().addBrokenBlock(exploding);
+      if (player == null) {
+        explodingBlocksIter.remove();
+        continue;
+      }
+
+      if (explodingType == targetMaterial) {
+        if (tntDestroyBedsEnabled) {
+          if (!this.handleDestroyTargetMaterial(this.ctx.getPlayerContext(player), explodingBlock)) {
+            explodingBlocksIter.remove();
+          }
+        } else {
+          explodingBlocksIter.remove();
+        }
+        continue;
+      }
+
+      if (this.ctx.getRegion().isPlacedBlock(explodingBlock)) {
+        this.ctx.getRegion().removePlacedBlock(explodingBlock);
+      } else {
+        if (tntDestroyWorldEnabled) {
+          if (BedwarsRevol.getInstance().isBreakableType(explodingType)) {
+            this.ctx.getRegion().addBrokenBlock(explodingBlock);
+          } else {
+            explodingBlocksIter.remove();
             continue;
           }
-          explodeBlocks.remove();
         } else {
-          this.ctx.getRegion().removePlacedBlock(exploding);
+          explodingBlocksIter.remove();
+          continue;
         }
+      }
+
+      // Blocks can be destroyed only by explosions from TNT and Fireballs
+      if (entityType != EntityType.PRIMED_TNT
+          && entityType != EntityType.MINECART_TNT
+          && entityType != EntityType.FIREBALL) {
+        explodingBlocksIter.remove();
         continue;
       }
-      if (this.ctx.getRegion().isPlacedBlock(exploding)) {
-        this.ctx.getRegion().removePlacedBlock(exploding);
-        continue;
-      }
-      if (exploding.getType().equals(targetMaterial)) {
-        if (!tntDestroyBeds) {
-          explodeBlocks.remove();
-          continue;
+
+      if (entityType == EntityType.FIREBALL) {
+        if (explodingType != Material.WOOL
+            && explodingType != Material.WOOD) {
+          explodingBlocksIter.remove();
         }
-        // only destroyable by tnt
-        if (!event.getEntityType().equals(EntityType.PRIMED_TNT)
-            && !event.getEntityType().equals(EntityType.MINECART_TNT)) {
-          explodeBlocks.remove();
-          continue;
-        }
-        // when it wasn't player who ignited the tnt
-        TNTPrimed primedTnt = (TNTPrimed) event.getEntity();
-        if (!(primedTnt.getSource() instanceof Player)) {
-          explodeBlocks.remove();
-          continue;
-        }
-        PlayerContext player = this.ctx.getPlayerContext((Player) primedTnt.getSource());
-        if (!this.handleDestroyTargetMaterial(player, exploding)) {
-          explodeBlocks.remove();
-        }
-      } else {
-        this.ctx.getRegion().addBrokenBlock(exploding);
       }
     }
   }
@@ -755,48 +776,34 @@ public class GameStateRunning extends GameState {
     }
   }
 
-  private boolean handleDestroyTargetMaterial(PlayerContext playerCtx, Block block) {
-    Player player = playerCtx.getPlayer();
-    TeamNew team = playerCtx.getTeam();
-    TeamNew teamOfDestroyedBed = null;
-    Block bedBlock = team.getHeadTarget();
+  private boolean handleDestroyTargetMaterial(PlayerContext destroyingPlayerCtx, Block block) {
+    Player player = destroyingPlayerCtx.getPlayer();
+    TeamNew team = destroyingPlayerCtx.getTeam();
+    TeamNew teamOfDestroyedBed;
+    Block teamBedHead = team.getHeadTarget();
 
     if (block.getType() == Material.BED_BLOCK) {
-      Block breakBlock = block;
-      Block neighbor = null;
-      Bed breakBed = (Bed) breakBlock.getState().getData();
-
-      if (!breakBed.isHeadOfBed()) {
-        neighbor = breakBlock;
-        breakBlock = UtilsNew.getBedNeighbor(neighbor);
-      } else {
-        neighbor = UtilsNew.getBedNeighbor(breakBlock);
-      }
-
-      if (bedBlock.equals(breakBlock)) {
+      if (teamBedHead.equals(block) || teamBedHead.equals(UtilsNew.getBedNeighbor(block))) {
         player.sendMessage(ChatWriterNew.pluginMessage(
             ChatColor.RED + BedwarsRevol._l(player, "ingame.blocks.ownbeddestroy")));
         return false;
       }
-
-      teamOfDestroyedBed = this.ctx.getTeamOfBed(breakBlock);
+      teamOfDestroyedBed = this.ctx.getTeamOfBed(block);
       if (teamOfDestroyedBed == null) {
         return false;
       }
       this.dropTargetBlock(block);
     } else {
-      if (bedBlock.equals(block)) {
+      if (teamBedHead.equals(block)) {
         player.sendMessage(
             ChatWriterNew.pluginMessage(
                 ChatColor.RED + BedwarsRevol._l(player, "ingame.blocks.ownbeddestroy")));
         return false;
       }
-
       teamOfDestroyedBed = this.ctx.getTeamOfBed(block);
       if (teamOfDestroyedBed == null) {
         return false;
       }
-
       this.dropTargetBlock(block);
     }
 
@@ -838,7 +845,7 @@ public class GameStateRunning extends GameState {
             BedwarsRevol._l(aPlayer, "ingame.blocks.beddestroyed." + transSuffix,
             ImmutableMap.of("team", teamOfDestroyedBed.getChatColor().toString()
                       + teamOfDestroyedBed.getName(),
-                "player", UtilsNew.getPlayerWithTeamString(playerCtx))));
+                "player", UtilsNew.getPlayerWithTeamString(destroyingPlayerCtx))));
         aPlayer.sendMessage(chatMsg);
       }
     }

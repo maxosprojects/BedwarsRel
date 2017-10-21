@@ -31,7 +31,7 @@ public class ConfigUpdaterNew {
     BedwarsRevol.getInstance().getConfig().addDefault("specials.rescue-platform.using-wait-time", 20);
     BedwarsRevol.getInstance().getConfig().addDefault("explodes.destroy-worldblocks", false);
     BedwarsRevol.getInstance().getConfig().addDefault("explodes.destroy-beds", false);
-    BedwarsRevol.getInstance().getConfig().addDefault("explodes.drop-blocking", false);
+    BedwarsRevol.getInstance().getConfig().addDefault("explodes.block-drops", false);
     BedwarsRevol.getInstance().getConfig().addDefault("rewards.enabled", false);
 
     List<String> defaultRewards = new ArrayList<String>();

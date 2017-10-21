@@ -310,11 +310,11 @@ public final class UtilsNew {
     return builder.toString();
   }
 
-  public static boolean isBedBlock(Block isBed) {
-    if (isBed == null) {
+  public static boolean isBedBlock(Block block) {
+    if (block == null) {
       return false;
     }
-    return (isBed.getType() == Material.BED || isBed.getType() == Material.BED_BLOCK);
+    return (block.getType() == Material.BED || block.getType() == Material.BED_BLOCK);
   }
 
   public static boolean isColorable(ItemStack itemstack) {
