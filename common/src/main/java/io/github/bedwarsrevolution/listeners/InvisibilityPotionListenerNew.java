@@ -140,9 +140,9 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
       // Hide from all players on all other teams
       if (otherPlayerCtx.getTeam() != playerTeam) {
         for (Parts part : Parts.values()) {
-          method.invoke(null, entityId, otherPlayerCtx, part.ordinal());
-          this.tableLock.lock();
           Player otherPlayer = otherPlayerCtx.getPlayer();
+          method.invoke(null, entityId, otherPlayer, part.ordinal());
+          this.tableLock.lock();
           playerInvisibleTo.put(entityId, otherPlayer);
           toInvisiblePlayer.put(otherPlayer, entityId);
           this.tableLock.unlock();
