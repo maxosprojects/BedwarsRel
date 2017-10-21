@@ -38,6 +38,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Created by {maxos} 2017
@@ -295,7 +296,7 @@ public class PlayerStatePlaying extends PlayerState {
   }
 
   @Override
-  public void onDamageToPlayer(EntityDamageEvent event, Player damager) {
+  public void onDamageToPlayer(final EntityDamageEvent event, final Player damager) {
     if (this.playerCtx.isProtectd() && event.getCause() != DamageCause.VOID) {
       event.setCancelled(true);
       return;
@@ -320,15 +321,21 @@ public class PlayerStatePlaying extends PlayerState {
     if (damager != null && event instanceof EntityDamageByEntityEvent) {
       EntityDamageByEntityEvent eventByEntity = (EntityDamageByEntityEvent) event;
       if (eventByEntity.getDamager().getType() == EntityType.ARROW) {
-        damager.playSound(damager.getLocation(), SoundMachineNew.get(
-            "SUCCESSFUL_HIT", "ENTITY_ARROW_HIT_PLAYER"),
-            Float.valueOf("1.0"), Float.valueOf("1.0"));
-        double healthLeft = this.playerCtx.getPlayer().getHealth() - event.getDamage();
-        damager.sendMessage(ChatWriterNew.pluginMessage(
-            BedwarsRevol._l(damager, "ingame.player.hit",
-                ImmutableMap.of("player", UtilsNew.getPlayerWithTeamString(this.playerCtx),
-                    "health", String.valueOf(
-                        UtilsNew.formatHealth(healthLeft))))));
+        new BukkitRunnable() {
+          @Override
+          public void run() {
+            damager.playSound(damager.getLocation(), SoundMachineNew.get(
+                "SUCCESSFUL_HIT", "ENTITY_ARROW_HIT_PLAYER"),
+                Float.valueOf("1.0"), Float.valueOf("1.0"));
+            double healthLeft = PlayerStatePlaying.this.playerCtx.getPlayer().getHealth();
+            damager.sendMessage(ChatWriterNew.pluginMessage(
+                BedwarsRevol._l(damager, "ingame.player.hit",
+                    ImmutableMap.of("player", UtilsNew.getPlayerWithTeamString(
+                        PlayerStatePlaying.this.playerCtx),
+                        "health", String.valueOf(
+                            UtilsNew.formatHealth(healthLeft))))));
+          }
+        }.runTaskLater(BedwarsRevol.getInstance(), 1L);
       }
     }
   }
