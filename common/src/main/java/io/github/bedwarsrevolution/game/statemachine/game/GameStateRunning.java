@@ -895,10 +895,16 @@ public class GameStateRunning extends GameState {
     objectiveHealth.setDisplayName(ChatColor.RED + "❤");
 
     for (PlayerContext playerCtx : this.ctx.getPlayers()) {
+      playerCtx.getPlayer().setScoreboard(scoreboard);
+    }
+    // Bug SPIGOT-1725: need to force update to show actual health instead of 0
+    for (PlayerContext playerCtx : this.ctx.getPlayers()) {
       Player player = playerCtx.getPlayer();
-      player.setScoreboard(scoreboard);
-      // Bug SPIGOT-1725: need to force update to show actual health instead of 0
-      player.setHealth(player.getHealth());
+      if (player.getHealth() > 10) {
+        player.setHealth(player.getHealth() - 0.01);
+      } else {
+        player.setHealth(player.getHealth() + 0.01);
+      }
     }
   }
 
