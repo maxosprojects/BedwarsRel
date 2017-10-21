@@ -149,7 +149,7 @@ ingame:
     waskicked: "You were kicked from the game!"
     gotresources: "&6&lGot $resources$&6&l from $victim$&6&l"
     resource: "$resource$: $amount$"
-    hit: "$player$&e has &c❤&6$health$&e left!"
+    hit: "$player$&e has &6$health$&c❤&e left!"
   blocks:
     ownbeddestroy: "You can't destroy your own bed!"
     beddestroyed:

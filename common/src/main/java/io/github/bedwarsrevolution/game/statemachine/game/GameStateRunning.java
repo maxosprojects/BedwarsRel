@@ -654,7 +654,6 @@ public class GameStateRunning extends GameState {
 
   public void onEventExplosionPrime(ExplosionPrimeEvent event) {
     if (event.getEntityType() == EntityType.PRIMED_TNT) {
-      System.out.println("reduced tnt radius");
       event.setRadius(2);
     }
   }
@@ -875,24 +874,31 @@ public class GameStateRunning extends GameState {
 
   private void updateScoreboard() {
     Scoreboard scoreboard = this.ctx.getScoreboard();
-    Objective obj = scoreboard.getObjective("display");
-    if (obj == null) {
-      obj = scoreboard.registerNewObjective("display", "dummy");
+    Objective objectiveDisplay = scoreboard.getObjective("display");
+    if (objectiveDisplay == null) {
+      objectiveDisplay = scoreboard.registerNewObjective("display", "dummy");
     }
-
-    obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-    obj.setDisplayName(this.formatScoreboardTitle());
-
+    objectiveDisplay.setDisplaySlot(DisplaySlot.SIDEBAR);
+    objectiveDisplay.setDisplayName(this.formatScoreboardTitle());
     for (TeamNew team : this.ctx.getTeams().values()) {
       scoreboard.resetScores(this.formatScoreboardTeam(team, false));
       scoreboard.resetScores(this.formatScoreboardTeam(team, true));
-
-      Score score = obj.getScore(this.formatScoreboardTeam(team, team.isBedDestroyed()));
+      Score score = objectiveDisplay.getScore(this.formatScoreboardTeam(team, team.isBedDestroyed()));
       score.setScore(team.getPlayers().size());
     }
 
+    Objective objectiveHealth = scoreboard.getObjective("health");
+    if (objectiveHealth == null) {
+      objectiveHealth = scoreboard.registerNewObjective("health", "health");
+    }
+    objectiveHealth.setDisplaySlot(DisplaySlot.BELOW_NAME);
+    objectiveHealth.setDisplayName(ChatColor.RED + "❤");
+
     for (PlayerContext playerCtx : this.ctx.getPlayers()) {
-      playerCtx.getPlayer().setScoreboard(scoreboard);
+      Player player = playerCtx.getPlayer();
+      player.setScoreboard(scoreboard);
+      // Bug SPIGOT-1725: need to force update to show actual health instead of 0
+      player.setHealth(player.getHealth());
     }
   }
 
