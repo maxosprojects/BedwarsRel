@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
 
-public class UpgradeArmorProtection implements Upgrade {
+public class UpgradeArmorProtection extends Upgrade {
   private static final String TYPE = "ARMOR_PROTECTION";
 
   private GameContext gameCtx;
@@ -75,6 +75,25 @@ public class UpgradeArmorProtection implements Upgrade {
     }
 
     return true;
+  }
+
+  @Override
+  public boolean shouldRender(PlayerContext playerCtx) {
+    UpgradeArmorProtection existing = playerCtx.getTeam().getUpgrade(UpgradeArmorProtection.class);
+    // There are no upgrades purchased yet and this is tier 1
+    return (existing == null && this.isLevel(1))
+        // Or this is one tier higher than already purchased
+        || (existing != null && existing.upgrade.ordinal() == this.upgrade.ordinal() - 1)
+        // This was purchased and it is top tier
+        || (existing != null && existing.upgrade == this.upgrade
+            && UpgradeArmorProtectionEnum.values().length == this.upgrade.ordinal() + 1);
+  }
+
+  @Override
+  public boolean alreadyOwn(PlayerContext playerCtx) {
+    UpgradeArmorProtection existing = (UpgradeArmorProtection) playerCtx.getTeam()
+        .getUpgrades().get(UpgradeArmorProtection.class);
+    return existing != null && existing.upgrade == this.upgrade;
   }
 
   @Override

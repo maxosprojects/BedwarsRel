@@ -69,6 +69,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Bed;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -1201,9 +1202,7 @@ public class GameStateRunning extends GameState {
   private void startResourceSpawners() {
     for (ResourceSpawnerNew rs : this.ctx.getResourceSpawners()) {
       rs.setCtx(this.ctx);
-      this.ctx.addRunningTask(BedwarsRevol.getInstance().getServer().getScheduler().runTaskTimer(
-          BedwarsRevol.getInstance(), rs, Math.round((((double) rs.getInterval()) / 1000.0) * 20.0),
-          Math.round((((double) rs.getInterval()) / 1000.0) * 20.0)));
+      rs.restart(rs.getInterval());
     }
   }
 

@@ -38,7 +38,6 @@ public class ShopActionBuy extends ShopAction {
 
   @Override
   public void execute(Map<String, Object> args) {
-    this.shop.playPickupSound();
     if (args == null || args.get(EVENT) == null) {
       BedwarsRevol.getInstance().getServer().getConsoleSender().sendMessage(ChatWriterNew.pluginMessage(
           ChatColor.RED + "ShopActionCategory received no InventoryClickEvent!"));
@@ -47,19 +46,21 @@ public class ShopActionBuy extends ShopAction {
 
     InventoryClickEvent event = (InventoryClickEvent) args.get(EVENT);
     event.setCancelled(true);
-    if (!this.hasEnoughResources()) {
-      Player player = this.playerCtx.getPlayer();
-      player.sendMessage(
-          ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
-              ._l(player, "errors.notenoughress")));
-      return;
-    }
 
     // Ignore double click that follows two single clicks when they made quickly
     if (event.getClick() == ClickType.DOUBLE_CLICK) {
       return;
     }
 
+    if (!this.hasEnoughResources()) {
+      Player player = this.playerCtx.getPlayer();
+      player.sendMessage(
+          ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
+              ._l(player, "errors.notenoughres")));
+      return;
+    }
+
+    this.shop.playPickupSound();
     boolean oneStackPerShift = this.playerCtx.isOneStackPerShift();
     boolean cancel = false;
     int bought = 0;
@@ -75,6 +76,7 @@ public class ShopActionBuy extends ShopAction {
     } else {
       this.buyItem();
     }
+    this.shop.render();
   }
 
   private boolean hasEnoughResources() {

@@ -14,7 +14,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class UpgradeItem implements Upgrade {
+public class UpgradeItem extends Upgrade {
   private static final String TYPE = "ITEM";
 
   @Getter

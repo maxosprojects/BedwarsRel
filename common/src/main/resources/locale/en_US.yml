@@ -32,7 +32,7 @@ errors:
   regionnotfound: "Region file does not exists!"
   savesign: "Couldn't create a new sign config file!"
   nogames: "No games found!"
-  notenoughress: "You don't have enough resource to buy this item!"
+  notenoughres: "You don't have enough resources to buy this item!"
   alreadypurchased: "This item has been already purchased!"
   teamnameinuse: "Team name is already in use!"
   minplayersmustnumber: "Min players must be a number!"
@@ -139,6 +139,7 @@ ingame:
     oldshop: "Use old shop"
     fullstackpershift: "Multiple stacks per shift click"
     onestackpershift: "One stack per shift click"
+    alreadyown: "&9Already own this"
   player:
     left: "&cPlayer $player$&c has left the game!"
     died: "&6&l$player$&6&l died!"

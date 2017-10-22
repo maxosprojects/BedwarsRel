@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
 
-public class UpgradeSwordSharpness implements Upgrade {
+public class UpgradeSwordSharpness extends Upgrade {
   public static final String TYPE = "SWORD_SHARPNESS";
 
   private TeamNew team;
@@ -48,8 +48,7 @@ public class UpgradeSwordSharpness implements Upgrade {
   @Override
   public boolean activate(UpgradeScope scope, UpgradeCycle cycle) {
     if (cycle == UpgradeCycle.ONCE) {
-      UpgradeSwordSharpness existingUpgrade = this.team.getUpgrade(
-          UpgradeSwordSharpness.class);
+      UpgradeSwordSharpness existingUpgrade = this.team.getUpgrade(UpgradeSwordSharpness.class);
       if (existingUpgrade != null && !this.upgrade.isHigherThan(existingUpgrade.upgrade)) {
         return false;
       }
@@ -73,6 +72,12 @@ public class UpgradeSwordSharpness implements Upgrade {
     }
 
     return true;
+  }
+
+  @Override
+  public boolean alreadyOwn(PlayerContext playerCtx) {
+    UpgradeSwordSharpness existing = playerCtx.getTeam().getUpgrade(UpgradeSwordSharpness.class);
+    return existing != null && existing.upgrade == this.upgrade;
   }
 
   @Override

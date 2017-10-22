@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
 
-public class UpgradeForge implements Upgrade {
+public class UpgradeForge extends Upgrade {
   private static final String TYPE = "FORGE";
 
   private GameContext gameContext;
@@ -72,6 +72,24 @@ public class UpgradeForge implements Upgrade {
     }
 
     return true;
+  }
+
+  @Override
+  public boolean shouldRender(PlayerContext playerCtx) {
+    UpgradeForge existing = playerCtx.getTeam().getUpgrade(UpgradeForge.class);
+    // There are no upgrades yet purchased and this is tier 1
+    return (existing == null && this.isLevel(1))
+        // Or this is one tier higher than already purchased
+        || (existing != null && existing.upgrade.ordinal() == this.upgrade.ordinal() - 1)
+        // This was purchased and it is top tier
+        || (existing != null && existing.upgrade == this.upgrade
+            && UpgradeForgeEnum.values().length == this.upgrade.ordinal() + 1);
+  }
+
+  @Override
+  public boolean alreadyOwn(PlayerContext playerCtx) {
+    UpgradeForge existing = (UpgradeForge) playerCtx.getTeam().getUpgrades().get(UpgradeForge.class);
+    return existing != null && existing.upgrade == this.upgrade;
   }
 
   @Override

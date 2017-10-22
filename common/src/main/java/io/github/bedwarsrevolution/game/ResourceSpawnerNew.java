@@ -18,6 +18,7 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 @Getter
 @Setter
@@ -30,6 +31,7 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
   private double spread = 1.0;
   private String name;
   private String team;
+  private BukkitTask task;
 
   public ResourceSpawnerNew(Map<String, Object> deserialize) {
     this.location = UtilsNew.locationDeserialize(deserialize.get("location"));
@@ -155,4 +157,17 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
     return rs;
   }
 
+  public void restart(int intrvl) {
+    if (this.task != null) {
+      try {
+        this.task.cancel();
+      } catch (Exception ex) {
+        // Ignore
+      }
+    }
+    long ticks = Math.round((((double) intrvl) / 1000.0) * 20.0);
+    this.task = BedwarsRevol.getInstance().getServer().getScheduler()
+        .runTaskTimer(BedwarsRevol.getInstance(), this, ticks, ticks);
+    this.ctx.addRunningTask(this.task);
+  }
 }

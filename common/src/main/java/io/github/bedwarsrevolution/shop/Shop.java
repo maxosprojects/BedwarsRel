@@ -65,7 +65,7 @@ public class Shop {
       return;
     }
 
-    this.renderCategories(inventory, ctx);
+    this.renderCategories(inventory);
 
     if (this.currentCategory.isEmpty()) {
       this.renderButtonStackPerShift(inventory, size - 4,
@@ -106,7 +106,7 @@ public class Shop {
     }
   }
 
-  private void renderCategories(Inventory inventory, GameContext ctx) {
+  private void renderCategories(Inventory inventory) {
     for (MerchantCategory cat : this.categories) {
       if (!this.player.hasPermission(cat.getPermission())) {
         continue;
@@ -114,7 +114,7 @@ public class Shop {
       ItemStack button = cat.getButton().clone();
       ItemMeta meta = button.getItemMeta();
       if (UtilsNew.isColorable(button)) {
-        button.setDurability(playerCtx.getTeam().getColor().getDyeColor().getWoolData());
+        button.setDurability(this.playerCtx.getTeam().getColor().getDyeColor().getWoolData());
       }
       ShopActionCategory action = new ShopActionCategory(this.playerCtx, this);
       if (this.currentCategory.equals(cat.getName())) {
@@ -152,19 +152,39 @@ public class Shop {
   // Caller must ensure this.currentCategory isn't empty
   private void renderTrades(Inventory inventory) {
     List<ShopTrade> offers = categoryMap.get(this.currentCategory).getOffers();
-    TeamNew team = playerCtx.getTeam();
+    TeamNew team = this.playerCtx.getTeam();
     for (ShopTrade trade : offers) {
+      ShopReward reward = trade.getReward();
       if (trade.getItem1().getType() == Material.AIR
-          && trade.getReward().getItem().getType() == Material.AIR) {
+          && reward.getItem().getType() == Material.AIR) {
+        continue;
+      }
+      if (reward.isUpgrade() && !reward.getUpgrade().shouldRender(this.playerCtx)) {
         continue;
       }
       ItemStack tradeStack = this.toItemStack(trade, team);
+      if (reward.isUpgrade() && reward.getUpgrade().alreadyOwn(this.playerCtx)) {
+        this.setAlreadyOwn(tradeStack);
+      }
       inventory.setItem(this.nextSlot, tradeStack);
       ShopActionBuy action = new ShopActionBuy(this.playerCtx, this);
       action.setTrade(trade);
       this.actions.set(this.nextSlot, action);
       this.nextSlot++;
     }
+  }
+
+  private void setAlreadyOwn(ItemStack itemStack) {
+    ItemMeta meta = itemStack.getItemMeta();
+    List<String> lores = meta.getLore();
+    if (lores == null) {
+      lores = new ArrayList<>();
+    }
+    lores.add("");
+    lores.add(ChatColor.translateAlternateColorCodes('&',
+        BedwarsRevol._l(this.player, "ingame.shop.alreadyown")));
+    meta.setLore(lores);
+    itemStack.setItemMeta(meta);
   }
 
   public void playButtonSound() {

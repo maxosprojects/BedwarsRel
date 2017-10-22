@@ -23,7 +23,7 @@ import org.bukkit.scheduler.BukkitRunnable;
  * This is superior to former "Trap" because it can't be jumped over nor anything
  * can be placed on top of the trap.
  */
-public class UpgradeBaseAlarm implements Upgrade {
+public class UpgradeBaseAlarm extends Upgrade {
   private static final String TYPE = "ALARM";
 
   private List<PotionEffect> effects = null;
