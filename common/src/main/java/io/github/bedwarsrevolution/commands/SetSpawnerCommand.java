@@ -18,7 +18,7 @@ public class SetSpawnerCommand extends BaseCommand {
   }
 
   @Override
-  public boolean execute(CommandSender sender, ArrayList<String> args) {
+  public boolean execute(CommandSender sender, List<String> args) {
 //    if (!super.hasPermission(sender)) {
 //      return false;
 //    }

@@ -3,6 +3,7 @@ package io.github.bedwarsrevolution.commands;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -13,7 +14,7 @@ public class SetMinPlayersCommand extends BaseCommand implements ICommand {
   }
 
   @Override
-  public boolean execute(CommandSender sender, ArrayList<String> args) {
+  public boolean execute(CommandSender sender, List<String> args) {
 //    if (!sender.hasPermission("bw." + this.getPermission())) {
 //      return false;
 //    }

@@ -3,6 +3,7 @@ package io.github.bedwarsrevolution.commands;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,21 +15,6 @@ public abstract class BaseCommand implements ICommand {
   public BaseCommand(BedwarsRevol plugin) {
     this.plugin = plugin;
   }
-
-  @Override
-  public abstract boolean execute(CommandSender sender, ArrayList<String> args);
-
-  @Override
-  public abstract String[] getArguments();
-
-  @Override
-  public abstract String getCommand();
-
-  @Override
-  public abstract String getDescription();
-
-  @Override
-  public abstract String getName();
 
   protected BedwarsRevol getPlugin() {
     return this.plugin;

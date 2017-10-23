@@ -5,6 +5,7 @@ import io.github.bedwarsrevolution.updater.ConfigUpdaterNew;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -15,7 +16,7 @@ public class ReloadCommand extends BaseCommand {
   }
 
   @Override
-  public boolean execute(CommandSender sender, ArrayList<String> args) {
+  public boolean execute(CommandSender sender, List<String> args) {
     if (!sender.hasPermission(this.getPermission())) {
       return false;
     }

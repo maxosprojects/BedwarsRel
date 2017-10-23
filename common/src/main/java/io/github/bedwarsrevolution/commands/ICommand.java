@@ -1,22 +1,22 @@
 package io.github.bedwarsrevolution.commands;
 
-import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.command.CommandSender;
 
 public interface ICommand {
 
-  public boolean execute(CommandSender sender, ArrayList<String> args);
+  boolean execute(CommandSender sender, List<String> args);
 
-  public String[] getArguments();
+  String[] getArguments();
 
-  public String getCommand();
+  String getCommand();
 
-  public String getDescription();
+  String getDescription();
 
-  public String getName();
+  String getName();
 
-  public String getPermission();
+  String getPermission();
 
-  public boolean hasPermission(CommandSender sender);
+  boolean hasPermission(CommandSender sender);
 
 }

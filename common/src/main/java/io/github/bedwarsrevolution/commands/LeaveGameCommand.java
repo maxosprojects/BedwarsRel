@@ -3,6 +3,7 @@ package io.github.bedwarsrevolution.commands;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -13,7 +14,7 @@ public class LeaveGameCommand extends BaseCommand {
   }
 
   @Override
-  public boolean execute(CommandSender sender, ArrayList<String> args) {
+  public boolean execute(CommandSender sender, List<String> args) {
     if (!super.hasPermission(sender)) {
       return false;
     }

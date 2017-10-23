@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -17,7 +18,7 @@ public class StatsCommand extends BaseCommand implements ICommand {
   }
 
   @Override
-  public boolean execute(CommandSender sender, ArrayList<String> args) {
+  public boolean execute(CommandSender sender, List<String> args) {
     if (!super.hasPermission(sender)) {
       return false;
     }

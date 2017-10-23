@@ -5,6 +5,7 @@ import io.github.bedwarsrevolution.BedwarsRevol;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -21,7 +22,7 @@ public class SetBedCommand extends BaseCommand implements ICommand {
   }
 
   @Override
-  public boolean execute(CommandSender sender, ArrayList<String> args) {
+  public boolean execute(CommandSender sender, List<String> args) {
 //    if (!super.hasPermission(sender)) {
 //      return false;
 //    }

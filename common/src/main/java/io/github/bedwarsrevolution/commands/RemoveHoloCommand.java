@@ -3,6 +3,7 @@ package io.github.bedwarsrevolution.commands;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -16,7 +17,7 @@ public class RemoveHoloCommand extends BaseCommand implements ICommand {
   }
 
   @Override
-  public boolean execute(CommandSender sender, ArrayList<String> args) {
+  public boolean execute(CommandSender sender, List<String> args) {
     if (!super.hasPermission(sender)) {
       return false;
     }

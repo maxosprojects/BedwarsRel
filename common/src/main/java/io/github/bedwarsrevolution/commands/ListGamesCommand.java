@@ -16,7 +16,7 @@ public class ListGamesCommand extends BaseCommand {
   }
 
   @Override
-  public boolean execute(CommandSender sender, ArrayList<String> args) {
+  public boolean execute(CommandSender sender, List<String> args) {
 //    if (!sender.hasPermission("bw." + this.getPermission())) {
 //      return false;
 //    }

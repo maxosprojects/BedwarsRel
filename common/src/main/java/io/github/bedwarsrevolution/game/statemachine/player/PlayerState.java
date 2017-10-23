@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -32,18 +31,19 @@ public abstract class PlayerState {
    * @param damager is only null if damage was caused to the player in context and damager
    *        couldn't be established, see
    *        {@link io.github.bedwarsrevolution.listeners.PlayerListenerNew#onEntityDamage(EntityDamageEvent)}
-   *        for implementation details
+   * @return whether a game changer event happened (e.g. death or player left)
    */
-  public abstract void onDamageToPlayer(EntityDamageEvent event, Player damager);
+  public abstract boolean onDamageToPlayer(EntityDamageEvent event, Player damager);
 
   /**
    * Called only when the damage was caused to a non-player entity and the damager is
    * the player in context
    * @param event
+   * @return whether a game changer event happened (e.g. death or player left)
    */
-  public abstract void onDamageByPlayer(EntityDamageEvent event);
+  public abstract boolean onDamageByPlayer(EntityDamageEvent event);
 
-  public abstract void onDrop(PlayerDropItemEvent event);
+  public abstract void onDropItem(PlayerDropItemEvent event);
 
   public abstract void onFly(PlayerToggleFlightEvent event);
 

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -18,7 +19,7 @@ public class DebugPasteCommand extends BaseCommand implements ICommand {
   }
 
   @Override
-  public boolean execute(final CommandSender sender, ArrayList<String> args) {
+  public boolean execute(final CommandSender sender, List<String> args) {
     if (!super.hasPermission(sender) && !sender.isOp()) {
       return false;
     }

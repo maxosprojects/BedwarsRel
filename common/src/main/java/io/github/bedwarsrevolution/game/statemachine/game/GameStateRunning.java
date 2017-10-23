@@ -2,14 +2,13 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import io.github.bedwarsrevolution.game.Cooldown;
-import io.github.bedwarsrevolution.game.Cooldown.Scope;
 import io.github.bedwarsrevolution.game.RegionNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerState;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerStatePlaying;
+import io.github.bedwarsrevolution.holo.FloatingItem;
 import io.github.bedwarsrevolution.shop.MerchantCategory;
 import io.github.bedwarsrevolution.shop.upgrades.Upgrade;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeBaseAlarm;
@@ -26,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -69,7 +69,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Bed;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -103,21 +102,23 @@ public class GameStateRunning extends GameState {
   @Override
   public void onEventEntityDamageToPlayer(EntityDamageEvent event, Player damager) {
     PlayerContext playerCtx = this.ctx.getPlayerContext((Player) event.getEntity());
-    playerCtx.getState().onDamageToPlayer(event, damager);
-    this.checkGameOver();
+    if (playerCtx.getState().onDamageToPlayer(event, damager)) {
+      this.checkGameOver();
+    }
   }
 
   @Override
   public void onEventEntityDamageByPlayer(EntityDamageEvent event, Player damager) {
     PlayerContext playerCtx = this.ctx.getPlayerContext(damager);
-    playerCtx.getState().onDamageByPlayer(event);
-    this.checkGameOver();
+    if (playerCtx.getState().onDamageByPlayer(event)) {
+      this.checkGameOver();
+    }
   }
 
   @Override
   public void onEventDrop(PlayerDropItemEvent event) {
     PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
-    playerCtx.getState().onDrop(event);
+    playerCtx.getState().onDropItem(event);
   }
 
   @Override
@@ -412,9 +413,9 @@ public class GameStateRunning extends GameState {
   @Override
   public void playerLeaves(PlayerContext playerCtx, boolean kicked) {
     playerCtx.getState().leave(kicked);
-    playerCtx.restoreLocation();
     playerCtx.restoreInventory();
     BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());
+    playerCtx.restoreLocation();
     this.ctx.removePlayer(playerCtx);
     playerCtx.getTeam().removePlayer(playerCtx);
     playerCtx.getPlayer().setScoreboard(
@@ -1097,12 +1098,13 @@ public class GameStateRunning extends GameState {
 //    this.moveFreePlayersToTeam();
 
 //    this.cycle.onGameStart();
-    this.startResourceSpawners();
 
     // Update world time before game starts
     this.updateTime();
 
     this.teleportPlayersToTeamSpawn();
+
+    this.startResourceSpawners();
 
 //    this.state = GameState.RUNNING;
 
@@ -1159,7 +1161,6 @@ public class GameStateRunning extends GameState {
 //          GameStateRunning.this.isOver = true;
           GameStateRunning.this.checkGameOver();
           this.cancel();
-          return;
         }
         GameStateRunning.this.timeLeft--;
       }
@@ -1200,10 +1201,29 @@ public class GameStateRunning extends GameState {
   }
 
   private void startResourceSpawners() {
+    Map<Material, Material> map = ImmutableMap.of(
+        Material.DIAMOND, Material.DIAMOND_BLOCK,
+        Material.EMERALD, Material.EMERALD_BLOCK);
     for (ResourceSpawnerNew rs : this.ctx.getResourceSpawners()) {
       rs.setCtx(this.ctx);
       rs.restart(rs.getInterval());
+      if (StringUtils.isEmpty(rs.getTeam())) {
+        Location location = rs.getLocation().clone();
+        location.add(0, 2, 0);
+
+        location.getBlock().getChunk().load(true);
+        location.clone().add(0, 1, 0).getBlock().getChunk().load(true);
+
+        FloatingItem floatingItem = new FloatingItem(location);
+        Material material = map.get(rs.getResources().get(0).getType());
+        if (material != null) {
+          ItemStack item = new ItemStack(material);
+          floatingItem.spawn(item, true, rs.getName());
+          this.ctx.addFloatingItem(floatingItem);
+        }
+      }
     }
+    this.ctx.startFloatingItems();
   }
 
   private void preparePlayersAndTeams() {

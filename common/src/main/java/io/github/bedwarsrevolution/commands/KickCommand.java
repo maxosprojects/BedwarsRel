@@ -4,6 +4,7 @@ import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -14,7 +15,7 @@ public class KickCommand extends BaseCommand implements ICommand {
   }
 
   @Override
-  public boolean execute(CommandSender sender, ArrayList<String> args) {
+  public boolean execute(CommandSender sender, List<String> args) {
     if (!super.hasPermission(sender) && !sender.isOp()) {
       return false;
     }
@@ -23,7 +24,7 @@ public class KickCommand extends BaseCommand implements ICommand {
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
 
     // find player
-    Player kickPlayer = BedwarsRevol.getInstance().getServer().getPlayer(args.get(0).toString());
+    Player kickPlayer = BedwarsRevol.getInstance().getServer().getPlayer(args.get(0));
 
     if (ctx == null) {
       player

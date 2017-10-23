@@ -25,17 +25,19 @@ public class PlayerStateWaitingGame extends PlayerState {
   }
 
   @Override
-  public void onDamageToPlayer(EntityDamageEvent event, Player damager) {
+  public boolean onDamageToPlayer(EntityDamageEvent event, Player damager) {
     event.setCancelled(true);
+    return false;
   }
 
   @Override
-  public void onDamageByPlayer(EntityDamageEvent event) {
+  public boolean onDamageByPlayer(EntityDamageEvent event) {
     event.setCancelled(true);
+    return false;
   }
 
   @Override
-  public void onDrop(PlayerDropItemEvent event) {
+  public void onDropItem(PlayerDropItemEvent event) {
     event.setCancelled(true);
   }
 

@@ -10,6 +10,7 @@ import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.RespawnProtectionRunnableNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import io.github.bedwarsrevolution.holo.FloatingItem;
 import io.github.bedwarsrevolution.shop.MerchantCategory;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
@@ -103,6 +104,7 @@ public class GameContext {
   @Setter
   private List<Map<String, Object>> defaultUpgrades;
   private Map<String, Cooldown> cooldowns = new HashMap<>();
+  private List<FloatingItem> floatingItems = new ArrayList<>();
 
   public GameContext(String name) {
     this.name = name;
@@ -254,12 +256,35 @@ public class GameContext {
     return null;
   }
 
+  public void startFloatingItems() {
+    this.addRunningTask(new BukkitRunnable() {
+      @Override
+      public void run() {
+        for (FloatingItem item : GameContext.this.floatingItems) {
+          item.update();
+        }
+      }
+    }.runTaskTimer(BedwarsRevol.getInstance(), 0, 1));
+  }
+
+  private void removeFloatingItems() {
+    for (FloatingItem item : this.floatingItems) {
+      item.delete();
+    }
+    this.floatingItems.clear();
+  }
+
+  public void addFloatingItem(FloatingItem item) {
+    this.floatingItems.add(item);
+  }
+
   public void reset() {
 //    // clear protections
 //    this.clearProtections();
 
-    // reset region
+    this.stopRunningTasks();
     this.resetRegion();
+    this.removeFloatingItems();
   }
 
   public void resetRegion() {
@@ -285,7 +310,7 @@ public class GameContext {
 //      BedwarsRevol.getInstance().getBugsnag().notify(e);
 //      e.printStackTrace();
 //    }
-    this.resetRegion();
+    this.reset();
     this.state = new GameStateStopped(this);
     this.updateSigns();
   }
