@@ -1,7 +1,9 @@
 package io.github.bedwarsrevolution.game;
 
+import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.holo.FloatingItem;
 import io.github.bedwarsrevolution.shop.ItemStackParser;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
@@ -10,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -23,7 +27,7 @@ import org.bukkit.scheduler.BukkitTask;
 @Getter
 @Setter
 @SerializableAs("ResourceSpawner")
-public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
+public class ResourceSpawnerNew implements ConfigurationSerializable {
   private GameContext ctx;
   private int interval = 1000;
   private List<ItemStack> resources = new ArrayList<>();
@@ -32,6 +36,9 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
   private String name;
   private String team;
   private BukkitTask task;
+  private long nextSpawn;
+  private FloatingItem floatingItem;
+  private long lastTitleUpdate;
 
   public ResourceSpawnerNew(Map<String, Object> deserialize) {
     this.location = UtilsNew.locationDeserialize(deserialize.get("location"));
@@ -116,8 +123,7 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
     return team != null && team.equals(teamName);
   }
 
-  @Override
-  public void run() {
+  private void spawn() {
     Location dropLocation = this.location.clone();
     for (ItemStack itemStack : this.resources) {
       ItemStack item = itemStack.clone();
@@ -158,16 +164,57 @@ public class ResourceSpawnerNew implements Runnable, ConfigurationSerializable {
   }
 
   public void restart(int intrvl) {
-    if (this.task != null) {
-      try {
-        this.task.cancel();
-      } catch (Exception ex) {
-        // Ignore
-      }
+    this.interval = intrvl;
+    this.nextSpawn = System.currentTimeMillis() + this.interval;
+    if (!StringUtils.isEmpty(this.team) || this.floatingItem != null) {
+      return;
     }
-    long ticks = Math.round((((double) intrvl) / 1000.0) * 20.0);
-    this.task = BedwarsRevol.getInstance().getServer().getScheduler()
-        .runTaskTimer(BedwarsRevol.getInstance(), this, ticks, ticks);
-    this.ctx.addRunningTask(this.task);
+    Map<Material, Material> map = ImmutableMap.of(
+        Material.DIAMOND, Material.DIAMOND_BLOCK,
+        Material.EMERALD, Material.EMERALD_BLOCK);
+    Location loc = this.location.clone();
+    loc.add(0, 2, 0);
+
+    loc.getBlock().getChunk().load(true);
+    loc.clone().add(0, 1, 0).getBlock().getChunk().load(true);
+
+    this.floatingItem = new FloatingItem(loc);
+    ItemStack res = this.resources.get(0);
+    Material material = map.get(res.getType());
+    ItemStack item;
+    if (material == null) {
+      item = new ItemStack(res.getType());
+    } else {
+      item = new ItemStack(material);
+    }
+    this.floatingItem.init(item, true, res.getItemMeta().getDisplayName());
   }
+
+  public void update() {
+    long current = System.currentTimeMillis();
+    if (current >= this.nextSpawn) {
+      this.spawn();
+      this.nextSpawn = current + this.interval;
+    }
+    if (this.floatingItem == null) {
+      return;
+    }
+    this.floatingItem.update();
+    if (this.lastTitleUpdate + 1000 < current) {
+      this.lastTitleUpdate = current;
+      String title = BedwarsRevol._l("ingame.resspawners.nextin",
+          ImmutableMap.of(
+              "resource", this.resources.get(0).getItemMeta().getDisplayName(),
+              "time", Long.toString((this.nextSpawn - current) / 1000)));
+      this.floatingItem.setText(0, title);
+    }
+  }
+
+  public void remove() {
+    if (this.floatingItem != null) {
+      this.floatingItem.delete();
+      this.floatingItem = null;
+    }
+  }
+
 }

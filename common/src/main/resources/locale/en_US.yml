@@ -198,6 +198,8 @@ ingame:
     forge2: "Golden Forge"
     forge3: "Emerald Forge"
     forge4: "Molten Forge"
+  resspawners:
+    nextin: "&fNext $resource$&f spawns in &6$time$&f sec"
 lobby:
   countdown: "Game will start in $sec$ second(s)!"
   countdowncancel: "More players needed. Countdown was cancelled!"

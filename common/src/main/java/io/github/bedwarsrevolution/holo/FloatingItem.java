@@ -1,12 +1,15 @@
 package io.github.bedwarsrevolution.holo;
 
+import com.comphenix.packetwrapper.WrapperPlayServerEntityTeleport;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.collect.Lists;
@@ -21,24 +24,13 @@ public class FloatingItem {
   private boolean goingDown;
   private List<ArmorStand> textStands = new ArrayList<>();
 
-  /**
-   * Constructs a new floating item and adds it to the items list
-   *
-   * @param location The location to spawn item at
-   */
   public FloatingItem(Location location) {
     this.location = location.clone();
     this.origLocation = location.clone();
     this.goingDown = true;
   }
 
-  /**
-   * Spawns the floating item with the given text and item type
-   *
-   * @param itemStack The itemstack
-   * @param big Whether the item should be big or not
-   */
-  public void spawn(ItemStack itemStack, boolean big, String... text) {
+  public void init(ItemStack itemStack, boolean big, String... text) {
     this.helmetStand = (ArmorStand) this.location.getWorld().spawnEntity(
         this.location, EntityType.ARMOR_STAND);
     this.helmetStand.setGravity(false);
@@ -48,26 +40,37 @@ public class FloatingItem {
     addText(text);
   }
 
-  /**
-   * Updates the floating item
-   */
   public void update() {
     if (this.helmetStand == null) {
       return;
     }
-    Location currLoc = this.helmetStand.getLocation();
     if (this.goingDown) {
-      currLoc.subtract(0, 0.01, 0);
-      currLoc.setYaw((currLoc.getYaw() - 7.5F));
+      this.location.subtract(0, 0.01, 0);
+      this.location.setYaw(this.location.getYaw() - 7.5F);
     } else {
-      currLoc.add(0, 0.01, 0);
-      currLoc.setYaw((currLoc.getYaw() + 7.5F));
+      this.location.add(0, 0.01, 0);
+      this.location.setYaw(this.location.getYaw() + 7.5F);
     }
-    this.helmetStand.teleport(currLoc);
-    if (currLoc.getY() > (0.25 + this.origLocation.getY())) {
+    if (this.location.getY() > (0.25 + this.origLocation.getY())) {
       this.goingDown = true;
-    } else if (currLoc.getY() < (-0.25 + this.origLocation.getY())) {
-      this.goingDown = false;    }
+    } else if (this.location.getY() < (-0.25 + this.origLocation.getY())) {
+      this.goingDown = false;
+    }
+    for (Entity entity : this.helmetStand.getNearbyEntities(100, 100, 100)) {
+      if (!(entity instanceof Player)) {
+        continue;
+      }
+      Player player = (Player) entity;
+      WrapperPlayServerEntityTeleport packet = new WrapperPlayServerEntityTeleport();
+      packet.setEntityID(this.helmetStand.getEntityId());
+      packet.setX(this.location.getX());
+      packet.setY(this.location.getY());
+      packet.setZ(this.location.getZ());
+      packet.setYaw(this.location.getYaw());
+      packet.setPitch(0);
+      packet.setOnGround(false);
+      packet.sendPacket(player);
+    }
   }
 
   private void addText(String... text) {
@@ -89,10 +92,7 @@ public class FloatingItem {
     }
   }
 
-  /**
-   * Deletes all text that the floating item has
-   */
-  public void deleteAllText() {
+  private void deleteText() {
     for (ArmorStand stand : this.textStands) {
       this.origLocation.getChunk().load(true);
       this.origLocation.clone().add(0, 1, 0).getChunk().load(true);
@@ -101,11 +101,8 @@ public class FloatingItem {
     this.textStands.clear();
   }
 
-  /**
-   * Deletes this floating item
-   */
   public void delete() {
-    deleteAllText();
+    deleteText();
     if (this.helmetStand != null) {
       this.origLocation.getChunk().load(true);
       this.origLocation.clone().add(0, 1, 0).getChunk().load(true);
@@ -113,4 +110,7 @@ public class FloatingItem {
     }
   }
 
+  public void setText(int num, String text) {
+    this.textStands.get(num).setCustomName(text.replace('&', '§'));
+  }
 }

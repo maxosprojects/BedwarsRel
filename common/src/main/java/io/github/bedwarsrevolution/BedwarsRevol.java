@@ -153,6 +153,11 @@ public class BedwarsRevol extends JavaPlugin {
     return BedwarsRevol._l(BedwarsRevol.getInstance().getConfig().getString("locale"), key);
   }
 
+  public static String _l(String key, Map<String, String> params) {
+    String locale = BedwarsRevol.getInstance().getConfig().getString("locale");
+    return BedwarsRevol._l(locale, key, params);
+  }
+
   public static String _l(String locale, String key) {
     if (!BedwarsRevol.getInstance().localization.containsKey(locale)) {
       BedwarsRevol.getInstance().loadLocalization(locale);

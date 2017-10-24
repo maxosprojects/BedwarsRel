@@ -256,26 +256,10 @@ public class GameContext {
     return null;
   }
 
-  public void startFloatingItems() {
-    this.addRunningTask(new BukkitRunnable() {
-      @Override
-      public void run() {
-        for (FloatingItem item : GameContext.this.floatingItems) {
-          item.update();
-        }
-      }
-    }.runTaskTimer(BedwarsRevol.getInstance(), 0, 1));
-  }
-
-  private void removeFloatingItems() {
-    for (FloatingItem item : this.floatingItems) {
-      item.delete();
+  private void removeSpawners() {
+    for (ResourceSpawnerNew spawner : this.resourceSpawners) {
+      spawner.remove();
     }
-    this.floatingItems.clear();
-  }
-
-  public void addFloatingItem(FloatingItem item) {
-    this.floatingItems.add(item);
   }
 
   public void reset() {
@@ -284,7 +268,7 @@ public class GameContext {
 
     this.stopRunningTasks();
     this.resetRegion();
-    this.removeFloatingItems();
+    this.removeSpawners();
   }
 
   public void resetRegion() {
@@ -371,7 +355,7 @@ public class GameContext {
       return teamCheck;
     }
 
-    if (this.getResourceSpawners().size() == 0) {
+    if (this.resourceSpawners.size() == 0) {
       return GameCheckResult.NO_RES_SPAWNER_ERROR;
     }
 

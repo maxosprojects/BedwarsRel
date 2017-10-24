@@ -1201,29 +1201,18 @@ public class GameStateRunning extends GameState {
   }
 
   private void startResourceSpawners() {
-    Map<Material, Material> map = ImmutableMap.of(
-        Material.DIAMOND, Material.DIAMOND_BLOCK,
-        Material.EMERALD, Material.EMERALD_BLOCK);
     for (ResourceSpawnerNew rs : this.ctx.getResourceSpawners()) {
       rs.setCtx(this.ctx);
       rs.restart(rs.getInterval());
-      if (StringUtils.isEmpty(rs.getTeam())) {
-        Location location = rs.getLocation().clone();
-        location.add(0, 2, 0);
-
-        location.getBlock().getChunk().load(true);
-        location.clone().add(0, 1, 0).getBlock().getChunk().load(true);
-
-        FloatingItem floatingItem = new FloatingItem(location);
-        Material material = map.get(rs.getResources().get(0).getType());
-        if (material != null) {
-          ItemStack item = new ItemStack(material);
-          floatingItem.spawn(item, true, rs.getName());
-          this.ctx.addFloatingItem(floatingItem);
+    }
+    this.ctx.addRunningTask(new BukkitRunnable() {
+      @Override
+      public void run() {
+        for (ResourceSpawnerNew spawner : GameStateRunning.this.ctx.getResourceSpawners()) {
+          spawner.update();
         }
       }
-    }
-    this.ctx.startFloatingItems();
+    }.runTaskTimer(BedwarsRevol.getInstance(), 0, 1));
   }
 
   private void preparePlayersAndTeams() {
