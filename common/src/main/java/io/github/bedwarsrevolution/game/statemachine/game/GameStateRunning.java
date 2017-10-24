@@ -1104,7 +1104,7 @@ public class GameStateRunning extends GameState {
 
     this.teleportPlayersToTeamSpawn();
 
-    this.startResourceSpawners();
+    this.ctx.getResourceSpawnerManager().start(this.ctx);
 
 //    this.state = GameState.RUNNING;
 
@@ -1198,21 +1198,6 @@ public class GameStateRunning extends GameState {
 //        }
       }
     }
-  }
-
-  private void startResourceSpawners() {
-    for (ResourceSpawnerNew rs : this.ctx.getResourceSpawners()) {
-      rs.setCtx(this.ctx);
-      rs.restart(rs.getInterval());
-    }
-    this.ctx.addRunningTask(new BukkitRunnable() {
-      @Override
-      public void run() {
-        for (ResourceSpawnerNew spawner : GameStateRunning.this.ctx.getResourceSpawners()) {
-          spawner.update();
-        }
-      }
-    }.runTaskTimer(BedwarsRevol.getInstance(), 0, 1));
   }
 
   private void preparePlayersAndTeams() {

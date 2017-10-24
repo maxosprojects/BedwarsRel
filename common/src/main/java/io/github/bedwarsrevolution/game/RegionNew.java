@@ -319,9 +319,7 @@ public class RegionNew {
       }
     }
 
-    for (ResourceSpawnerNew spawner : ctx.getResourceSpawners()) {
-      spawner.getLocation().getChunk().load();
-    }
+    ctx.getResourceSpawnerManager().loadChunks();
 
     for (Entity entity : this.removingEntities) {
       entity.remove();
@@ -344,10 +342,15 @@ public class RegionNew {
         continue;
       }
 
-      if (e.getType().equals(EntityType.CREEPER) || e.getType().equals(EntityType.CAVE_SPIDER)
-          || e.getType().equals(EntityType.SPIDER) || e.getType().equals(EntityType.ZOMBIE)
-          || e.getType().equals(EntityType.SKELETON) || e.getType().equals(EntityType.SILVERFISH)
-          || e.getType().equals(EntityType.ARROW)) {
+      EntityType eType = e.getType();
+      if (eType == EntityType.CREEPER
+          || eType == EntityType.CAVE_SPIDER
+          || eType == EntityType.SPIDER
+          || eType == EntityType.ZOMBIE
+          || eType == EntityType.SKELETON
+          || eType == EntityType.SILVERFISH
+          || eType == EntityType.ARROW
+          || eType == EntityType.ARMOR_STAND) {
         e.remove();
         continue;
       }

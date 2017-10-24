@@ -1,6 +1,7 @@
 package io.github.bedwarsrevolution.holo;
 
 import com.comphenix.packetwrapper.WrapperPlayServerEntityTeleport;
+import com.comphenix.packetwrapper.WrapperPlayServerRelEntityMoveLook;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,13 +31,13 @@ public class FloatingItem {
     this.goingDown = true;
   }
 
-  public void init(ItemStack itemStack, boolean big, String... text) {
+  public void init(ItemStack itemStack, boolean small, String... text) {
     this.helmetStand = (ArmorStand) this.location.getWorld().spawnEntity(
         this.location, EntityType.ARMOR_STAND);
     this.helmetStand.setGravity(false);
     this.helmetStand.setHelmet(itemStack);
     this.helmetStand.setVisible(false);
-    this.helmetStand.setSmall(!big);
+    this.helmetStand.setSmall(small);
     addText(text);
   }
 
@@ -45,10 +46,10 @@ public class FloatingItem {
       return;
     }
     if (this.goingDown) {
-      this.location.subtract(0, 0.01, 0);
+      this.location.setY(this.location.getY() + 0.01);
       this.location.setYaw(this.location.getYaw() - 7.5F);
     } else {
-      this.location.add(0, 0.01, 0);
+      this.location.setY(this.location.getY() - 0.01);
       this.location.setYaw(this.location.getYaw() + 7.5F);
     }
     if (this.location.getY() > (0.25 + this.origLocation.getY())) {
@@ -56,6 +57,33 @@ public class FloatingItem {
     } else if (this.location.getY() < (-0.25 + this.origLocation.getY())) {
       this.goingDown = false;
     }
+    this.teleport();
+  }
+
+  public void update(double dy, float yaw) {
+//    this.location.setY(this.origLocation.getY() + dy);
+//    this.location.setYaw(yaw);
+//    this.teleport();
+    for (Entity entity : this.helmetStand.getNearbyEntities(100, 100, 100)) {
+      if (!(entity instanceof Player)) {
+        continue;
+      }
+      Player player = (Player) entity;
+      WrapperPlayServerRelEntityMoveLook packet = new WrapperPlayServerRelEntityMoveLook();
+      packet.setEntityID(this.helmetStand.getEntityId());
+      packet.setDx(0);
+      packet.setDy((this.origLocation.getY() + dy) - this.location.getY());
+      packet.setDz(0);
+      packet.setYaw(yaw);
+      packet.setPitch(0);
+      packet.setOnGround(false);
+      packet.sendPacket(player);
+    }
+    this.location.setY(this.origLocation.getY() + dy);
+    this.location.setYaw(yaw);
+  }
+
+  private void teleport() {
     for (Entity entity : this.helmetStand.getNearbyEntities(100, 100, 100)) {
       if (!(entity instanceof Player)) {
         continue;
@@ -113,4 +141,5 @@ public class FloatingItem {
   public void setText(int num, String text) {
     this.textStands.get(num).setCustomName(text.replace('&', '§'));
   }
+
 }

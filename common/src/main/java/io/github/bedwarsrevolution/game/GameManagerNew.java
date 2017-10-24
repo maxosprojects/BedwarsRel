@@ -152,7 +152,7 @@ public class GameManagerNew {
 
             ResourceSpawnerNew rs = (ResourceSpawnerNew) obj;
             rs.setCtx(ctx);
-            ctx.addResourceSpawner(rs);
+            ctx.getResourceSpawnerManager().add(rs);
           }
         }
 
@@ -164,7 +164,7 @@ public class GameManagerNew {
 
             ResourceSpawnerNew rsp = (ResourceSpawnerNew) rs;
             rsp.setCtx(ctx);
-            ctx.addResourceSpawner(rsp);
+            ctx.getResourceSpawnerManager().add(rsp);
           }
         }
       }

@@ -33,14 +33,7 @@ public enum UpgradeForgeEnum implements UpgradeEnum {
   }
 
   public void equipTeam(GameContext ctx, TeamNew team) {
-    for (ResourceSpawnerNew spawner : ctx.getResourceSpawners()) {
-      if (team.getName().equals(spawner.getTeam())) {
-        Integer interval = intervals.get(spawner.getName());
-        if (interval != null) {
-          spawner.restart(interval);
-        }
-      }
-    }
+    ctx.getResourceSpawnerManager().restart(this.intervals, team);
   }
 
 }

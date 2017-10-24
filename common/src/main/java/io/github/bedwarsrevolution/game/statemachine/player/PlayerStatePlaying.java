@@ -206,16 +206,9 @@ public class PlayerStatePlaying extends PlayerState {
   }
 
   private String transferResources(PlayerContext to) {
-    List<ResourceSpawnerNew> spawners = this.playerCtx.getGameContext().getResourceSpawners();
-    Set<Material> types = new HashSet<>();
     PlayerInventory destInv = to.getPlayer().getInventory();
     Multimap<Material, ItemStack> map = ArrayListMultimap.create();
-    for (ResourceSpawnerNew spawner : spawners) {
-      List<ItemStack> resources = spawner.getResources();
-      for (ItemStack resource : resources) {
-        types.add(resource.getType());
-      }
-    }
+    Set<Material> types = this.playerCtx.getGameContext().getResourceSpawnerManager().getTypes();
     // Collect resources into map
     for (ItemStack item : this.playerCtx.getPlayer().getInventory().getContents()) {
       if (item != null && types.contains(item.getType())) {

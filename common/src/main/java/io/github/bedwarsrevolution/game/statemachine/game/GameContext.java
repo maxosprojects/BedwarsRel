@@ -6,7 +6,7 @@ import io.github.bedwarsrevolution.game.GameCheckResult;
 import io.github.bedwarsrevolution.game.GameJoinSignNew;
 import io.github.bedwarsrevolution.game.GameManagerNew;
 import io.github.bedwarsrevolution.game.RegionNew;
-import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
+import io.github.bedwarsrevolution.game.ResourceSpawnerManager;
 import io.github.bedwarsrevolution.game.RespawnProtectionRunnableNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
@@ -88,7 +88,7 @@ public class GameContext {
   @Setter
   private RegionNew region = null;
   @Getter
-  private List<ResourceSpawnerNew> resourceSpawners = new ArrayList<>();
+  private ResourceSpawnerManager resourceSpawnerManager = new ResourceSpawnerManager();
   private Map<Player, RespawnProtectionRunnableNew> respawnProtections = new HashMap<>();
   private List<BukkitTask> runningTasks = new ArrayList<>();
   @Getter
@@ -256,19 +256,13 @@ public class GameContext {
     return null;
   }
 
-  private void removeSpawners() {
-    for (ResourceSpawnerNew spawner : this.resourceSpawners) {
-      spawner.remove();
-    }
-  }
-
   public void reset() {
 //    // clear protections
 //    this.clearProtections();
 
     this.stopRunningTasks();
     this.resetRegion();
-    this.removeSpawners();
+    this.resourceSpawnerManager.remove();
   }
 
   public void resetRegion() {
@@ -297,10 +291,6 @@ public class GameContext {
     this.reset();
     this.state = new GameStateStopped(this);
     this.updateSigns();
-  }
-
-  public void addResourceSpawner(ResourceSpawnerNew rs) {
-    this.resourceSpawners.add(rs);
   }
 
   public void addTeam(TeamNew team) {
@@ -355,8 +345,9 @@ public class GameContext {
       return teamCheck;
     }
 
-    if (this.resourceSpawners.size() == 0) {
-      return GameCheckResult.NO_RES_SPAWNER_ERROR;
+    GameCheckResult resourceSpawnerCheck = this.resourceSpawnerManager.check();
+    if (resourceSpawnerCheck != GameCheckResult.OK) {
+      return resourceSpawnerCheck;
     }
 
     if (this.lobby == null) {
