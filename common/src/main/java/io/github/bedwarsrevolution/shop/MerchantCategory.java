@@ -213,7 +213,7 @@ public class MerchantCategory {
   }
 
   @SuppressWarnings("unchecked")
-  public ArrayList<ShopTrade> getFilteredOffers() {
+  public List<ShopTrade> getFilteredOffers() {
     ArrayList<ShopTrade> trades = (ArrayList<ShopTrade>) this.offers.clone();
     Iterator<ShopTrade> iterator = trades.iterator();
 
@@ -232,7 +232,7 @@ public class MerchantCategory {
     return this.name;
   }
 
-  public ArrayList<ShopTrade> getOffers() {
+  public List<ShopTrade> getOffers() {
     return this.offers;
   }
 

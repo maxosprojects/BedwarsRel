@@ -12,15 +12,20 @@ import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.holo.FloatingItem;
 import io.github.bedwarsrevolution.shop.MerchantCategory;
+import io.github.bedwarsrevolution.shop.ShopReward;
+import io.github.bedwarsrevolution.shop.ShopTrade;
+import io.github.bedwarsrevolution.shop.upgrades.UpgradeItem;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
@@ -34,6 +39,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
@@ -105,6 +111,7 @@ public class GameContext {
   private List<Map<String, Object>> defaultUpgrades;
   private Map<String, Cooldown> cooldowns = new HashMap<>();
   private List<FloatingItem> floatingItems = new ArrayList<>();
+  private Map<Material, ItemStack> shopItemsRegistry;
 
   public GameContext(String name) {
     this.name = name;
@@ -425,6 +432,22 @@ public class GameContext {
 
   public void loadItemShopCategories() {
     this.shopCategories = MerchantCategory.loadCategories(BedwarsRevol.getInstance().getShopConfig());
+    this.shopItemsRegistry = new HashMap<>();
+    String upgradeItemType = new UpgradeItem().getType();
+    for (MerchantCategory cat : this.shopCategories) {
+      for (ShopTrade trade : cat.getOffers()) {
+        ShopReward reward = trade.getReward();
+        if (!reward.isUpgrade()
+            || upgradeItemType.equals(reward.getUpgrade().getType())) {
+          ItemStack item = reward.getItem();
+          this.shopItemsRegistry.put(item.getType(), item);
+        }
+      }
+    }
+  }
+
+  public ItemStack getShopItem(Material type) {
+    return this.shopItemsRegistry.get(type);
   }
 
   public void addRunningTask(BukkitTask task) {
@@ -494,4 +517,5 @@ public class GameContext {
   public Cooldown getCooldown(String item) {
     return this.cooldowns.get(item);
   }
+
 }

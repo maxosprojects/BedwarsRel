@@ -46,6 +46,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
@@ -511,15 +512,27 @@ public class GameStateRunning extends GameState {
 //        brokenBlock.getWorld().dropItemNaturally(brokenBlock.getLocation(), enderChest);
 //      }
 
-    // Prevent drops of type that is not the broken block
     for (ItemStack drop : brokenBlock.getDrops()) {
+      // Prevent drops of type that is not the broken block
       if (drop.getType() != brokenBlock.getType()) {
-        brokenBlock.getDrops().remove(drop);
-        brokenBlock.setType(Material.AIR);
+        event.setDropItems(false);
         break;
       }
     }
     this.ctx.getRegion().removePlacedBlock(brokenBlock);
+  }
+
+  @Override
+  public void onEventEntityPickupItem(EntityPickupItemEvent event) {
+    if (!(event.getEntity() instanceof Player)) {
+      return;
+    }
+
+    ItemStack item = event.getItem().getItemStack();
+    ItemStack shopItem = this.ctx.getShopItem(item.getType());
+    if (shopItem != null) {
+      item.setItemMeta(shopItem.getItemMeta());
+    }
   }
 
   @Override

@@ -248,7 +248,7 @@ public class Shop {
     if (lores == null) {
       lores = new ArrayList<>();
     }
-
+    lores.add("");
     lores.add(ChatColor.WHITE + String.valueOf(item1.getAmount()) + " "
         + item1.getItemMeta().getDisplayName());
     if (item2 != null) {
