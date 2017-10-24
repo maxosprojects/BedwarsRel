@@ -23,6 +23,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
 @Getter
 @Setter
@@ -112,10 +113,10 @@ public class ResourceSpawnerNew implements ConfigurationSerializable {
   }
 
   public void dropItem(Location dropLocation, ItemStack itemStack) {
-    Item item = this.ctx.getRegion().getWorld().dropItemNaturally(dropLocation, itemStack);
+    Item item = this.ctx.getRegion().getWorld().dropItem(dropLocation, itemStack);
     item.setPickupDelay(0);
-    if (this.spread != 1.0) {
-      item.setVelocity(item.getVelocity().multiply(this.spread));
+    if (this.spread != -1) {
+      item.setVelocity(new Vector(this.spread, this.spread, this.spread));
     }
   }
 
@@ -205,7 +206,7 @@ public class ResourceSpawnerNew implements ConfigurationSerializable {
       String title = BedwarsRevol._l("ingame.resspawners.nextin",
           ImmutableMap.of(
               "resource", this.resources.get(0).getItemMeta().getDisplayName(),
-              "time", Long.toString((this.nextSpawn - current) / 1000)));
+              "time", Long.toString((long)Math.ceil((this.nextSpawn - current) / 1000.0D))));
       this.floatingItem.setText(0, title);
     }
   }
