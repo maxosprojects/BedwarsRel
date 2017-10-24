@@ -18,8 +18,8 @@ import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.shop.CraftItemStack;
+import io.github.bedwarsrevolution.utils.NmsUtils;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
     FEET,
     LEGS,
     CHEST,
-    HEAD;
+    HEAD
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
@@ -57,46 +57,36 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
     final Player player = event.getPlayer();
     ItemStack item = event.getItem();
     if (item.getType() == Material.POTION) {
-      try {
-        Class<?> hiderClass = BedwarsRevol.getInstance().getVersionRelatedClass("HideArmor");
-        final Method methodHide = hiderClass.getMethod(
-            "hide", int.class, Player.class, int.class);
-        final Method methodUnhide = hiderClass.getMethod(
-            "unhide", int.class, Player.class, Object.class, int.class);
-
-        PotionMeta meta = (PotionMeta) item.getItemMeta();
-        if (meta.hasCustomEffect(PotionEffectType.INVISIBILITY)) {
-          // Default 30 sec
-          int duration = 600;
-          for (PotionEffect effect : meta.getCustomEffects()) {
-            if (PotionEffectType.INVISIBILITY.equals(effect.getType())) {
-              duration = effect.getDuration();
-            }
+      PotionMeta meta = (PotionMeta) item.getItemMeta();
+      if (meta.hasCustomEffect(PotionEffectType.INVISIBILITY)) {
+        // Default 30 sec
+        int duration = 600;
+        for (PotionEffect effect : meta.getCustomEffects()) {
+          if (PotionEffectType.INVISIBILITY.equals(effect.getType())) {
+            duration = effect.getDuration();
           }
-          this.hideArmor(player, methodHide);
-          if (invisibilityTasks.containsKey(player)) {
-            invisibilityTasks.get(player).cancel();
-          }
-          invisibilityTasks.put(player, new BukkitRunnable() {
-            @Override
-            public void run() {
-              invisibilityTasks.remove(player);
-              try {
-                InvisibilityPotionListenerNew.this.unhideArmor(player, methodUnhide);
-              } catch (InvocationTargetException | IllegalAccessException e) {
-                e.printStackTrace();
-              }
-            }
-          }.runTaskLater(BedwarsRevol.getInstance(), duration));
         }
-        new BukkitRunnable() {
+        this.hideArmor(player);
+        if (invisibilityTasks.containsKey(player)) {
+          invisibilityTasks.get(player).cancel();
+        }
+        invisibilityTasks.put(player, new BukkitRunnable() {
+          @Override
           public void run() {
-            player.getInventory().remove(Material.GLASS_BOTTLE);
+            invisibilityTasks.remove(player);
+            try {
+              InvisibilityPotionListenerNew.this.unhideArmor(player);
+            } catch (InvocationTargetException | IllegalAccessException e) {
+              e.printStackTrace();
+            }
           }
-        }.runTaskLater(BedwarsRevol.getInstance(), 1L);
-      } catch (Exception ex) {
-        ex.printStackTrace();
+        }.runTaskLater(BedwarsRevol.getInstance(), duration));
       }
+      new BukkitRunnable() {
+        public void run() {
+          player.getInventory().remove(Material.GLASS_BOTTLE);
+        }
+      }.runTaskLater(BedwarsRevol.getInstance(), 1L);
     }
   }
 
@@ -127,8 +117,7 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
     return this;
   }
 
-  private void hideArmor(Player player, Method method)
-      throws InvocationTargetException, IllegalAccessException {
+  private void hideArmor(Player player) {
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
     if (ctx == null || ctx.getPlayerContext(player).getState().isSpectator()) {
       return;
@@ -141,7 +130,7 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
       if (otherPlayerCtx.getTeam() != playerTeam) {
         for (Parts part : Parts.values()) {
           Player otherPlayer = otherPlayerCtx.getPlayer();
-          method.invoke(null, entityId, otherPlayer, part.ordinal());
+          NmsUtils.hideArmor(entityId, otherPlayer, part.ordinal());
           this.tableLock.lock();
           playerInvisibleTo.put(entityId, otherPlayer);
           toInvisiblePlayer.put(otherPlayer, entityId);
@@ -151,7 +140,7 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
     }
   }
 
-  private void unhideArmor(Player player, Method method)
+  private void unhideArmor(Player player)
       throws InvocationTargetException, IllegalAccessException {
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
     if (ctx == null) {
@@ -173,10 +162,10 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
     this.tableLock.unlock();
     for (Player playerInOtherTeam : removed) {
       if (makeVisible) {
-        method.invoke(null, entityId, playerInOtherTeam, feet, FEET.ordinal());
-        method.invoke(null, entityId, playerInOtherTeam, legs, LEGS.ordinal());
-        method.invoke(null, entityId, playerInOtherTeam, chest, CHEST.ordinal());
-        method.invoke(null, entityId, playerInOtherTeam, head, HEAD.ordinal());
+        NmsUtils.unhideArmor(entityId, playerInOtherTeam, feet, FEET.ordinal());
+        NmsUtils.unhideArmor(entityId, playerInOtherTeam, legs, LEGS.ordinal());
+        NmsUtils.unhideArmor(entityId, playerInOtherTeam, chest, CHEST.ordinal());
+        NmsUtils.unhideArmor(entityId, playerInOtherTeam, head, HEAD.ordinal());
       }
     }
   }
