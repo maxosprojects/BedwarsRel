@@ -166,6 +166,17 @@ public class GameStateRunning extends GameState {
       event.setCancelled(true);
       return;
     }
+
+    // Prevent putting out native map fire
+    if (clickedBlock != null && event.getAction() == Action.LEFT_CLICK_BLOCK) {
+      Block actionBlock = clickedBlock.getRelative(event.getBlockFace());
+      if (actionBlock.getType() == Material.FIRE
+          && !ctx.getRegion().isPlacedBlock(actionBlock)) {
+        event.setCancelled(true);
+        return;
+      }
+    }
+
     if (event.getAction() != Action.RIGHT_CLICK_BLOCK
         && event.getAction() != Action.RIGHT_CLICK_AIR) {
       return;
@@ -599,6 +610,15 @@ public class GameStateRunning extends GameState {
         || replacedBlock.getType().equals(Material.STATIONARY_WATER)
         || replacedBlock.getType().equals(Material.LAVA)
         || replacedBlock.getType().equals(Material.STATIONARY_LAVA))) {
+      event.setCancelled(true);
+      event.setBuild(false);
+      return;
+    }
+
+    // Prevent replacing native map fire
+    if (replacedBlock != null
+        && replacedBlock.getType() == Material.FIRE
+        && !this.ctx.getRegion().isPlacedBlock(replacedBlock.getBlock())) {
       event.setCancelled(true);
       event.setBuild(false);
       return;
