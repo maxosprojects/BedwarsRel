@@ -374,10 +374,12 @@ public class GameStateRunning extends GameState {
 
   @Override
   public void onEventInventoryOpen(InventoryOpenEvent event) {
-    if (event.getInventory().getType() == InventoryType.ENCHANTING
-        || event.getInventory().getType() == InventoryType.BREWING
-        || (event.getInventory().getType() == InventoryType.CRAFTING
-        && !BedwarsRevol.getInstance().getBooleanConfig("allow-crafting", false))) {
+    InventoryType type = event.getInventory().getType();
+    if (type == InventoryType.ENCHANTING
+        || type == InventoryType.BREWING
+        || type == InventoryType.HOPPER
+        || (type == InventoryType.CRAFTING
+            && !BedwarsRevol.getInstance().getBooleanConfig("allow-crafting", false))) {
       event.setCancelled(true);
       return;
     } else if (event.getInventory().getType() == InventoryType.CRAFTING
