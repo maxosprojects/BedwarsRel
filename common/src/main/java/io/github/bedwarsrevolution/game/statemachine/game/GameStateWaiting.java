@@ -523,6 +523,7 @@ public class GameStateWaiting extends GameState {
 //      BedwarsRel.getInstance().getPlayerStatisticManager().unloadStatistic(p);
 //    }
 
+    playerCtx.deactivate();
     playerCtx.getState().leave(kicked);
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();

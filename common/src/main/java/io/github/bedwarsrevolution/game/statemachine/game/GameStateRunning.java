@@ -426,6 +426,7 @@ public class GameStateRunning extends GameState {
 
   @Override
   public void playerLeaves(PlayerContext playerCtx, boolean kicked) {
+    playerCtx.deactivate();
     playerCtx.getState().leave(kicked);
     playerCtx.restoreInventory();
     BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());

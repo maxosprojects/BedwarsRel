@@ -119,7 +119,7 @@ public class GameStateEnding extends GameState {
 
   @Override
   public void playerLeaves(PlayerContext playerCtx, boolean kicked) {
-//    playerCtx.getState().leave(kicked);
+    playerCtx.deactivate();
     playerCtx.restoreLocation();
     playerCtx.restoreInventory();
     BedwarsRevol.getInstance().getGameManager().removePlayer(playerCtx.getPlayer());

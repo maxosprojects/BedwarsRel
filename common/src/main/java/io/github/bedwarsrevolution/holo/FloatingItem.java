@@ -16,19 +16,22 @@ import org.bukkit.inventory.ItemStack;
 import com.google.common.collect.Lists;
 
 /**
- * <b>Idea from Hypixels Bedwars diamond and emerald generators</b>
- * @author Kristoffer
+ * Original author: Kristoffer
+ * Redesigned and implemented: maxos
  */
 public class FloatingItem {
+  // How often to update the list of players in radius
+  private static final long PLAYERS_LIST_UPDATE_INTERVAL = 1000;
+
   private Location location, origLocation;
   private ArmorStand helmetStand;
-  private boolean goingDown;
   private List<ArmorStand> textStands = new ArrayList<>();
+  private long lastPlayersInRadiusUpdate = 0;
+  private List<Player> players;
 
   public FloatingItem(Location location) {
     this.location = location.clone();
     this.origLocation = location.clone();
-    this.goingDown = true;
   }
 
   public void init(ItemStack itemStack, boolean small, String... text) {
@@ -41,34 +44,28 @@ public class FloatingItem {
     addText(text);
   }
 
-  public void update() {
-    if (this.helmetStand == null) {
-      return;
-    }
-    if (this.goingDown) {
-      this.location.setY(this.location.getY() + 0.01);
-      this.location.setYaw(this.location.getYaw() - 7.5F);
+  public void update(double dyFromOrigin, float yaw) {
+    long now = System.currentTimeMillis();
+    if (now > this.lastPlayersInRadiusUpdate + PLAYERS_LIST_UPDATE_INTERVAL) {
+      this.lastPlayersInRadiusUpdate = now;
+      this.players = new ArrayList<>();
+      for (Entity entity : this.helmetStand.getNearbyEntities(100, 100, 100)) {
+        if (entity instanceof Player) {
+          this.players.add((Player) entity);
+        }
+      }
+      this.move((this.origLocation.getY() + dyFromOrigin) - this.location.getY(), yaw);
+      teleport();
     } else {
-      this.location.setY(this.location.getY() - 0.01);
-      this.location.setYaw(this.location.getYaw() + 7.5F);
+      this.move((this.origLocation.getY() + dyFromOrigin) - this.location.getY(), yaw);
     }
-    if (this.location.getY() > (0.25 + this.origLocation.getY())) {
-      this.goingDown = true;
-    } else if (this.location.getY() < (-0.25 + this.origLocation.getY())) {
-      this.goingDown = false;
-    }
-    this.teleport();
   }
 
-  public void update(double dy, float yaw) {
-//    this.location.setY(this.origLocation.getY() + dy);
-//    this.location.setYaw(yaw);
-//    this.teleport();
-    for (Entity entity : this.helmetStand.getNearbyEntities(100, 100, 100)) {
-      if (!(entity instanceof Player)) {
+  private void move(double dy, float yaw) {
+    for (Player player : this.players) {
+      if (!player.isOnline()) {
         continue;
       }
-      Player player = (Player) entity;
       WrapperPlayServerRelEntityMoveLook packet = new WrapperPlayServerRelEntityMoveLook();
       packet.setEntityID(this.helmetStand.getEntityId());
       packet.setDx(0);
@@ -84,11 +81,10 @@ public class FloatingItem {
   }
 
   private void teleport() {
-    for (Entity entity : this.helmetStand.getNearbyEntities(100, 100, 100)) {
-      if (!(entity instanceof Player)) {
+    for (Player player : this.players) {
+      if (!player.isOnline()) {
         continue;
       }
-      Player player = (Player) entity;
       WrapperPlayServerEntityTeleport packet = new WrapperPlayServerEntityTeleport();
       packet.setEntityID(this.helmetStand.getEntityId());
       packet.setX(this.location.getX());

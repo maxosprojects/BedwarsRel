@@ -191,7 +191,7 @@ public class ResourceSpawnerNew implements ConfigurationSerializable {
     this.floatingItem.init(item, false, res.getItemMeta().getDisplayName());
   }
 
-  public void update(double dy, float yaw) {
+  public void update(double dyFromOrigin, float yaw) {
     long current = System.currentTimeMillis();
     if (current >= this.nextSpawn) {
       this.spawn();
@@ -200,7 +200,7 @@ public class ResourceSpawnerNew implements ConfigurationSerializable {
     if (this.floatingItem == null) {
       return;
     }
-    this.floatingItem.update(dy, yaw);
+    this.floatingItem.update(dyFromOrigin, yaw);
     if (this.lastTitleUpdate + 1000 < current) {
       this.lastTitleUpdate = current;
       String title = BedwarsRevol._l("ingame.resspawners.nextin",

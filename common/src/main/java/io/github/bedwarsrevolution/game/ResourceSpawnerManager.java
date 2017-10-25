@@ -83,7 +83,7 @@ public class ResourceSpawnerManager {
     }
     this.yCount += yCoef;
     this.yawCount += this.yawCoef;
-    double dy = this.yCount * this.yCount * yCoef / 2500.0D - yCoef * 0.25D;
+    double dyFromOrigin = this.yCount * this.yCount * yCoef / 2500.0D - yCoef * 0.25D;
     float yaw = this.yawCount * this.yawCount * yawCoef / 1.7361f;
     if (yawCoef == -1) {
       yaw += 719f;
@@ -91,7 +91,7 @@ public class ResourceSpawnerManager {
 //    float yaw = this.yawCount;
 //    System.out.println(yaw);
     for (ResourceSpawnerNew spawner : ResourceSpawnerManager.this.resourceSpawners) {
-      spawner.update(dy, yaw);
+      spawner.update(dyFromOrigin, yaw);
     }
   }
 

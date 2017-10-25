@@ -55,6 +55,8 @@ public class PlayerContext {
   @Setter
   private boolean oneStackPerShift = true;
   private Map<String, Long> itemsLastUsed = new HashMap<>();
+  @Getter
+  private boolean active = true;
 
   public PlayerContext(Player player, GameContext gameContext) {
     this.player = player;
@@ -237,5 +239,9 @@ public class PlayerContext {
 
   private boolean canBeUsed(Long lastUsed, int wait) {
     return lastUsed == null || lastUsed + wait < System.currentTimeMillis();
+  }
+
+  public void deactivate() {
+    this.active = false;
   }
 }
