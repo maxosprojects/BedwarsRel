@@ -2,6 +2,7 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.LobbyScoreboard;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerStateWaitingGame;
@@ -49,10 +50,13 @@ import org.bukkit.scoreboard.Scoreboard;
 public class GameStateWaiting extends GameState {
   private static final String TRANSLATION = "waiting";
 
+  private final LobbyScoreboard scoreboard;
   private GameLobbyCountdownNew lobbyCountdown;
 
   public GameStateWaiting(GameContext ctx) {
     super(ctx);
+    this.scoreboard = new LobbyScoreboard(this.ctx);
+    this.scoreboard.init();
   }
 
   @Override
@@ -339,7 +343,7 @@ public class GameStateWaiting extends GameState {
 
     playerCtx.setState(new PlayerStateWaitingGame(playerCtx));
 
-    this.updateScoreboard();
+    this.scoreboard.update();
     this.ctx.updateSigns();
 
     player.sendMessage(ChatWriterNew.pluginMessage(
@@ -540,7 +544,7 @@ public class GameStateWaiting extends GameState {
         this.lobbyCountdown = null;
       }
     }
-    this.updateScoreboard();
+    this.scoreboard.update();
 
     //    try {
 //      p.setScoreboard(BedwarsRel.getInstance().getScoreboardManager().getMainScoreboard());
@@ -653,52 +657,6 @@ public class GameStateWaiting extends GameState {
     } else {
       return super.getStatus();
     }
-  }
-
-  private void updateScoreboard() {
-    Scoreboard scoreboard = this.ctx.getScoreboard();
-    scoreboard.clearSlot(DisplaySlot.SIDEBAR);
-    Objective obj = scoreboard.getObjective("lobby");
-    if (obj != null) {
-      obj.unregister();
-    }
-    obj = scoreboard.registerNewObjective("lobby", "dummy");
-    obj.setDisplaySlot(DisplaySlot.SIDEBAR);
-    obj.setDisplayName(this.formatScoreboard(
-        BedwarsRevol.getInstance().getStringConfig("lobby-scoreboard.title", "&eBedWars Revolution")));
-
-    List<String> rows = BedwarsRevol.getInstance().getConfig()
-        .getStringList("lobby-scoreboard.content");
-    int rowMax = rows.size();
-    if (rows.isEmpty()) {
-      return;
-    }
-
-    for (String row : rows) {
-      if (row.trim().equals("")) {
-        for (int i = 0; i <= rowMax; i++) {
-          row = row + " ";
-        }
-      }
-
-      Score score = obj.getScore(this.formatScoreboard(row));
-      score.setScore(rowMax);
-      rowMax--;
-    }
-
-    for (PlayerContext playerCtx : this.ctx.getPlayers()) {
-      playerCtx.getPlayer().setScoreboard(scoreboard);
-    }
-  }
-
-  private String formatScoreboard(String str) {
-    String finalStr = str;
-    finalStr = finalStr.replace("$regionname$", this.ctx.getRegion().getName());
-    finalStr = finalStr.replace("$gamename$", this.ctx.getName());
-    finalStr = finalStr.replace("$players$", String.valueOf(this.ctx.getPlayers().size()));
-    finalStr = finalStr.replace("$maxplayers$", String.valueOf(this.ctx.getMaxPlayers()));
-    finalStr = ChatColor.translateAlternateColorCodes('&', finalStr);
-    return UtilsNew.truncate(finalStr, GameContext.MAX_OBJECTIVE_DISPLAY_LENGTH);
   }
 
 }

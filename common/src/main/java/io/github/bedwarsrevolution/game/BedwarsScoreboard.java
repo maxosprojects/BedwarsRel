@@ -22,7 +22,7 @@ public abstract class BedwarsScoreboard {
 
   protected final GameContext ctx;
   protected final Scoreboard scoreboard;
-  protected Objective display;
+  private Objective display;
   private List<String> lines = new ArrayList<>();
 
   public BedwarsScoreboard(GameContext ctx) {
@@ -64,7 +64,7 @@ public abstract class BedwarsScoreboard {
     }
   }
 
-  public void updateLine(int pos, String line) {
+  protected void updateLine(int pos, String line) {
     String fixedLine = this.fixLine(line);
     String existing = this.lines.get(pos);
     if (!fixedLine.equals(existing)) {

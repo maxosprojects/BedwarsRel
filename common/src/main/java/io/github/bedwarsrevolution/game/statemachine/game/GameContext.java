@@ -50,7 +50,7 @@ public class GameContext {
 
   @Getter
   @Setter
-  private GameState state = new GameStateWaiting(this);
+  private GameState state;
   @Setter
   private boolean autobalance = false;
   @Setter
@@ -85,7 +85,6 @@ public class GameContext {
 //  @Setter
 //  private String regionName;
   @Getter
-  @Setter
   private RegionNew region = null;
   @Getter
   private ResourceSpawnerManager resourceSpawnerManager = new ResourceSpawnerManager();
@@ -510,6 +509,11 @@ public class GameContext {
 
   public Cooldown getCooldown(String item) {
     return this.cooldowns.get(item);
+  }
+
+  public void setRegion(RegionNew region) {
+    this.region = region;
+    this.state = new GameStateWaiting(this);
   }
 
 }
