@@ -402,20 +402,6 @@ public class BedwarsRevol extends JavaPlugin {
     return false;
   }
 
-  /**
-   * Returns the max length of a game in seconds
-   *
-   * @return The length of the game in seconds
-   */
-  public int getMaxLength() {
-    if (this.getConfig().contains("gamelength") && this.getConfig().isInt("gamelength")) {
-      return this.getConfig().getInt("gamelength") * 60;
-    }
-
-    // fallback time is 60 minutes
-    return 60 * 60;
-  }
-
   public Package getMinecraftPackage() {
     try {
       if (this.minecraft == null) {

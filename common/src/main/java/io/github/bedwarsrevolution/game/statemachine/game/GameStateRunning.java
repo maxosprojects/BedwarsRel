@@ -2,13 +2,14 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.BedwarsScoreboard;
+import io.github.bedwarsrevolution.game.GameScoreboard;
+import io.github.bedwarsrevolution.game.GameStageManager;
 import io.github.bedwarsrevolution.game.RegionNew;
-import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerState;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerStatePlaying;
-import io.github.bedwarsrevolution.holo.FloatingItem;
 import io.github.bedwarsrevolution.shop.MerchantCategory;
 import io.github.bedwarsrevolution.shop.upgrades.Upgrade;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeBaseAlarm;
@@ -25,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -70,26 +70,19 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Bed;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.Vector;
 
 /**
  * Created by {maxos} 2017
  */
 public class GameStateRunning extends GameState {
-
   private static final String TRANSLATION = "running";
 
-  private int timeLeft;
-  private int length;
+  private GameStageManager gameStageManager;
+  private BedwarsScoreboard scoreboard;
 
   public GameStateRunning(GameContext ctx) {
     super(ctx);
-    this.timeLeft = BedwarsRevol.getInstance().getMaxLength();
-    this.length = BedwarsRevol.getInstance().getMaxLength();
   }
 
   @Override
@@ -104,6 +97,7 @@ public class GameStateRunning extends GameState {
   public void onEventEntityDamageToPlayer(EntityDamageEvent event, Player damager) {
     PlayerContext playerCtx = this.ctx.getPlayerContext((Player) event.getEntity());
     if (playerCtx.getState().onDamageToPlayer(event, damager)) {
+      this.scoreboard.update();
       this.checkGameOver();
     }
   }
@@ -112,6 +106,7 @@ public class GameStateRunning extends GameState {
   public void onEventEntityDamageByPlayer(EntityDamageEvent event, Player damager) {
     PlayerContext playerCtx = this.ctx.getPlayerContext(damager);
     if (playerCtx.getState().onDamageByPlayer(event)) {
+      this.scoreboard.update();
       this.checkGameOver();
     }
   }
@@ -435,6 +430,7 @@ public class GameStateRunning extends GameState {
     playerCtx.getTeam().removePlayer(playerCtx);
     playerCtx.getPlayer().setScoreboard(
         BedwarsRevol.getInstance().getScoreboardManager().getNewScoreboard());
+    this.scoreboard.update();
     this.checkGameOver();
     this.ctx.updateSigns();
   }
@@ -904,73 +900,9 @@ public class GameStateRunning extends GameState {
     this.ctx.broadcastSound(Sound.valueOf(BedwarsRevol.getInstance()
             .getStringConfig("bed-sound", "ENDERDRAGON_GROWL").toUpperCase()),
         30.0F, 10.0F);
-    this.updateScoreboard();
+    this.scoreboard.update();
     this.checkGameOver();
     return true;
-  }
-
-  private void updateScoreboard() {
-    Scoreboard scoreboard = this.ctx.getScoreboard();
-    Objective objectiveDisplay = scoreboard.getObjective("display");
-    if (objectiveDisplay == null) {
-      objectiveDisplay = scoreboard.registerNewObjective("display", "dummy");
-    }
-    objectiveDisplay.setDisplaySlot(DisplaySlot.SIDEBAR);
-    objectiveDisplay.setDisplayName(this.formatScoreboardTitle());
-    for (TeamNew team : this.ctx.getTeams().values()) {
-      scoreboard.resetScores(this.formatScoreboardTeam(team, false));
-      scoreboard.resetScores(this.formatScoreboardTeam(team, true));
-      Score score = objectiveDisplay.getScore(this.formatScoreboardTeam(team, team.isBedDestroyed()));
-      score.setScore(team.getPlayers().size());
-    }
-
-    Objective objectiveHealth = scoreboard.getObjective("health");
-    if (objectiveHealth == null) {
-      objectiveHealth = scoreboard.registerNewObjective("health", "health");
-    }
-    objectiveHealth.setDisplaySlot(DisplaySlot.BELOW_NAME);
-    objectiveHealth.setDisplayName(ChatColor.RED + "❤");
-
-    for (PlayerContext playerCtx : this.ctx.getPlayers()) {
-      playerCtx.getPlayer().setScoreboard(scoreboard);
-    }
-    // Bug SPIGOT-1725: need to force update to show actual health instead of 0
-    for (PlayerContext playerCtx : this.ctx.getPlayers()) {
-      Player player = playerCtx.getPlayer();
-      if (player.getHealth() > 10) {
-        player.setHealth(player.getHealth() - 0.01);
-      } else {
-        player.setHealth(player.getHealth() + 0.01);
-      }
-    }
-  }
-
-  private String formatScoreboardTitle() {
-    String format = BedwarsRevol.getInstance()
-        .getStringConfig("scoreboard.format-title", "&e$region$&f - $time$");
-    format = format.replace("$region$", this.ctx.getRegion().getName());
-    format = format.replace("$game$", this.ctx.getName());
-    format = format.replace("$time$", UtilsNew.getFormattedTime(this.timeLeft));
-
-    format = ChatColor.translateAlternateColorCodes('&', format);
-    return UtilsNew.truncate(format, GameContext.MAX_OBJECTIVE_DISPLAY_LENGTH);
-  }
-
-  private String formatScoreboardTeam(TeamNew team, boolean bedDestroyed) {
-    String format;
-    if (bedDestroyed) {
-      format = BedwarsRevol.getInstance().getStringConfig("scoreboard.format-bed-destroyed",
-          "&c$status$ $team$");
-    } else {
-      format = BedwarsRevol.getInstance().getStringConfig(
-          "scoreboard.format-bed-alive", "&a$status$ $team$");
-    }
-    format = format.replace("$status$", (bedDestroyed) ?
-        GameContext.BED_DESTROYED : GameContext.BED_EXISTS);
-    format = format.replace("$team$", team.getChatColor() + team.getName());
-
-    format = ChatColor.translateAlternateColorCodes('&', format);
-    return UtilsNew.truncate(format, GameContext.MAX_SCORE_LENGTH);
   }
 
   private void dropTargetBlock(Block targetBlock) {
@@ -1022,7 +954,7 @@ public class GameStateRunning extends GameState {
     // If only one team is left then we got the winner
     if (notLostTeams.size() == 1) {
       this.runGameOver(notLostTeams.iterator().next(), false);
-    } else if (this.timeLeft <= 0) {
+    } else if (this.gameStageManager.isFinished()) {
       this.runGameOver(null, false);
     }
   }
@@ -1071,7 +1003,7 @@ public class GameStateRunning extends GameState {
           title = TitleWriterNew.pluginMessage(
               BedwarsRevol._l(aPlayer, "ingame.title.draw-title"));
         } else {
-          int playTime = this.length - this.timeLeft;
+          int playTime = this.gameStageManager.getPlaytime();
           String formattedTime = UtilsNew.getFormattedTime(playTime);
           if (aPlayerCtx.getTeam() == winner) {
             title = TitleWriterNew.pluginMessage(
@@ -1159,14 +1091,13 @@ public class GameStateRunning extends GameState {
 //      this.displayRecord();
 //    }
 
-    this.startTimerCountdown();
+    this.initStage();
 
 //    if (BedwarsRevol.getInstance().getBooleanConfig("titles.map.enabled", false)) {
 //      this.displayMapInfo();
 //    }
 
     this.ctx.updateSigns();
-    this.updateScoreboard();
 
 //    if (BedwarsRel.getInstance().getBooleanConfig("global-messages", true)) {
 //      for (Player aPlayer : BedwarsRel.getInstance().getServer().getOnlinePlayers()) {
@@ -1185,37 +1116,24 @@ public class GameStateRunning extends GameState {
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(startedEvent);
   }
 
-  private void startTimerCountdown() {
-    this.timeLeft = BedwarsRevol.getInstance().getMaxLength();
-    this.length = BedwarsRevol.getInstance().getMaxLength();
+  private void initStage() {
+    this.gameStageManager = new GameStageManager(this.ctx);
+    this.scoreboard = new GameScoreboard(this.ctx, this.gameStageManager);
+    this.scoreboard.init();
     BukkitRunnable task = new BukkitRunnable() {
 
       @Override
       public void run() {
-        GameStateRunning.this.updateScoreboardTimer();
-        if (GameStateRunning.this.timeLeft == 0) {
-//          GameStateRunning.this.isOver = true;
-          GameStateRunning.this.checkGameOver();
+        GameStageManager manager = GameStateRunning.this.gameStageManager;
+        manager.tick();
+        if (manager.isFinished()) {
           this.cancel();
+          GameStateRunning.this.checkGameOver();
         }
-        GameStateRunning.this.timeLeft--;
+        GameStateRunning.this.scoreboard.update();
       }
     };
     this.ctx.addRunningTask(task.runTaskTimer(BedwarsRevol.getInstance(), 0L, 20L));
-  }
-
-  private void updateScoreboardTimer() {
-    Scoreboard scoreboard = this.ctx.getScoreboard();
-    Objective obj = scoreboard.getObjective("display");
-    if (obj == null) {
-      obj = scoreboard.registerNewObjective("display", "dummy");
-    }
-
-    obj.setDisplayName(this.formatScoreboardTitle());
-
-    for (PlayerContext playerCtx : this.ctx.getPlayers()) {
-      playerCtx.getPlayer().setScoreboard(scoreboard);
-    }
   }
 
   private void teleportPlayersToTeamSpawn() {

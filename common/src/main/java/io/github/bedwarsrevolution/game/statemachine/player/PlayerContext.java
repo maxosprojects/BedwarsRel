@@ -49,13 +49,14 @@ public class PlayerContext {
   private boolean teleporting;
   @Getter
   @Setter
-  private boolean virtuallyAlive = true;
+  private boolean virtuallyDead = false;
   private Map<Class<? extends Upgrade>, List<Upgrade>> upgrades = new HashMap<>();
   @Getter
   @Setter
   private boolean oneStackPerShift = true;
   private Map<String, Long> itemsLastUsed = new HashMap<>();
   @Getter
+  // Whether player is still in a game
   private boolean active = true;
 
   public PlayerContext(Player player, GameContext gameContext) {

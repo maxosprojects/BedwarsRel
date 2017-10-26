@@ -82,7 +82,7 @@ public abstract class PlayerState {
     this.playerCtx.clear(false);
     this.playerCtx.respawn();
 
-    this.playerCtx.setVirtuallyAlive(false);
+    this.playerCtx.setVirtuallyDead(true);
 
 //    if (this.getState() == GameStateOld.RUNNING && this.isStopping()) {
 //      String title = ChatColor.translateAlternateColorCodes('&',

@@ -172,6 +172,11 @@ public final class UtilsNew {
     return loc.add(loc.getDirection().setY(0).normalize().multiply(blockOffset));
   }
 
+  /**
+   * From seconds
+   * @param time
+   * @return
+   */
   public static String getFormattedTime(int time) {
     int min = time / 60;
     int sec = time % 60;

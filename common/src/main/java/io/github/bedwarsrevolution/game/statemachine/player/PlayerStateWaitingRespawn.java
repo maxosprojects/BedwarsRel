@@ -74,7 +74,7 @@ public class PlayerStateWaitingRespawn extends PlayerState {
   }
 
   public void runWaitingRespawn(boolean withCountdown) {
-    if (!this.playerCtx.isVirtuallyAlive()) {
+    if (this.playerCtx.isVirtuallyDead()) {
       return;
     }
 
@@ -120,7 +120,7 @@ public class PlayerStateWaitingRespawn extends PlayerState {
     PlayerState newState = new PlayerStatePlaying(this.playerCtx);
     this.playerCtx.setState(newState);
     newState.setGameMode();
-    this.playerCtx.setVirtuallyAlive(true);
+    this.playerCtx.setVirtuallyDead(false);
   }
 
 }

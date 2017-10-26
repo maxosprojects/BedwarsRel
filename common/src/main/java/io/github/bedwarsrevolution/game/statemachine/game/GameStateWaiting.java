@@ -665,7 +665,7 @@ public class GameStateWaiting extends GameState {
     obj = scoreboard.registerNewObjective("lobby", "dummy");
     obj.setDisplaySlot(DisplaySlot.SIDEBAR);
     obj.setDisplayName(this.formatScoreboard(
-        BedwarsRevol.getInstance().getStringConfig("lobby-scoreboard.title", "&eBEDWARS")));
+        BedwarsRevol.getInstance().getStringConfig("lobby-scoreboard.title", "&eBedWars Revolution")));
 
     List<String> rows = BedwarsRevol.getInstance().getConfig()
         .getStringList("lobby-scoreboard.content");

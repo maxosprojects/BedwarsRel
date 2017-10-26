@@ -7,6 +7,7 @@ import io.github.bedwarsrevolution.shop.upgrades.Upgrade;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeBaseAlarm;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -266,7 +267,17 @@ public class TeamNew implements ConfigurationSerializable {
   }
 
   public List<PlayerContext> getPlayers() {
-    return new ArrayList<>(this.players);
+    return Collections.unmodifiableList(this.players);
+  }
+
+  public int getFunctionalPlayers() {
+    int count = 0;
+    for (PlayerContext playerCtx : this.players) {
+      if (playerCtx.isActive() && !playerCtx.getState().isSpectator()) {
+        count++;
+      }
+    }
+    return count;
   }
 
   public Long getItemLastUsed(String itemName) {

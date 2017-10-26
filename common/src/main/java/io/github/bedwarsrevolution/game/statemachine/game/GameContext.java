@@ -21,11 +21,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
@@ -48,11 +46,7 @@ import org.bukkit.scoreboard.Scoreboard;
  * Created by {maxos} 2017
  */
 public class GameContext {
-
   public static final int MAX_OBJECTIVE_DISPLAY_LENGTH = 32;
-  public static final int MAX_SCORE_LENGTH = 40;
-  public static final String BED_EXISTS = "\u2714";
-  public static final String BED_DESTROYED= "\u2718";
 
   @Getter
   @Setter
@@ -86,10 +80,10 @@ public class GameContext {
   @Getter
   private List<MerchantCategory> shopCategories = null;
   private Map<Player, PlayerContext> playerContexts = new HashMap<>();
-  private int record = 0;
-  private List<String> recordHolders = new ArrayList<>();
-  @Setter
-  private String regionName;
+//  private int record = 0;
+//  private List<String> recordHolders = new ArrayList<>();
+//  @Setter
+//  private String regionName;
   @Getter
   @Setter
   private RegionNew region = null;
@@ -116,7 +110,7 @@ public class GameContext {
   public GameContext(String name) {
     this.name = name;
     this.scoreboard = BedwarsRevol.getInstance().getScoreboardManager().getNewScoreboard();
-    this.record = BedwarsRevol.getInstance().getMaxLength();
+//    this.record = BedwarsRevol.getInstance().getMaxLength();
     this.autobalance = BedwarsRevol.getInstance().getBooleanConfig("global-autobalance", false);
 
     if (BedwarsRevol.getInstance().isBungee()) {

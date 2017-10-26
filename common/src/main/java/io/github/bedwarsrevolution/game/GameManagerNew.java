@@ -230,7 +230,7 @@ public class GameManagerNew {
         ctx.setTime(cfg.getInt("time"));
       }
 
-      ctx.setRegionName(regionName);
+//      ctx.setRegionName(regionName);
       ctx.setRegion(new RegionNew(loc1, loc2, regionName));
 
       if (cfg.contains("autobalance")) {

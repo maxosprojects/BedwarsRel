@@ -97,11 +97,10 @@ public class ResourceSpawnerManager {
 
   public void restart(Map<String, Integer> intervals, TeamNew team) {
     for (ResourceSpawnerNew spawner : this.resourceSpawners) {
-      if (team.getName().equals(spawner.getTeam())) {
-        Integer interval = intervals.get(spawner.getName());
-        if (interval != null) {
+      Integer interval = intervals.get(spawner.getName());
+      if (interval != null
+          && (team == null || team.getName().equals(spawner.getTeam()))) {
           spawner.restart(interval);
-        }
       }
     }
   }
