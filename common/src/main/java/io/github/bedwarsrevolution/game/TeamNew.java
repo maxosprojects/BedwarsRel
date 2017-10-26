@@ -57,9 +57,9 @@ public class TeamNew implements ConfigurationSerializable {
     if (deserialize.containsKey("bedhead")) {
       this.setTargetHeadBlock(UtilsNew.locationDeserialize(deserialize.get("bedhead")));
 
-      if (this.getTargetHeadBlock() != null && deserialize.containsKey("bedfeed")
+      if (this.getTargetHeadBlock() != null && deserialize.containsKey("bedfeet")
           && this.getTargetHeadBlock().getBlock().getType().equals(Material.BED_BLOCK)) {
-        this.setTargetFeetBlock(UtilsNew.locationDeserialize(deserialize.get("bedfeed")));
+        this.setTargetFeetBlock(UtilsNew.locationDeserialize(deserialize.get("bedfeet")));
       }
     }
   }
@@ -226,7 +226,7 @@ public class TeamNew implements ConfigurationSerializable {
     team.put("chestloc", UtilsNew.locationSerialize(this.chestLoc));
 
     if (this.targetFeetBlock != null) {
-      team.put("bedfeed", UtilsNew.locationSerialize(this.targetFeetBlock));
+      team.put("bedfeet", UtilsNew.locationSerialize(this.targetFeetBlock));
     }
 
     return team;

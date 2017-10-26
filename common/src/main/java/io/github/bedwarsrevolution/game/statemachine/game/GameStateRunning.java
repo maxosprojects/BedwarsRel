@@ -38,6 +38,7 @@ import org.bukkit.entity.Fireball;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
@@ -59,6 +60,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
@@ -537,8 +539,25 @@ public class GameStateRunning extends GameState {
     if (!(event.getEntity() instanceof Player)) {
       return;
     }
-
     ItemStack item = event.getItem().getItemStack();
+    if (item.getType() == Material.BED) {
+      event.setCancelled(true);
+      return;
+    }
+    this.onPlayerPickupItem(item);
+  }
+
+  @Override
+  public void onEventPlayerPickupItem(PlayerPickupItemEvent event) {
+    ItemStack item = event.getItem().getItemStack();
+    if (item.getType() == Material.BED) {
+      event.setCancelled(true);
+      return;
+    }
+    this.onPlayerPickupItem(item);
+  }
+
+  private void onPlayerPickupItem(ItemStack item) {
     ItemStack shopItem = this.ctx.getShopItem(item.getType());
     if (shopItem != null) {
       item.setItemMeta(shopItem.getItemMeta());
@@ -906,27 +925,29 @@ public class GameStateRunning extends GameState {
   }
 
   private void dropTargetBlock(Block targetBlock) {
-    if (targetBlock.getType().equals(Material.BED_BLOCK)) {
+//    if (targetBlock.getType() == Material.BED_BLOCK) {
       Block bedHead;
       Block bedFeet;
       Bed bedBlock = (Bed) targetBlock.getState().getData();
 
-      if (!bedBlock.isHeadOfBed()) {
-        bedFeet = targetBlock;
-        bedHead = UtilsNew.getBedNeighbor(bedFeet);
-      } else {
+      if (bedBlock.isHeadOfBed()) {
         bedHead = targetBlock;
         bedFeet = UtilsNew.getBedNeighbor(bedHead);
+      } else {
+        bedFeet = targetBlock;
+        bedHead = UtilsNew.getBedNeighbor(bedFeet);
       }
 
-      if (!BedwarsRevol.getInstance().getCurrentVersion().startsWith("v1_12")) {
-        bedFeet.setType(Material.AIR);
+      if (BedwarsRevol.getInstance().getCurrentVersion().startsWith("v1_12")) {
+//        bedHead.setType(Material.AIR);
+        bedHead.breakNaturally();
       } else {
-        bedHead.setType(Material.AIR);
+//        bedFeet.setType(Material.AIR);
+        bedFeet.breakNaturally();
       }
-    } else {
-      targetBlock.setType(Material.AIR);
-    }
+//    } else {
+//      targetBlock.setType(Material.AIR);
+//    }
   }
 
   private void checkGameOver() {

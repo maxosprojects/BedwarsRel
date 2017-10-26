@@ -289,26 +289,26 @@ public class RegionNew {
       if ((targetMaterial.equals(Material.BED_BLOCK) || targetMaterial.equals(Material.BED))
           && team.getFeetTarget() != null) {
         Block blockHead = this.world.getBlockAt(team.getHeadTarget().getLocation());
-        Block blockFeed = this.world.getBlockAt(team.getFeetTarget().getLocation());
+        Block blockFeet = this.world.getBlockAt(team.getFeetTarget().getLocation());
         BlockState headState = blockHead.getState();
-        BlockState feedState = blockFeed.getState();
+        BlockState feetState = blockFeet.getState();
 
         headState.setType(Material.BED_BLOCK);
-        feedState.setType(Material.BED_BLOCK);
+        feetState.setType(Material.BED_BLOCK);
         headState.setRawData((byte) 0x0);
-        feedState.setRawData((byte) 0x8);
-        feedState.update(true, false);
+        feetState.setRawData((byte) 0x8);
+        feetState.update(true, false);
         headState.update(true, false);
 
         Bed bedHead = (Bed) headState.getData();
         bedHead.setHeadOfBed(true);
-        bedHead.setFacingDirection(blockHead.getFace(blockFeed).getOppositeFace());
+        bedHead.setFacingDirection(blockHead.getFace(blockFeet).getOppositeFace());
 
-        Bed bedFeed = (Bed) feedState.getData();
-        bedFeed.setHeadOfBed(false);
-        bedFeed.setFacingDirection(blockFeed.getFace(blockHead));
+        Bed bedFeet = (Bed) feetState.getData();
+        bedFeet.setHeadOfBed(false);
+        bedFeet.setFacingDirection(blockFeet.getFace(blockHead));
 
-        feedState.update(true, false);
+        feetState.update(true, false);
         headState.update(true, true);
       } else {
         Block blockHead = this.world.getBlockAt(team.getHeadTarget().getLocation());
