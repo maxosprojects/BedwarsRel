@@ -17,9 +17,9 @@ import io.github.bedwarsrevolution.shop.upgrades.UpgradeItem;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeRegistry;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeScope;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.NmsUtils;
 import io.github.bedwarsrevolution.utils.TitleWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,9 +36,9 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
-import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
@@ -248,24 +248,46 @@ public class GameStateRunning extends GameState {
       }
     }
 
-    if (event.getItem() != null && event.getItem().getType() == Material.FIREBALL) {
-      event.setCancelled(true);
-      if (!playerCtx.useItem(Material.FIREBALL.name())) {
-        return;
+    if (event.getItem() != null) {
+      switch (event.getItem().getType()) {
+        case FIREBALL:
+          event.setCancelled(true);
+          if (!playerCtx.useItem(Material.FIREBALL.name())) {
+            return;
+          }
+          this.launchFireball(player);
+          break;
+        case MONSTER_EGG:
+          if (event.getAction() != Action.RIGHT_CLICK_BLOCK
+              || event.getBlockFace() != BlockFace.UP) {
+            return;
+          }
+          event.setCancelled(true);
+          this.spawnGolem(playerCtx, event.getClickedBlock());
+          break;
       }
-      // Take one fireball from the player
-      Inventory inv = player.getInventory();
-      int slot = inv.first(Material.FIREBALL);
-      ItemStack stack = inv.getItem(slot);
-      stack.setAmount(stack.getAmount() - 1);
-      // Launch fireball
-      Vector vec = player.getLocation().getDirection();
-      Fireball ball = player.launchProjectile(Fireball.class);
-      // Setting incendiary to false disables explosion damage oO
+    }
+  }
+
+  private void spawnGolem(PlayerContext playerCtx, Block block) {
+    Location loc = block.getLocation().clone().add(0, 1, 0);
+    IronGolem golem = (IronGolem) block.getWorld().spawnEntity(loc, EntityType.IRON_GOLEM);
+    playerCtx.getTeam().addGolem(golem);
+  }
+
+  private void launchFireball(Player player) {
+    // Take one fireball from the player
+    Inventory inv = player.getInventory();
+    int slot = inv.first(Material.FIREBALL);
+    ItemStack stack = inv.getItem(slot);
+    stack.setAmount(stack.getAmount() - 1);
+    // Launch fireball
+    Vector vec = player.getLocation().getDirection();
+    Fireball ball = player.launchProjectile(Fireball.class);
+    // Setting incendiary to false disables explosion damage oO
 //      ball.setIsIncendiary(false);
 //      ball.setYield(2);
-      ball.setVelocity(vec);
-    }
+    ball.setVelocity(vec);
   }
 
   @Override
@@ -658,27 +680,22 @@ public class GameStateRunning extends GameState {
     Block block = event.getBlock();
     if (block.getType() == Material.TNT) {
       event.setCancelled(true);
-      Location loc = block.getLocation().add(0.5D, 0.0D, 0.5D);
-      TNTPrimed tnt = (TNTPrimed) block.getWorld().spawnEntity(loc, EntityType.PRIMED_TNT);
-      try {
-        Class<?> tntSourceClass = BedwarsRevol.getInstance().getVersionRelatedClass("TntSource");
-        final Method methodSetSource = tntSourceClass.getMethod(
-            "setSource", Player.class, TNTPrimed.class);
-        methodSetSource.invoke(null, player, tnt);
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-      new BukkitRunnable() {
-        public void run() {
-//          player.getInventory().removeItem(new ItemStack[]{new ItemStack(Material.TNT, 1)});
-//          player.updateInventory();
-          PlayerInventory inv = player.getInventory();
-          int slot = inv.getHeldItemSlot();
-          ItemStack stack = inv.getItem(slot);
-          stack.setAmount(stack.getAmount() - 1);
-        }
-      }.runTaskLater(BedwarsRevol.getInstance(), 1L);
+      this.spawnTnt(player, block);
     }
+  }
+
+  private void spawnTnt(final Player player, Block block) {
+    Location loc = block.getLocation().clone().add(0.5D, 0.0D, 0.5D);
+    TNTPrimed tnt = (TNTPrimed) block.getWorld().spawnEntity(loc, EntityType.PRIMED_TNT);
+    NmsUtils.setTntSource(player, tnt);
+    new BukkitRunnable() {
+      public void run() {
+        PlayerInventory inv = player.getInventory();
+        int slot = inv.getHeldItemSlot();
+        ItemStack stack = inv.getItem(slot);
+        stack.setAmount(stack.getAmount() - 1);
+      }
+    }.runTaskLater(BedwarsRevol.getInstance(), 1L);
   }
 
   @Override
@@ -1135,6 +1152,16 @@ public class GameStateRunning extends GameState {
 
 //    BedwarsGameStartedEvent startedEvent = new BedwarsGameStartedEvent(this);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(startedEvent);
+
+    // Golems check once a second for enemy targets to attack nearby
+    this.ctx.addRunningTask(new BukkitRunnable() {
+      @Override
+      public void run() {
+        for (TeamNew team : GameStateRunning.this.ctx.getTeams().values()) {
+          team.checkGolems();
+        }
+      }
+    }.runTaskTimer(BedwarsRevol.getInstance(), 0, 20));
   }
 
   private void initStage() {

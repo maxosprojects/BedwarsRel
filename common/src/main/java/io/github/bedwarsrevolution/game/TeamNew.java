@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import lombok.Data;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,6 +20,8 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -26,6 +29,7 @@ import org.bukkit.inventory.Inventory;
 @Data
 @SerializableAs("Team")
 public class TeamNew implements ConfigurationSerializable {
+
   private List<Block> chests = null;
   private TeamColorNew color = null;
   private Inventory inventory = null;
@@ -42,6 +46,7 @@ public class TeamNew implements ConfigurationSerializable {
   private GameContext gameCtx;
   private List<PlayerContext> players = new ArrayList<>();
   private Map<String, Long> itemsLastUsed = new HashMap<>();
+  private List<IronGolem> golems = new CopyOnWriteArrayList<>();
 
   public TeamNew(Map<String, Object> deserialize) {
     this.reset();
@@ -71,7 +76,6 @@ public class TeamNew implements ConfigurationSerializable {
     this.setColor(color);
     this.setMaxPlayers(maxPlayers);
     this.setScoreboardTeam(scoreboardTeam);
-    this.setChests(new ArrayList<Block>());
   }
 
   public void reset() {
@@ -80,6 +84,7 @@ public class TeamNew implements ConfigurationSerializable {
     this.setInventory(inventory);
     this.chests = new ArrayList<>();
     this.upgrades = new HashMap<>();
+    this.golems = new CopyOnWriteArrayList<>();
   }
 
   public void addChest(Block chestBlock) {
@@ -286,5 +291,37 @@ public class TeamNew implements ConfigurationSerializable {
 
   public void setItemUsed(String itemName) {
     this.itemsLastUsed.put(itemName, System.currentTimeMillis());
+  }
+
+  public void addGolem(IronGolem golem) {
+    this.golems.add(golem);
+  }
+
+  /**
+   * Checks whether there are any enemy players near one of the team's golems
+   */
+  public void checkGolems() {
+    double distSquared = 7 * 7;
+      for (IronGolem golem : this.golems) {
+        Location golemLoc = golem.getLocation();
+        for (TeamNew enemyTeam : this.gameCtx.getTeams().values()) {
+          if (enemyTeam == this) {
+            continue;
+          }
+          for (PlayerContext enemyPlayerCtx : enemyTeam.getPlayers()) {
+            Player enemy = enemyPlayerCtx.getPlayer();
+            if (golemLoc.distanceSquared(enemy.getLocation()) > distSquared) {
+              continue;
+            }
+            golem.setPlayerCreated(false);
+            golem.damage(0, enemy);
+            golem.setTarget(enemy);
+          }
+        }
+      }
+  }
+
+  public boolean ownsGolem(IronGolem golem) {
+    return this.golems.contains(golem);
   }
 }

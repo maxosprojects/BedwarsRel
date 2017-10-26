@@ -18,7 +18,9 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -330,7 +332,14 @@ public class PlayerStatePlaying extends PlayerState {
 
   @Override
   public boolean onDamageByPlayer(EntityDamageEvent event) {
-    event.setCancelled(true);
+    if (event.getEntityType() == EntityType.IRON_GOLEM) {
+      IronGolem golem = (IronGolem) event.getEntity();
+      if (this.playerCtx.getTeam().ownsGolem(golem)) {
+        event.setCancelled(true);
+      }
+    } else {
+      event.setCancelled(true);
+    }
     return false;
   }
 

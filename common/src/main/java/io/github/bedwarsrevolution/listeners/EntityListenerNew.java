@@ -19,6 +19,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
@@ -214,5 +215,12 @@ public class EntityListenerNew extends BaseListenerNew {
       return;
     }
     ctx.getState().onEventRegainHealth(event);
+  }
+
+  @EventHandler
+  public void onDeath(EntityDeathEvent event) {
+    if (event.getEntityType() == EntityType.IRON_GOLEM) {
+      event.getDrops().clear();
+    }
   }
 }
