@@ -37,7 +37,7 @@ public class RegionNew {
   private String name = null;
   private List<Block> placedBlocks = null;
   private List<Block> placedUnbreakableBlocks = null;
-  private List<Entity> removingEntities = null;
+//  private List<Entity> removingEntities = null;
   private World world = null;
 
   public RegionNew(Location pos1, Location pos2, String name) {
@@ -59,7 +59,7 @@ public class RegionNew {
     this.placedUnbreakableBlocks = new ArrayList<>();
     this.brokenBlockPower = new HashMap<>();
     this.inventories = new ArrayList<>();
-    this.removingEntities = new ArrayList<>();
+//    this.removingEntities = new ArrayList<>();
 
     this.name = name;
   }
@@ -123,9 +123,9 @@ public class RegionNew {
     }
   }
 
-  public void addRemovingEntity(Entity removing) {
-    this.removingEntities.add(removing);
-  }
+//  public void addRemovingEntity(Entity removing) {
+//    this.removingEntities.add(removing);
+//  }
 
   public boolean check() {
     return (this.minCorner != null && this.maxCorner != null && this.world != null);
@@ -212,11 +212,10 @@ public class RegionNew {
     this.placedUnbreakableBlocks.remove(block);
   }
 
-  public void removeRemovingEntity(Entity removing) {
-    this.removingEntities.remove(removing);
-  }
+//  public void removeRemovingEntity(Entity removing) {
+//    this.removingEntities.remove(removing);
+//  }
 
-  @SuppressWarnings("deprecation")
   public void reset(GameContext ctx) {
     this.loadChunks();
 
@@ -321,17 +320,17 @@ public class RegionNew {
 
     ctx.getResourceSpawnerManager().loadChunks();
 
-    for (Entity entity : this.removingEntities) {
-      entity.remove();
-    }
+//    for (Entity entity : this.removingEntities) {
+//      entity.remove();
+//    }
 
     Iterator<Entity> entityIterator = this.world.getEntities().iterator();
     while (entityIterator.hasNext()) {
       Entity e = entityIterator.next();
 
-      if (this.removingEntities.contains(e)) {
-        continue;
-      }
+//      if (this.removingEntities.contains(e)) {
+//        continue;
+//      }
 
       if (!this.isInRegion(e.getLocation())) {
         continue;
@@ -350,7 +349,8 @@ public class RegionNew {
           || eType == EntityType.SKELETON
           || eType == EntityType.SILVERFISH
           || eType == EntityType.ARROW
-          || eType == EntityType.ARMOR_STAND) {
+          || eType == EntityType.ARMOR_STAND
+          || eType == EntityType.IRON_GOLEM) {
         e.remove();
         continue;
       }
@@ -361,7 +361,7 @@ public class RegionNew {
       }
     }
 
-    this.removingEntities.clear();
+//    this.removingEntities.clear();
   }
 
   private void setMinMax(Location pos1, Location pos2) {
