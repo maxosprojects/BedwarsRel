@@ -258,11 +258,11 @@ public class GameStateRunning extends GameState {
           this.launchFireball(player);
           break;
         case MONSTER_EGG:
+          event.setCancelled(true);
           if (event.getAction() != Action.RIGHT_CLICK_BLOCK
               || event.getBlockFace() != BlockFace.UP) {
             return;
           }
-          event.setCancelled(true);
           this.spawnGolem(playerCtx, event.getClickedBlock());
           break;
       }
@@ -270,9 +270,22 @@ public class GameStateRunning extends GameState {
   }
 
   private void spawnGolem(PlayerContext playerCtx, Block block) {
+    Player player = playerCtx.getPlayer();
+    TeamNew team = playerCtx.getTeam();
+    if (team.isGolemLimitReached()) {
+      player.sendMessage(ChatWriterNew.pluginMessage(
+          "&cOnly 5 living Iron Golems allowed per team"));
+      return;
+    }
+    // Take one fireball from the player
+    Inventory inv = player.getInventory();
+    int slot = inv.first(Material.MONSTER_EGG);
+    ItemStack stack = inv.getItem(slot);
+    stack.setAmount(stack.getAmount() - 1);
+    // Spawn golem
     Location loc = block.getLocation().clone().add(0, 1, 0);
     IronGolem golem = (IronGolem) block.getWorld().spawnEntity(loc, EntityType.IRON_GOLEM);
-    playerCtx.getTeam().addGolem(golem);
+    team.addGolem(golem);
   }
 
   private void launchFireball(Player player) {

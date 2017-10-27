@@ -9,6 +9,7 @@ import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -301,8 +302,11 @@ public class TeamNew implements ConfigurationSerializable {
    * Checks whether there are any enemy players near one of the team's golems
    */
   public void checkGolems() {
-    double distSquared = 7 * 7;
+    double distSquared = 10 * 10;
       for (IronGolem golem : this.golems) {
+        if (golem.isDead()) {
+          continue;
+        }
         Location golemLoc = golem.getLocation();
         for (TeamNew enemyTeam : this.gameCtx.getTeams().values()) {
           if (enemyTeam == this) {
@@ -323,5 +327,15 @@ public class TeamNew implements ConfigurationSerializable {
 
   public boolean ownsGolem(IronGolem golem) {
     return this.golems.contains(golem);
+  }
+
+  public boolean isGolemLimitReached() {
+    int count = 0;
+    for (IronGolem golem : this.golems) {
+      if (!golem.isDead()) {
+        count++;
+      }
+    }
+    return count >= 5;
   }
 }
