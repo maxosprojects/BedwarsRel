@@ -1099,6 +1099,8 @@ public class GameStateRunning extends GameState {
 //      return false;
 //    }
 
+    this.ctx.reset();
+
 //    this.isOver = false;
     for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
       Player player = aPlayerCtx.getPlayer();

@@ -1,6 +1,5 @@
 package io.github.bedwarsrevolution.holo;
 
-import com.comphenix.packetwrapper.WrapperPlayServerEntityTeleport;
 import com.comphenix.packetwrapper.WrapperPlayServerRelEntityMoveLook;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +22,7 @@ public class FloatingItem {
   // How often to update the list of players in radius
   private static final long PLAYERS_LIST_UPDATE_INTERVAL = 1000;
 
-  private Location location, origLocation;
+  private Location location;
   private ArmorStand helmetStand;
   private List<ArmorStand> textStands = new ArrayList<>();
   private long lastPlayersInRadiusUpdate = 0;
@@ -31,7 +30,6 @@ public class FloatingItem {
 
   public FloatingItem(Location location) {
     this.location = location.clone();
-    this.origLocation = location.clone();
   }
 
   public void init(ItemStack itemStack, boolean small, String... text) {
@@ -44,7 +42,7 @@ public class FloatingItem {
     addText(text);
   }
 
-  public void update(double dyFromOrigin, float yaw) {
+  public void update(double dy, float yaw) {
     long now = System.currentTimeMillis();
     if (now > this.lastPlayersInRadiusUpdate + PLAYERS_LIST_UPDATE_INTERVAL) {
       this.lastPlayersInRadiusUpdate = now;
@@ -54,11 +52,8 @@ public class FloatingItem {
           this.players.add((Player) entity);
         }
       }
-      this.move((this.origLocation.getY() + dyFromOrigin) - this.location.getY(), yaw);
-      teleport();
-    } else {
-      this.move((this.origLocation.getY() + dyFromOrigin) - this.location.getY(), yaw);
     }
+    this.move(dy, yaw);
   }
 
   private void move(double dy, float yaw) {
@@ -69,28 +64,9 @@ public class FloatingItem {
       WrapperPlayServerRelEntityMoveLook packet = new WrapperPlayServerRelEntityMoveLook();
       packet.setEntityID(this.helmetStand.getEntityId());
       packet.setDx(0);
-      packet.setDy((this.origLocation.getY() + dy) - this.location.getY());
+      packet.setDy(dy);
       packet.setDz(0);
       packet.setYaw(yaw);
-      packet.setPitch(0);
-      packet.setOnGround(false);
-      packet.sendPacket(player);
-    }
-    this.location.setY(this.origLocation.getY() + dy);
-    this.location.setYaw(yaw);
-  }
-
-  private void teleport() {
-    for (Player player : this.players) {
-      if (!player.isOnline()) {
-        continue;
-      }
-      WrapperPlayServerEntityTeleport packet = new WrapperPlayServerEntityTeleport();
-      packet.setEntityID(this.helmetStand.getEntityId());
-      packet.setX(this.location.getX());
-      packet.setY(this.location.getY());
-      packet.setZ(this.location.getZ());
-      packet.setYaw(this.location.getYaw());
       packet.setPitch(0);
       packet.setOnGround(false);
       packet.sendPacket(player);
@@ -118,8 +94,8 @@ public class FloatingItem {
 
   private void deleteText() {
     for (ArmorStand stand : this.textStands) {
-      this.origLocation.getChunk().load(true);
-      this.origLocation.clone().add(0, 1, 0).getChunk().load(true);
+      this.location.getChunk().load(true);
+      this.location.clone().add(0, 1, 0).getChunk().load(true);
       stand.remove();
     }
     this.textStands.clear();
@@ -128,8 +104,8 @@ public class FloatingItem {
   public void delete() {
     deleteText();
     if (this.helmetStand != null) {
-      this.origLocation.getChunk().load(true);
-      this.origLocation.clone().add(0, 1, 0).getChunk().load(true);
+      this.location.getChunk().load(true);
+      this.location.clone().add(0, 1, 0).getChunk().load(true);
       this.helmetStand.remove();
     }
   }

@@ -19,14 +19,14 @@ public class ResourceSpawnerManager {
   private List<ResourceSpawnerNew> resourceSpawners = new ArrayList<>();
   private Set<Material> types = new HashSet<>();
   private GameContext ctx;
-  private int yCount = -25;
-  private double yCoef = 1;
-  private int yawCount = -25;
-  private int yawCoef = 1;
+  private double counter = 0;
+  private double increment = 0.0628;
+  private double yCoef = 0.25;
+  private double lastDyFromOrigin;
 
-  public void remove() {
+  public void reset() {
     for (ResourceSpawnerNew spawner : this.resourceSpawners) {
-      spawner.remove();
+      spawner.reset();
     }
   }
 
@@ -71,28 +71,14 @@ public class ResourceSpawnerManager {
   }
 
   private void update() {
-    if (this.yCount > 24) {
-      yCoef = -1;
-    } else if (this.yCount < -24) {
-      yCoef = 1;
-    }
-    if (this.yawCount > 24) {
-      yawCoef = -1;
-    } else if (this.yawCount < -24) {
-      yawCoef = 1;
-    }
-    this.yCount += yCoef;
-    this.yawCount += this.yawCoef;
-    double dyFromOrigin = this.yCount * this.yCount * yCoef / 2500.0D - yCoef * 0.25D;
-    float yaw = this.yawCount * this.yawCount * yawCoef / 1.7361f;
-    if (yawCoef == -1) {
-      yaw += 719f;
-    }
-//    float yaw = this.yawCount;
-//    System.out.println(yaw);
+    double sin = Math.sin(this.counter);
+    double dyFromOrigin = sin * this.yCoef;
+    float yaw = (float) (sin * 360.0);
+    this.counter += this.increment;
     for (ResourceSpawnerNew spawner : ResourceSpawnerManager.this.resourceSpawners) {
-      spawner.update(dyFromOrigin, yaw);
+      spawner.update(dyFromOrigin - this.lastDyFromOrigin, yaw);
     }
+    this.lastDyFromOrigin = dyFromOrigin;
   }
 
   public void restart(Map<String, Integer> intervals, TeamNew team) {

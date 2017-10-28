@@ -31,6 +31,7 @@ import org.bukkit.util.Vector;
 public class ResourceSpawnerNew implements ConfigurationSerializable {
   private GameContext ctx;
   private int interval = 1000;
+  private final int defaultInterval;
   private List<ItemStack> resources = new ArrayList<>();
   private Location location;
   private double spread = 1.0;
@@ -67,6 +68,7 @@ public class ResourceSpawnerNew implements ConfigurationSerializable {
     if (deserialize.containsKey("team")) {
       this.team = deserialize.get("team").toString();
     }
+    this.defaultInterval = this.interval;
   }
 
   public ResourceSpawnerNew(GameContext ctx, String name, Location location) {
@@ -81,6 +83,7 @@ public class ResourceSpawnerNew implements ConfigurationSerializable {
     this.location = location;
     this.spread = BedwarsRevol.getInstance().getConfig()
         .getDouble("resource." + name + ".spread", 1.0);
+    this.defaultInterval = this.interval;
   }
 
   private void parseResourceConfig(String name) {
@@ -191,7 +194,7 @@ public class ResourceSpawnerNew implements ConfigurationSerializable {
     this.floatingItem.init(item, false, res.getItemMeta().getDisplayName());
   }
 
-  public void update(double dyFromOrigin, float yaw) {
+  public void update(double dy, float yaw) {
     long current = System.currentTimeMillis();
     if (current >= this.nextSpawn) {
       this.spawn();
@@ -200,7 +203,7 @@ public class ResourceSpawnerNew implements ConfigurationSerializable {
     if (this.floatingItem == null) {
       return;
     }
-    this.floatingItem.update(dyFromOrigin, yaw);
+    this.floatingItem.update(dy, yaw);
     if (this.lastTitleUpdate + 1000 < current) {
       this.lastTitleUpdate = current;
       String title = BedwarsRevol._l("ingame.resspawners.nextin",
@@ -211,7 +214,8 @@ public class ResourceSpawnerNew implements ConfigurationSerializable {
     }
   }
 
-  public void remove() {
+  public void reset() {
+    this.interval = this.defaultInterval;
     if (this.floatingItem != null) {
       this.floatingItem.delete();
       this.floatingItem = null;

@@ -261,8 +261,8 @@ public class GameContext {
 //    this.clearProtections();
 
     this.stopRunningTasks();
+    this.resourceSpawnerManager.reset();
     this.resetRegion();
-    this.resourceSpawnerManager.remove();
   }
 
   public void resetRegion() {
