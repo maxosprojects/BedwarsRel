@@ -284,7 +284,11 @@ public class GameStateRunning extends GameState {
     stack.setAmount(stack.getAmount() - 1);
     // Spawn golem
     Location loc = block.getLocation().clone().add(0, 1, 0);
-    IronGolem golem = (IronGolem) block.getWorld().spawnEntity(loc, EntityType.IRON_GOLEM);
+    Set<Player> friendlyPlayers = new HashSet<>();
+    for (PlayerContext otherPlayerCtx : team.getPlayers()) {
+      friendlyPlayers.add(otherPlayerCtx.getPlayer());
+    }
+    IronGolem golem = NmsUtils.spawnCustomIronGolem(loc, friendlyPlayers);
     team.addGolem(golem);
   }
 
@@ -1165,16 +1169,6 @@ public class GameStateRunning extends GameState {
 
 //    BedwarsGameStartedEvent startedEvent = new BedwarsGameStartedEvent(this);
 //    BedwarsRel.getInstance().getServer().getPluginManager().callEvent(startedEvent);
-
-    // Golems check once a second for enemy targets to attack nearby
-    this.ctx.addRunningTask(new BukkitRunnable() {
-      @Override
-      public void run() {
-        for (TeamNew team : GameStateRunning.this.ctx.getTeams().values()) {
-          team.checkGolems();
-        }
-      }
-    }.runTaskTimer(BedwarsRevol.getInstance(), 0, 20));
   }
 
   private void initStage() {

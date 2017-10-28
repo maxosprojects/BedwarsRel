@@ -56,6 +56,8 @@ public class CustomEntityRegistry extends RegistryMaterials {
       throw new RuntimeException("Unable to override the old entity RegistryMaterials", e);
     }
 
+    instance.putCustomEntity(99, "CustomIronGolem", CustomIronGolem.class);
+
     return instance;
   }
 

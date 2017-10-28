@@ -298,33 +298,6 @@ public class TeamNew implements ConfigurationSerializable {
     this.golems.add(golem);
   }
 
-  /**
-   * Checks whether there are any enemy players near one of the team's golems
-   */
-  public void checkGolems() {
-    double distSquared = 10 * 10;
-      for (IronGolem golem : this.golems) {
-        if (golem.isDead()) {
-          continue;
-        }
-        Location golemLoc = golem.getLocation();
-        for (TeamNew enemyTeam : this.gameCtx.getTeams().values()) {
-          if (enemyTeam == this) {
-            continue;
-          }
-          for (PlayerContext enemyPlayerCtx : enemyTeam.getPlayers()) {
-            Player enemy = enemyPlayerCtx.getPlayer();
-            if (golemLoc.distanceSquared(enemy.getLocation()) > distSquared) {
-              continue;
-            }
-            golem.setPlayerCreated(false);
-            golem.damage(0, enemy);
-            golem.setTarget(enemy);
-          }
-        }
-      }
-  }
-
   public boolean ownsGolem(IronGolem golem) {
     return this.golems.contains(golem);
   }
