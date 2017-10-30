@@ -1,6 +1,7 @@
-package io.github.bedwarsrevolution.com.v1_12_r1;
+package io.github.bedwarsrevolution.com.v1_12_r1.dragon;
 
 import com.google.common.base.Predicate;
+import io.github.bedwarsrevolution.com.v1_12_r1.CustomEnderDragon;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.server.v1_12_R1.DragonControllerLandedSearch;

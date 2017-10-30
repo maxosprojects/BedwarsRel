@@ -1,6 +1,7 @@
-package io.github.bedwarsrevolution.com.v1_12_r1;
+package io.github.bedwarsrevolution.com.v1_12_r1.dragon;
 
 import com.google.common.collect.ImmutableSet;
+import io.github.bedwarsrevolution.com.v1_12_r1.CustomEnderDragon;
 import io.github.bedwarsrevolution.utils.NmsUtils;
 import java.util.Set;
 import net.minecraft.server.v1_12_R1.AbstractDragonController;
@@ -9,6 +10,7 @@ import net.minecraft.server.v1_12_R1.DragonControllerLanding;
 import net.minecraft.server.v1_12_R1.DragonControllerLandingFly;
 import net.minecraft.server.v1_12_R1.DragonControllerManager;
 import net.minecraft.server.v1_12_R1.DragonControllerPhase;
+import net.minecraft.server.v1_12_R1.DragonControllerStrafe;
 import net.minecraft.server.v1_12_R1.IDragonController;
 import org.bukkit.entity.Player;
 
@@ -18,7 +20,7 @@ import org.bukkit.entity.Player;
 @SuppressWarnings("unchecked")
 public class CustomDragonControllerManager extends DragonControllerManager {
 
-  private static final ImmutableSet<Class<? extends AbstractDragonController>> overriddenControllers =
+  private static final ImmutableSet<Class<? extends AbstractDragonController>> replacedControllers =
       ImmutableSet.of(
           DragonControllerLandingFly.class,
           DragonControllerLanding.class,
@@ -27,6 +29,7 @@ public class CustomDragonControllerManager extends DragonControllerManager {
   private final CustomEnderDragon dragon;
   private final Set<Player> friendlyPlayers;
   private CustomDragonControllerLandedSearch searchController = null;
+  private CustomDragonControllerStrafe strafeController;
 
   public CustomDragonControllerManager(CustomEnderDragon dragon, Set<Player> friendlyPlayers) {
     super(dragon);
@@ -35,19 +38,27 @@ public class CustomDragonControllerManager extends DragonControllerManager {
   }
 
   @Override
-  public void setControllerPhase(DragonControllerPhase<?> dragoncontrollerphase) {
-    if (overriddenControllers.contains(dragoncontrollerphase)) {
+  public void setControllerPhase(DragonControllerPhase<?> phase) {
+    Class<? extends IDragonController> controller = getController(phase);
+    if (replacedControllers.contains(controller)) {
       super.setControllerPhase(DragonControllerPhase.g);
     } else {
-      super.setControllerPhase(dragoncontrollerphase);
+      super.setControllerPhase(phase);
     }
   }
 
   @Override
-  public <T extends IDragonController> T b(DragonControllerPhase<T> controllerPhase) {
-    Class<? extends IDragonController> controller = getPhase(controllerPhase);
-    if (!overriddenControllers.contains(controller)) {
-      return super.b(controllerPhase);
+  public <T extends IDragonController> T b(DragonControllerPhase<T> phase) {
+    Class<? extends IDragonController> controller = getController(phase);
+    if (!replacedControllers.contains(controller) && controller != DragonControllerStrafe.class) {
+      return super.b(phase);
+    }
+    /** ControllerStrafe is a special case. See {@link CustomDragonControllerStrafe} **/
+    if (controller == DragonControllerStrafe.class) {
+      if (this.strafeController == null) {
+        this.strafeController = new CustomDragonControllerStrafe(this.dragon);
+      }
+      return (T) this.strafeController;
     }
     if (this.searchController == null) {
       this.searchController = new CustomDragonControllerLandedSearch(this.dragon, this.friendlyPlayers);
@@ -55,7 +66,7 @@ public class CustomDragonControllerManager extends DragonControllerManager {
     return (T) searchController;
   }
 
-  private <T extends IDragonController> Class<? extends IDragonController> getPhase(
+  private <T extends IDragonController> Class<? extends IDragonController> getController(
       DragonControllerPhase<T> controllerPhase) {
     return (Class<? extends IDragonController>)
         NmsUtils.getPrivateField("m", DragonControllerPhase.class, controllerPhase);

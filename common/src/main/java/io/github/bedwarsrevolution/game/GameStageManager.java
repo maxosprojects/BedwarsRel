@@ -86,10 +86,10 @@ public class GameStageManager {
         NmsUtils.spawnCustomEnderDragon(respLoc, friendlyPlayers);
       }
       private double improv(double input) {
-        return input + rnd.nextDouble() * 10.0D;
+        return input + rnd.nextDouble() * 20.0D - 10.0D;
       }
       private float improv(float input) {
-        return input + rnd.nextFloat() * 10.0F;
+        return input + rnd.nextFloat() * 20.0F - 10.0F;
       }
     }
 

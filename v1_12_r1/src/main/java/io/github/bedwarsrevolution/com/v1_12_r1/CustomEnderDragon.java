@@ -1,5 +1,6 @@
 package io.github.bedwarsrevolution.com.v1_12_r1;
 
+import io.github.bedwarsrevolution.com.v1_12_r1.dragon.CustomDragonControllerManager;
 import io.github.bedwarsrevolution.utils.NmsUtils;
 import java.util.Set;
 import net.minecraft.server.v1_12_R1.EntityEnderDragon;
