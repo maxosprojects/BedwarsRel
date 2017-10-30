@@ -3,9 +3,9 @@ package io.github.bedwarsrevolution.utils;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Set;
 import org.bukkit.Location;
+import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
@@ -18,6 +18,7 @@ public class NmsUtils {
   private static Method methodUnhideArmor = null;
   private static Method methodSetTntSource = null;
   private static Method methodSpawnCustomGolem = null;
+  private static Method methodSpawnCustomDragon = null;
 
   public static void hideArmor(int entityId, Player otherPlayer, int slot) {
     try {
@@ -61,9 +62,9 @@ public class NmsUtils {
   public static IronGolem spawnCustomIronGolem(Location location, Set<Player> friendlyPlayers) {
     try {
       if (methodSpawnCustomGolem == null) {
-        Class<?> tntSourceClass = BedwarsRevol.getInstance()
+        Class<?> ironGolemClass = BedwarsRevol.getInstance()
             .getVersionRelatedClass("CustomIronGolem");
-        methodSpawnCustomGolem = tntSourceClass.getMethod(
+        methodSpawnCustomGolem = ironGolemClass.getMethod(
             "spawn", Location.class, Set.class);
       }
       return (IronGolem) methodSpawnCustomGolem.invoke(null, location, friendlyPlayers);
@@ -73,11 +74,25 @@ public class NmsUtils {
     return null;
   }
 
+  public static EnderDragon spawnCustomEnderDragon(Location location, Set<Player> friendlyPlayers) {
+    try {
+      if (methodSpawnCustomDragon == null) {
+        Class<?> enderDragonClass = BedwarsRevol.getInstance()
+            .getVersionRelatedClass("CustomEnderDragon");
+        methodSpawnCustomDragon = enderDragonClass.getMethod(
+            "spawn", Location.class, Set.class);
+      }
+      return (EnderDragon) methodSpawnCustomDragon.invoke(null, location, friendlyPlayers);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return null;
+  }
+
   public static Object getPrivateField(String fieldName, Class clazz, Object object) {
-    Field field;
     Object fieldValue = null;
     try {
-      field = clazz.getDeclaredField(fieldName);
+      Field field = clazz.getDeclaredField(fieldName);
       field.setAccessible(true);
       fieldValue = field.get(object);
     } catch(Exception e) {
@@ -85,4 +100,15 @@ public class NmsUtils {
     }
     return fieldValue;
   }
+
+  public static void setPrivateField(String fieldName, Class clazz, Object object, Object value) {
+    try {
+      Field field = clazz.getDeclaredField(fieldName);
+      field.setAccessible(true);
+      field.set(object, value);
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+  }
+
 }

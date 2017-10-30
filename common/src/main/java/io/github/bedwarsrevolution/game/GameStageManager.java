@@ -5,9 +5,16 @@ import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.NmsUtils;
 import io.github.bedwarsrevolution.utils.UtilsNew;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import lombok.Getter;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Created by {maxos} 2017
@@ -23,7 +30,7 @@ public class GameStageManager {
     EMERALD_II(5, "emerald", 25000, "Emerald Tier II", "&a&lEmerald Generators &6upgraded to &eTier II"),
     DIAMOND_III(5, "diamond", 7000, "Diamond Tier III", "&b&lDiamond Generators &6upgraded to &eTier III"),
     EMERALD_III(5, "emerald", 12000, "Emerald Tier III", "&a&lEmerald Generators &6upgraded to &eTier III"),
-    BED_DESTRUCTION(5, "Bed destruction") {
+    BED_DESTRUCTION(3, "Bed destruction") {
       @Override
       protected void end(GameStageManager manager) {
         for (TeamNew team : manager.ctx.getTeams().values()) {
@@ -37,11 +44,54 @@ public class GameStageManager {
         this.tellAllPlayers(manager, "&c&lSudden death! All beds destroyed!");
       }
     },
-    TIE(5, "Tie") {
+    DRAGONS_ATTACK(3, "Dragons attack") {
+      @Override
+      protected void end(GameStageManager manager) {
+        Random rnd = new Random();
+        for (TeamNew team : manager.ctx.getTeams().values()) {
+          Set<Player> friendlyPlayers = new HashSet<>();
+          for (PlayerContext otherPlayerCtx : team.getPlayers()) {
+            friendlyPlayers.add(otherPlayerCtx.getPlayer());
+          }
+          new DelayedDragonSpawn(manager.ctx.getTopMiddle(), friendlyPlayers, rnd)
+              .runTaskLater(BedwarsRevol.getInstance(), rnd.nextInt(60));
+        }
+        this.tellAllPlayers(manager, "&c&lDragons attack!");
+      }
+    },
+    TIE(4, "Tie") {
       @Override
       protected void end(GameStageManager manager) {
       }
     };
+
+    private class DelayedDragonSpawn extends BukkitRunnable {
+      private final Location loc;
+      private final Set<Player> friendlyPlayers;
+      private final Random rnd;
+
+      DelayedDragonSpawn(Location defaultLocation, Set<Player> friendlyPlayers, Random rnd) {
+        this.loc = defaultLocation;
+        this.friendlyPlayers = friendlyPlayers;
+        this.rnd = rnd;
+      }
+      @Override
+      public void run() {
+        Location respLoc = new Location(this.loc.getWorld(),
+            this.improv(this.loc.getX()),
+            this.loc.getY(),
+            this.improv(this.loc.getZ()),
+            this.improv(this.loc.getYaw()),
+            this.improv(this.loc.getPitch()));
+        NmsUtils.spawnCustomEnderDragon(respLoc, friendlyPlayers);
+      }
+      private double improv(double input) {
+        return input + rnd.nextDouble() * 10.0D;
+      }
+      private float improv(float input) {
+        return input + rnd.nextFloat() * 10.0F;
+      }
+    }
 
     @Getter
     private final int length;

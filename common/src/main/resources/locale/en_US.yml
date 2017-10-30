@@ -143,8 +143,8 @@ ingame:
   player:
     left: "&cPlayer $player$&c has left the game!"
     died: "&6&l$player$&6&l died!"
-    fellintovoid: "&6&l$player$&6&l fell into void"
-    knockedintovoid: "&6&l$killer$&6&l knocked $player$&6&l into void"
+    fellintovoid: "&6&l$player$&6&l fell into the void"
+    knockedintovoid: "&6&l$killer$&6&l knocked $player$&6&l into the void"
     killed: "&6&l$killer$&6&l killed $player$&6&l!"
     kicked: "&c$player$&c was kicked!"
     waskicked: "You were kicked from the game!"

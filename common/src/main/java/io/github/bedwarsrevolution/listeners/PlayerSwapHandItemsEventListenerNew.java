@@ -1,4 +1,4 @@
-package io.github.bedwarsrevolution.listeners.events;
+package io.github.bedwarsrevolution.listeners;
 
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;

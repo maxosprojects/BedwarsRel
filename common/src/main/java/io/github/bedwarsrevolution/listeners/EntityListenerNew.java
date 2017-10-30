@@ -1,19 +1,11 @@
 package io.github.bedwarsrevolution.listeners;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
+import java.util.Set;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -21,13 +13,32 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.metadata.MetadataValue;
 
 public class EntityListenerNew extends BaseListenerNew {
+  private static final Set<EntityType> preventDropsFrom = ImmutableSet.of(
+      EntityType.IRON_GOLEM,
+      EntityType.ENDER_DRAGON);
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onEntityDamage(EntityDamageEvent event) {
+    if (event.getEntityType() != EntityType.VILLAGER
+        || !(event instanceof EntityDamageByEntityEvent)) {
+      return;
+    }
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager()
+        .getGameByLocation(event.getEntity().getLocation());
+    if (ctx == null) {
+      return;
+    }
+    EntityDamageByEntityEvent eventByEntity = (EntityDamageByEntityEvent) event;
+    EntityType type = eventByEntity.getDamager().getType();
+    if (type == EntityType.ENDER_DRAGON
+        || type == EntityType.DRAGON_FIREBALL) {
+      event.setCancelled(true);
+    }
+  }
 
 //  @EventHandler(priority = EventPriority.HIGHEST)
 //  public void onEntityDamage(EntityDamageEvent event) {
@@ -219,7 +230,7 @@ public class EntityListenerNew extends BaseListenerNew {
 
   @EventHandler
   public void onDeath(EntityDeathEvent event) {
-    if (event.getEntityType() == EntityType.IRON_GOLEM) {
+    if (preventDropsFrom.contains(event.getEntityType())) {
       event.getDrops().clear();
     }
   }

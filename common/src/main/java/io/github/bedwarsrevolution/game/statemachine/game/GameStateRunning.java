@@ -1099,8 +1099,6 @@ public class GameStateRunning extends GameState {
 //      return false;
 //    }
 
-    this.ctx.reset();
-
 //    this.isOver = false;
     for (PlayerContext aPlayerCtx : this.ctx.getPlayers()) {
       Player player = aPlayerCtx.getPlayer();
@@ -1110,6 +1108,8 @@ public class GameStateRunning extends GameState {
                 ChatColor.GREEN + BedwarsRevol._l(player, "ingame.gamestarting")));
       }
     }
+
+    this.ctx.reset();
 
     // load shop categories again (if shop was changed)
     this.ctx.loadItemShopCategories();

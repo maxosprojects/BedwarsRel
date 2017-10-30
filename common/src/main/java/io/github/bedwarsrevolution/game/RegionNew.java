@@ -1,11 +1,13 @@
 package io.github.bedwarsrevolution.game;
 
+import com.google.common.collect.ImmutableSet;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,7 +27,19 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.material.Redstone;
 
 public class RegionNew {
-  public final static int CHUNK_SIZE = 16;
+  public static final int CHUNK_SIZE = 16;
+  private static final Set<EntityType> entitiesToRemove = ImmutableSet.of(
+      EntityType.CREEPER,
+      EntityType.CAVE_SPIDER,
+      EntityType.SPIDER,
+      EntityType.ZOMBIE,
+      EntityType.SKELETON,
+      EntityType.SILVERFISH,
+      EntityType.ARROW,
+      EntityType.ARMOR_STAND,
+      EntityType.IRON_GOLEM,
+      EntityType.ENDER_DRAGON);
+
   private HashMap<Block, Byte> brokenBlockData = null;
   private HashMap<Block, BlockFace> brokenBlockFace = null;
   private HashMap<Block, Boolean> brokenBlockPower = null;
@@ -326,39 +340,30 @@ public class RegionNew {
 
     Iterator<Entity> entityIterator = this.world.getEntities().iterator();
     while (entityIterator.hasNext()) {
-      Entity e = entityIterator.next();
+      Entity entity = entityIterator.next();
 
 //      if (this.removingEntities.contains(e)) {
 //        continue;
 //      }
 
-      if (!this.isInRegion(e.getLocation())) {
+      if (!this.isInRegion(entity.getLocation())) {
         continue;
       }
 
-      if (e instanceof Item) {
-        e.remove();
+      if (entity instanceof Item) {
+        entity.remove();
         continue;
       }
 
-      EntityType eType = e.getType();
-      if (eType == EntityType.CREEPER
-          || eType == EntityType.CAVE_SPIDER
-          || eType == EntityType.SPIDER
-          || eType == EntityType.ZOMBIE
-          || eType == EntityType.SKELETON
-          || eType == EntityType.SILVERFISH
-          || eType == EntityType.ARROW
-          || eType == EntityType.ARMOR_STAND
-          || eType == EntityType.IRON_GOLEM) {
-        e.remove();
-        continue;
+      if (entitiesToRemove.contains(entity.getType())) {
+        entity.remove();
+//        continue;
       }
 
-      if (e instanceof LivingEntity) {
-        LivingEntity le = (LivingEntity) e;
-        le.setRemoveWhenFarAway(false);
-      }
+//      if (entity instanceof LivingEntity) {
+//        LivingEntity le = (LivingEntity) entity;
+//        le.setRemoveWhenFarAway(false);
+//      }
     }
 
 //    this.removingEntities.clear();

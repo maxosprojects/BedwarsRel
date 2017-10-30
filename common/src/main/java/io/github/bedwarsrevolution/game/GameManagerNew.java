@@ -3,8 +3,6 @@ package io.github.bedwarsrevolution.game;
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
-import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
-import io.github.bedwarsrevolution.shop.upgrades.UpgradeScope;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.io.File;
