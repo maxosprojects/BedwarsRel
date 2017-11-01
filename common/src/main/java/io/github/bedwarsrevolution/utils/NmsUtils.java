@@ -78,7 +78,7 @@ public class NmsUtils {
     try {
       if (methodSpawnCustomDragon == null) {
         Class<?> enderDragonClass = BedwarsRevol.getInstance()
-            .getVersionRelatedClass("CustomEnderDragon");
+            .getVersionRelatedClass("CustomEnderDragon2");
         methodSpawnCustomDragon = enderDragonClass.getMethod(
             "spawn", Location.class, Set.class);
       }
