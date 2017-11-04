@@ -19,17 +19,14 @@ import org.bukkit.entity.Player;
  */
 @SuppressWarnings("unchecked")
 public class CustomDragonControllerManager2 extends DragonControllerManager {
-
-  private static final ImmutableSet<Class<? extends AbstractDragonController>> replacedControllers =
-      ImmutableSet.of(
-          DragonControllerLandingFly.class,
-          DragonControllerLanding.class,
-          DragonControllerLandedSearch.class);
-
   private final CustomEnderDragon2 dragon;
   private final Set<Player> friendlyPlayers;
-  private CustomDragonControllerLandedSearch2 searchController = null;
-  private CustomDragonControllerStrafe strafeController;
+  private CustomDragonControllerHold2 holdController;
+
+  static {
+    DragonControllerPhase<?>[] phases = (DragonControllerPhase<?>[]) NmsUtils.getPrivateField("l", DragonControllerPhase.class, null);
+    NmsUtils.setPrivateField("m", DragonControllerPhase.class, phases[0], CustomDragonControllerHold2.class);
+  }
 
   public CustomDragonControllerManager2(CustomEnderDragon2 dragon, Set<Player> friendlyPlayers) {
     super(dragon);
@@ -37,39 +34,20 @@ public class CustomDragonControllerManager2 extends DragonControllerManager {
     this.friendlyPlayers = friendlyPlayers;
   }
 
-  @Override
-  public void setControllerPhase(DragonControllerPhase<?> phase) {
-    Class<? extends IDragonController> controller = getController(phase);
-    if (replacedControllers.contains(controller)) {
-      super.setControllerPhase(DragonControllerPhase.g);
-    } else {
-      super.setControllerPhase(phase);
-    }
-  }
-
-  @Override
-  public <T extends IDragonController> T b(DragonControllerPhase<T> phase) {
-    Class<? extends IDragonController> controller = getController(phase);
-    if (!replacedControllers.contains(controller) && controller != DragonControllerStrafe.class) {
-      return super.b(phase);
-    }
-    /** ControllerStrafe is a special case. See {@link CustomDragonControllerStrafe} **/
-    if (controller == DragonControllerStrafe.class) {
-      if (this.strafeController == null) {
-        this.strafeController = new CustomDragonControllerStrafe(this.dragon);
-      }
-      return (T) this.strafeController;
-    }
-    if (this.searchController == null) {
-      this.searchController = new CustomDragonControllerLandedSearch2(this.dragon, this.friendlyPlayers);
-    }
-    return (T) searchController;
-  }
-
-  private <T extends IDragonController> Class<? extends IDragonController> getController(
-      DragonControllerPhase<T> controllerPhase) {
-    return (Class<? extends IDragonController>)
-        NmsUtils.getPrivateField("m", DragonControllerPhase.class, controllerPhase);
-  }
+//  @Override
+//  public void setControllerPhase(DragonControllerPhase<?> phase) {
+//    super.setControllerPhase(DragonControllerPhase.a);
+//  }
+//
+//  @Override
+//  public <T extends IDragonController> T b(DragonControllerPhase<T> phase) {
+//    if (this.dragon == null) {
+//      return super.b(phase);
+//    }
+//    if (this.holdController == null) {
+//      this.holdController = new CustomDragonControllerHold2(this.dragon);
+//    }
+//    return (T) holdController;
+//  }
 
 }

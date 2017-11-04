@@ -291,7 +291,7 @@ public class GameStateRunning extends GameState {
     }
 //    IronGolem golem = NmsUtils.spawnCustomIronGolem(loc, friendlyPlayers);
 //    team.addGolem(golem);
-    NmsUtils.spawnCustomEnderDragon(loc, Collections.<Player>emptySet());
+    NmsUtils.spawnCustomEnderDragon(this.ctx.getTopMiddle(), Collections.<Player>emptySet());
   }
 
   private void launchFireball(Player player) {
