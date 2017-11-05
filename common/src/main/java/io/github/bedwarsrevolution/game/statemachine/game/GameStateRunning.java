@@ -1235,7 +1235,7 @@ public class GameStateRunning extends GameState {
           (String) elem.get("type"), (int) elem.get("level"));
       if (upgrade instanceof UpgradeItem) {
         // Make a copy to run fixMeta on
-        UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);
+        UpgradeItem temp = (UpgradeItem) upgrade.build(null, null, null);
         temp.setItem(MerchantCategory.fixMeta(
             ItemStack.deserialize((Map<String, Object>) item.get("item"))));
         upgrade = temp;
@@ -1258,13 +1258,13 @@ public class GameStateRunning extends GameState {
     for (PlayerContext playerCtx : this.ctx.getPlayers()) {
       TeamNew team = playerCtx.getTeam();
       for (Upgrade upgrade : playerUpgrades) {
-        playerCtx.addUpgrade(upgrade.create(this.ctx, team, playerCtx));
+        playerCtx.addUpgrade(upgrade.build(this.ctx, team, playerCtx));
       }
       playerCtx.respawn();
     }
     for (TeamNew team : this.ctx.getTeams().values()) {
       for (Upgrade upgrade : teamUpgrades) {
-        team.setUpgrade(upgrade.create(this.ctx, team, null));
+        team.setUpgrade(upgrade.build(this.ctx, team, null));
       }
     }
   }

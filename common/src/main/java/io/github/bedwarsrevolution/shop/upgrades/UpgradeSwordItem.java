@@ -15,7 +15,7 @@ public class UpgradeSwordItem extends UpgradeItem {
   }
 
   @Override
-  public Upgrade create(GameContext gameCtx, TeamNew team, PlayerContext playerCtx) {
+  public Upgrade build(GameContext gameCtx, TeamNew team, PlayerContext playerCtx) {
     UpgradeSwordItem item = new UpgradeSwordItem(this.level);
     item.gameCtx = gameCtx;
     item.playerCtx = playerCtx;

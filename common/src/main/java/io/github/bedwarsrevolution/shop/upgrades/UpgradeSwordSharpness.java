@@ -37,7 +37,7 @@ public class UpgradeSwordSharpness extends Upgrade {
   }
 
   @Override
-  public Upgrade create(GameContext gameContext, TeamNew team, PlayerContext playerCtx) {
+  public Upgrade build(GameContext gameContext, TeamNew team, PlayerContext playerCtx) {
     UpgradeSwordSharpness item = new UpgradeSwordSharpness(this.upgrade);
     item.team = team;
     item.permanent = this.permanent;

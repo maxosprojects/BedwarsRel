@@ -47,8 +47,6 @@ public class Shop {
 
   /**
    * Renders the shop and highlights an open category if any.
-   *
-   * @return slot number to render any other buttons necessary
    */
   public void render() {
     int cats = this.getAccessibleNumberOfCategories();

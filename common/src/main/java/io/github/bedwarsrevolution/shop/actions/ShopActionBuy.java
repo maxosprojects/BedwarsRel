@@ -106,7 +106,7 @@ public class ShopActionBuy extends ShopAction {
     ShopReward reward = this.trade.getReward();
     if (reward.isUpgrade()) {
       Upgrade builder = reward.getUpgrade();
-      Upgrade upgrade = builder.create(gameCtx, team, this.playerCtx);
+      Upgrade upgrade = builder.build(gameCtx, team, this.playerCtx);
       if (!upgrade.activate(UpgradeScope.TEAM, UpgradeCycle.ONCE)) {
         player.sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol
             ._l(player, "errors.alreadypurchased")));

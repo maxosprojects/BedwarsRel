@@ -38,7 +38,7 @@ public class UpgradeArmorProtection extends Upgrade {
   }
 
   @Override
-  public Upgrade create(GameContext gameContext, TeamNew team, PlayerContext playerCtx) {
+  public Upgrade build(GameContext gameContext, TeamNew team, PlayerContext playerCtx) {
     UpgradeArmorProtection item = new UpgradeArmorProtection(this.upgrade);
     item.gameCtx = gameContext;
     item.team = team;

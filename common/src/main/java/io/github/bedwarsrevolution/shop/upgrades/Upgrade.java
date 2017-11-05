@@ -14,17 +14,18 @@ public abstract class Upgrade {
   public abstract boolean isLevel(int level);
 
   /**
-   * Creates and returns a new uninitialized (not yet added to the game) @{@link Upgrade}
+   * Builds and returns a new unactivated @{@link Upgrade}.
+   * Unactivated means: not yet initialized, nor added to the game
    *
    * @param gameContext
    * @param team
    * @param playerCtx
    * @return
    */
-  public abstract Upgrade create(GameContext gameContext, TeamNew team, PlayerContext playerCtx);
+  public abstract Upgrade build(GameContext gameContext, TeamNew team, PlayerContext playerCtx);
 
   /**
-   * Initializes the item and adds it to the game.
+   * Activates (initializes) the item and adds it to the game.
    *
    * @return whether item initialization was successful (e.g. was successfully added to the game).
    */

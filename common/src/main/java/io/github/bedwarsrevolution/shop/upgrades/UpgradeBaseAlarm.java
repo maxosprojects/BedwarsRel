@@ -131,7 +131,7 @@ public class UpgradeBaseAlarm extends Upgrade {
   }
 
   @Override
-  public Upgrade create(GameContext gameContext, TeamNew team, PlayerContext playerCtx) {
+  public Upgrade build(GameContext gameContext, TeamNew team, PlayerContext playerCtx) {
     UpgradeBaseAlarm item = new UpgradeBaseAlarm();
 
     item.gameCtx = gameContext;

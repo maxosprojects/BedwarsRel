@@ -38,7 +38,7 @@ public class UpgradeItem extends Upgrade {
   protected GameContext gameCtx;
 
   @Override
-  public Upgrade create(GameContext gameCtx, TeamNew team, PlayerContext playerCtx) {
+  public Upgrade build(GameContext gameCtx, TeamNew team, PlayerContext playerCtx) {
     UpgradeItem item = new UpgradeItem();
     item.gameCtx = gameCtx;
     item.playerCtx = playerCtx;

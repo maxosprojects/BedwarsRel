@@ -93,7 +93,8 @@ public class MerchantCategory {
       String catName = (String) cat.get("name");
       ItemStack catButton = fixMeta(ItemStack.deserialize((Map<String, Object>) cat.get("button")));
       ItemMeta catMeta = catButton.getItemMeta();
-      catMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES,
+      catMeta.addItemFlags(
+          ItemFlag.HIDE_ATTRIBUTES,
           ItemFlag.HIDE_POTION_EFFECTS,
           ItemFlag.HIDE_ENCHANTS);
       catButton.setItemMeta(catMeta);
@@ -150,7 +151,7 @@ public class MerchantCategory {
             upgrade = UpgradeRegistry.getUpgrade(
                 (String)upgradeElem.get("type"), (int)upgradeElem.get("level"));
             if (upgrade instanceof UpgradeItem) {
-              UpgradeItem temp = (UpgradeItem) upgrade.create(null, null, null);
+              UpgradeItem temp = (UpgradeItem) upgrade.build(null, null, null);
               temp.setItem(rewardButton);
               upgrade = temp;
             }

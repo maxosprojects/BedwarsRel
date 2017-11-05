@@ -37,7 +37,7 @@ public class UpgradeForge extends Upgrade {
   }
 
   @Override
-  public Upgrade create(GameContext gameContext, TeamNew team, PlayerContext playerCtx) {
+  public Upgrade build(GameContext gameContext, TeamNew team, PlayerContext playerCtx) {
     UpgradeForge item = new UpgradeForge(this.upgrade);
     item.gameContext = gameContext;
     item.team = team;
