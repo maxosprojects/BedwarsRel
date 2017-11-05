@@ -7,6 +7,7 @@ import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.DamageHolder;
 import io.github.bedwarsrevolution.shop.Shop;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
+import io.github.bedwarsrevolution.utils.NmsUtils;
 import io.github.bedwarsrevolution.utils.SoundMachineNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.IronGolem;
@@ -307,9 +309,10 @@ public class PlayerStatePlaying extends PlayerState {
       return true;
     }
 
-    if (damager != null && event instanceof EntityDamageByEntityEvent) {
+    if (event instanceof EntityDamageByEntityEvent) {
       EntityDamageByEntityEvent eventByEntity = (EntityDamageByEntityEvent) event;
-      if (eventByEntity.getDamager().getType() == EntityType.ARROW) {
+      EntityType damagerType = eventByEntity.getDamager().getType();
+      if (damager != null && damagerType == EntityType.ARROW) {
         new BukkitRunnable() {
           @Override
           public void run() {
@@ -325,6 +328,12 @@ public class PlayerStatePlaying extends PlayerState {
                             UtilsNew.formatHealth(healthLeft))))));
           }
         }.runTaskLater(BedwarsRevol.getInstance(), 1L);
+      } else if (damagerType == EntityType.ENDER_DRAGON) {
+        Set<Player> friendlies = NmsUtils.getCustomEnderDragonFrendlies(
+            (EnderDragon) eventByEntity.getDamager());
+        if (friendlies != null && friendlies.contains(this.playerCtx.getPlayer())) {
+          event.setCancelled(true);
+        }
       }
     }
     return false;

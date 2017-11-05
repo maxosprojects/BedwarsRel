@@ -57,7 +57,7 @@ public class CustomEntityRegistry extends RegistryMaterials {
     }
 
     instance.putCustomEntity(99, "CustomIronGolem", CustomIronGolem.class);
-    instance.putCustomEntity(63, "CustomEnderDragon2", CustomEnderDragon2.class);
+    instance.putCustomEntity(63, "CustomEnderDragon2", CustomEnderDragon.class);
 
     return instance;
   }

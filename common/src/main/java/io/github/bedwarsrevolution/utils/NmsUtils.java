@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
@@ -19,6 +20,7 @@ public class NmsUtils {
   private static Method methodSetTntSource = null;
   private static Method methodSpawnCustomGolem = null;
   private static Method methodSpawnCustomDragon = null;
+  private static Method methodCustomDragonGetFriendlies = null;
 
   public static void hideArmor(int entityId, Player otherPlayer, int slot) {
     try {
@@ -78,11 +80,27 @@ public class NmsUtils {
     try {
       if (methodSpawnCustomDragon == null) {
         Class<?> enderDragonClass = BedwarsRevol.getInstance()
-            .getVersionRelatedClass("CustomEnderDragon2");
+            .getVersionRelatedClass("CustomEnderDragon");
         methodSpawnCustomDragon = enderDragonClass.getMethod(
             "spawn", Location.class, Set.class);
       }
       return (EnderDragon) methodSpawnCustomDragon.invoke(null, location, friendlyPlayers);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return null;
+  }
+
+  @SuppressWarnings(value = "unchecked")
+  public static Set<Player> getCustomEnderDragonFrendlies(EnderDragon dragon) {
+    try {
+      if (methodCustomDragonGetFriendlies == null) {
+        Class<?> enderDragonClass = BedwarsRevol.getInstance()
+            .getVersionRelatedClass("CustomEnderDragon");
+        methodCustomDragonGetFriendlies = enderDragonClass.getMethod(
+            "getFriendlies", EnderDragon.class);
+      }
+      return (Set<Player>) methodCustomDragonGetFriendlies.invoke(null, dragon);
     } catch (Exception ex) {
       ex.printStackTrace();
     }

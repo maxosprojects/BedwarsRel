@@ -21,7 +21,6 @@ import io.github.bedwarsrevolution.utils.NmsUtils;
 import io.github.bedwarsrevolution.utils.TitleWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -289,9 +288,8 @@ public class GameStateRunning extends GameState {
     for (PlayerContext otherPlayerCtx : team.getPlayers()) {
       friendlyPlayers.add(otherPlayerCtx.getPlayer());
     }
-//    IronGolem golem = NmsUtils.spawnCustomIronGolem(loc, friendlyPlayers);
-//    team.addGolem(golem);
-    NmsUtils.spawnCustomEnderDragon(this.ctx.getTopMiddle(), Collections.<Player>emptySet());
+    IronGolem golem = NmsUtils.spawnCustomIronGolem(loc, friendlyPlayers);
+    team.addGolem(golem);
   }
 
   private void launchFireball(Player player) {
