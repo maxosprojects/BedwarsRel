@@ -3,6 +3,10 @@ package io.github.bedwarsrevolution.shop.upgrades;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 public class UpgradeSwordItem extends UpgradeItem {
   private static final String TYPE = "SWORD_ITEM";
@@ -27,7 +31,23 @@ public class UpgradeSwordItem extends UpgradeItem {
 
   @Override
   public boolean activate(UpgradeScope scope, UpgradeCycle cycle) {
-    this.installItem(cycle, true);
+    // Replace existing WOOD_SWORD
+    if (this.purchase.getType() == Material.WOOD_SWORD) {
+      this.installItem();
+    } else {
+      Player player = this.playerCtx.getPlayer();
+      Inventory inv = player.getInventory();
+      ItemStack item = this.purchase.clone();
+      int replaceSlot = inv.first(Material.WOOD_SWORD);
+      if (replaceSlot == -1) {
+        inv.addItem(item);
+      } else {
+        inv.setItem(replaceSlot, item);
+      }
+      player.updateInventory();
+    }
+    this.msg(cycle, true);
+
     TeamNew team = this.playerCtx.getTeam();
     UpgradeSwordSharpness sharpness = team.getUpgrade(UpgradeSwordSharpness.class);
     if (sharpness != null) {

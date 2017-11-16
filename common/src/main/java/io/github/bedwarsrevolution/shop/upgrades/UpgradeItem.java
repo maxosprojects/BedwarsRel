@@ -67,26 +67,30 @@ public class UpgradeItem extends Upgrade {
       this.playerCtx.addUpgrade(this);
     }
 
-    installItem(cycle, false);
+    this.installItem();
+    this.msg(cycle, false);
 
     return true;
   }
 
-  protected void installItem(UpgradeCycle cycle, boolean forceChat) {
+  protected void installItem() {
     Player player = this.playerCtx.getPlayer();
     Inventory inv = player.getInventory();
     ItemStack item = this.purchase.clone();
     inv.addItem(item);
-    player.getPlayer().updateInventory();
+    player.updateInventory();
+  }
 
+  protected void msg(UpgradeCycle cycle, boolean forceChat) {
     if (forceChat || cycle == UpgradeCycle.ONCE) {
-      String name = item.getType().name();
-      if (item.hasItemMeta()) {
-        ItemMeta meta = item.getItemMeta();
+      String name = this.purchase.getType().name();
+      if (this.purchase.hasItemMeta()) {
+        ItemMeta meta = this.purchase.getItemMeta();
         if (meta.hasDisplayName()) {
           name = meta.getDisplayName();
         }
       }
+      Player player = this.playerCtx.getPlayer();
       player.sendMessage(ChatWriterNew.pluginMessage(
           BedwarsRevol._l(player, "success.itempurchased",
               ImmutableMap.of("item", name))));
