@@ -9,6 +9,7 @@ import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class UpgradeArmorItems extends Upgrade {
@@ -105,6 +106,11 @@ public class UpgradeArmorItems extends Upgrade {
       existing = existingList.get(0);
     }
     return existing != null && existing.purchase == this.purchase;
+  }
+
+  @Override
+  public boolean isMaterial(Material type) {
+    return false;
   }
 
   @Override

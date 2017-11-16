@@ -114,7 +114,7 @@ public class GameStateRunning extends GameState {
   }
 
   @Override
-  public void onEventDrop(PlayerDropItemEvent event) {
+  public void onEventDropItem(PlayerDropItemEvent event) {
     PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
     playerCtx.getState().onDropItem(event);
   }
@@ -145,11 +145,6 @@ public class GameStateRunning extends GameState {
       return;
     }
     PlayerContext playerCtx = this.ctx.getPlayerContext((Player) event.getWhoClicked());
-    // If open inventory isn't shop
-    if (!event.getInventory().getName().equals(BedwarsRevol._l(
-        playerCtx.getPlayer(), "ingame.shop.name"))) {
-      return;
-    }
     playerCtx.getState().onInventoryClick(event);
   }
 

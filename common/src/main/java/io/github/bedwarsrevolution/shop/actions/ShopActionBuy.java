@@ -47,7 +47,7 @@ public class ShopActionBuy extends ShopAction {
     InventoryClickEvent event = (InventoryClickEvent) args.get(EVENT);
     event.setCancelled(true);
 
-    // Ignore double click that follows two single clicks when they made quickly
+    // Ignore double click that follows two single clicks when they are made quickly
     if (event.getClick() == ClickType.DOUBLE_CLICK) {
       return;
     }

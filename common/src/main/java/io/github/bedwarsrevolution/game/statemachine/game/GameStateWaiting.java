@@ -78,7 +78,7 @@ public class GameStateWaiting extends GameState {
   }
 
   @Override
-  public void onEventDrop(PlayerDropItemEvent event) {
+  public void onEventDropItem(PlayerDropItemEvent event) {
     event.setCancelled(true);
   }
 

@@ -21,6 +21,7 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -320,13 +321,13 @@ public class PlayerListenerNew extends BaseListenerNew {
   }
 
   @EventHandler
-  public void onDrop(PlayerDropItemEvent event) {
+  public void onDropItem(PlayerDropItemEvent event) {
     Player player = event.getPlayer();
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
     if (ctx == null) {
       return;
     }
-    ctx.getState().onEventDrop(event);
+    ctx.getState().onEventDropItem(event);
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
@@ -386,6 +387,19 @@ public class PlayerListenerNew extends BaseListenerNew {
       return;
     }
     ctx.getState().onEventInventoryClick(event);
+  }
+
+  @EventHandler
+  public void onInventoryDrag(InventoryDragEvent event) {
+    if (!(event.getWhoClicked() instanceof Player)) {
+      return;
+    }
+    Player player = (Player) event.getWhoClicked();
+    GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    if (ctx == null) {
+      return;
+    }
+    ctx.getState().onEventInventoryDrag(event);
   }
 
   /*

@@ -8,6 +8,7 @@ import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class UpgradeForge extends Upgrade {
@@ -90,6 +91,11 @@ public class UpgradeForge extends Upgrade {
   public boolean alreadyOwn(PlayerContext playerCtx) {
     UpgradeForge existing = (UpgradeForge) playerCtx.getTeam().getUpgrades().get(UpgradeForge.class);
     return existing != null && existing.upgrade == this.upgrade;
+  }
+
+  @Override
+  public boolean isMaterial(Material type) {
+    return false;
   }
 
   @Override

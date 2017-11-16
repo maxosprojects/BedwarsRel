@@ -11,6 +11,7 @@ import io.github.bedwarsrevolution.shop.upgrades.UpgradeCycle;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeScope;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -174,6 +175,48 @@ public class PlayerContext {
     if (!this.player.getWorld().getName().equals(location.getWorld().getName())) {
       this.teleporting = true;
     }
+  }
+
+  public Iterable<Upgrade> getAllUpgrades() {
+    return new Iterable<Upgrade>() {
+      @Override
+      public Iterator<Upgrade> iterator() {
+        return getAllUpgradesView();
+      }
+    };
+  }
+
+  private Iterator<Upgrade> getAllUpgradesView() {
+    return new Iterator<Upgrade>() {
+      private Iterator<List<Upgrade>> listIterator = upgrades.values().iterator();
+      private Iterator<Upgrade> itemIterator;
+      @Override
+      public boolean hasNext() {
+        if (this.itemIterator != null && this.itemIterator.hasNext()) {
+          return true;
+        }
+        if (this.listIterator != null && listIterator.hasNext()) {
+          this.itemIterator = listIterator.next().iterator();
+          return this.itemIterator.hasNext();
+        }
+        return false;
+      }
+      @Override
+      public Upgrade next() {
+        if (this.itemIterator != null && this.itemIterator.hasNext()) {
+          return this.itemIterator.next();
+        }
+        if (this.listIterator != null && listIterator.hasNext()) {
+          this.itemIterator = listIterator.next().iterator();
+          return this.itemIterator.next();
+        }
+        throw new RuntimeException("No more elements");
+      }
+      @Override
+      public void remove() {
+        throw new RuntimeException("Not implemented");
+      }
+    };
   }
 
   public <T extends Upgrade> List<T> getUpgrades(Class<T> upgradeClass) {

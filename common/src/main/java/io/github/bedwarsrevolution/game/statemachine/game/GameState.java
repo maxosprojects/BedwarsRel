@@ -20,6 +20,7 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -65,7 +66,7 @@ public abstract class GameState {
    */
   public abstract void onEventEntityDamageByPlayer(EntityDamageEvent event, Player damager);
 
-  public abstract void onEventDrop(PlayerDropItemEvent event);
+  public abstract void onEventDropItem(PlayerDropItemEvent event);
 
   public abstract void onEventFly(PlayerToggleFlightEvent event);
 
@@ -184,6 +185,10 @@ public abstract class GameState {
   }
 
   public void onEventExplosionPrime(ExplosionPrimeEvent event) {
+  }
+
+  public void onEventInventoryDrag(InventoryDragEvent event) {
+    event.setCancelled(true);
   }
 
 //  private String getStatus(Game game) {

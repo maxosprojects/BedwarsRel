@@ -1,5 +1,6 @@
 package io.github.bedwarsrevolution.shop;
 
+import com.google.common.collect.ImmutableSet;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
@@ -8,6 +9,7 @@ import io.github.bedwarsrevolution.shop.actions.ShopAction;
 import io.github.bedwarsrevolution.shop.actions.ShopActionBuy;
 import io.github.bedwarsrevolution.shop.actions.ShopActionCategory;
 import io.github.bedwarsrevolution.shop.actions.ShopActionStackPerShift;
+import io.github.bedwarsrevolution.shop.upgrades.Upgrade;
 import io.github.bedwarsrevolution.utils.SoundMachineNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import java.lang.reflect.Method;
@@ -16,20 +18,31 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class Shop {
+  private static final Set<InventoryAction> CHECKED_ACTIONS = ImmutableSet.of(
+      InventoryAction.SWAP_WITH_CURSOR,
+      InventoryAction.PLACE_ALL,
+      InventoryAction.PLACE_ONE,
+      InventoryAction.PLACE_SOME);
 
   private final PlayerContext playerCtx;
   private final Player player;
+  private final String windowName;
   private List<MerchantCategory> categories;
   private Map<String, MerchantCategory> categoryMap = new HashMap<>();
   private String currentCategory = "";
@@ -43,6 +56,7 @@ public class Shop {
     for (MerchantCategory cat : this.categories) {
       this.categoryMap.put(cat.getName(), cat);
     }
+    this.windowName = BedwarsRevol._l(this.player, "ingame.shop.name");
   }
 
   /**
@@ -55,8 +69,7 @@ public class Shop {
     this.actions = Arrays.asList(new ShopAction[size]);
     this.nextSlot = 0;
 
-    Inventory inventory = Bukkit.createInventory(this.player, size, BedwarsRevol
-        ._l(this.player, "ingame.shop.name"));
+    Inventory inventory = Bukkit.createInventory(this.player, size, this.windowName);
 
     GameContext ctx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(this.player);
     if (ctx == null) {
@@ -92,8 +105,15 @@ public class Shop {
   }
 
   public void handleClick(InventoryClickEvent event) {
+    boolean isShop = event.getInventory().getName().equals(this.windowName);
     int rawSlot = event.getRawSlot();
-    if (rawSlot < this.actions.size()) {
+    Inventory clickedInventory = event.getClickedInventory();
+    InventoryView view = event.getView();
+    ItemStack clickedStack = event.getCurrentItem();
+    InventoryAction inventoryAction = event.getAction();
+    ItemStack cursorStack = event.getCursor();
+
+    if (isShop && rawSlot >= 0 && rawSlot < this.actions.size()) {
       event.setCancelled(true);
       Map<String, Object> args = new HashMap<>();
       args.put("InventoryClickEvent", event);
@@ -101,7 +121,45 @@ public class Shop {
       if (action != null) {
         this.actions.get(rawSlot).execute(args);
       }
+      return;
     }
+
+    if (clickedInventory == null) {
+      event.setCancelled(true);
+      return;
+    }
+    if (inventoryAction == InventoryAction.MOVE_TO_OTHER_INVENTORY
+        && (view.getTopInventory().getType() != InventoryType.CRAFTING)
+        && this.isPermanentUpgrade(clickedStack.getType())) {
+      event.setCancelled(true);
+      return;
+    }
+    if (clickedInventory.getType() != InventoryType.PLAYER
+        && CHECKED_ACTIONS.contains(inventoryAction)
+        && this.isPermanentUpgrade(cursorStack.getType())) {
+      event.setCancelled(true);
+    }
+  }
+
+  public void handleDrop(PlayerDropItemEvent event) {
+    ItemStack item = event.getItemDrop().getItemStack();
+    if (this.isPermanentUpgrade(item.getType())) {
+      event.setCancelled(true);
+    }
+  }
+
+  private boolean isPermanentUpgrade(Material material) {
+    for (Upgrade upgrade : this.playerCtx.getAllUpgrades()) {
+      if (upgrade.isPermanent() && upgrade.isMaterial(material)) {
+        return true;
+      }
+    }
+    for (Upgrade upgrade : this.playerCtx.getTeam().getUpgrades().values()) {
+      if (upgrade.isPermanent() && upgrade.isMaterial(material)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void renderCategories(Inventory inventory) {
@@ -155,6 +213,7 @@ public class Shop {
       ShopReward reward = trade.getReward();
       if (trade.getItem1().getType() == Material.AIR
           && reward.getItem().getType() == Material.AIR) {
+        this.nextSlot++;
         continue;
       }
       if (reward.isUpgrade() && !reward.getUpgrade().shouldRender(this.playerCtx)) {
@@ -258,4 +317,5 @@ public class Shop {
     tradeStack.setItemMeta(meta);
     return tradeStack;
   }
+
 }

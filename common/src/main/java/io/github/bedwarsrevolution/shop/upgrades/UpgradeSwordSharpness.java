@@ -8,6 +8,7 @@ import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 public class UpgradeSwordSharpness extends Upgrade {
@@ -78,6 +79,11 @@ public class UpgradeSwordSharpness extends Upgrade {
   public boolean alreadyOwn(PlayerContext playerCtx) {
     UpgradeSwordSharpness existing = playerCtx.getTeam().getUpgrade(UpgradeSwordSharpness.class);
     return existing != null && existing.upgrade == this.upgrade;
+  }
+
+  @Override
+  public boolean isMaterial(Material type) {
+    return false;
   }
 
   @Override

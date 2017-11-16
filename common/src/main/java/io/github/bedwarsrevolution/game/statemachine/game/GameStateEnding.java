@@ -64,7 +64,7 @@ public class GameStateEnding extends GameState {
   }
 
   @Override
-  public void onEventDrop(PlayerDropItemEvent event) {
+  public void onEventDropItem(PlayerDropItemEvent event) {
   }
 
   @Override

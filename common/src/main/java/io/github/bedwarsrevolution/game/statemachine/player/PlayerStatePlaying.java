@@ -354,6 +354,7 @@ public class PlayerStatePlaying extends PlayerState {
 
   @Override
   public void onDropItem(PlayerDropItemEvent event) {
+    this.playerCtx.getShop().handleDrop(event);
   }
 
   @Override
@@ -422,11 +423,6 @@ public class PlayerStatePlaying extends PlayerState {
 
   @Override
   public void onInventoryClick(InventoryClickEvent event) {
-    event.setCancelled(true);
-    ItemStack clickedStack = event.getCurrentItem();
-    if (clickedStack == null) {
-      return;
-    }
     this.playerCtx.getShop().handleClick(event);
   }
 

@@ -12,6 +12,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -174,6 +175,11 @@ public class UpgradeBaseAlarm extends Upgrade {
     return TYPE;
   }
 
+  @Override
+  public boolean isMaterial(Material type) {
+    return false;
+  }
+
   public boolean isLocationIn(Location loc) {
     int x = loc.getBlockX();
     int z = loc.getBlockZ();
@@ -182,10 +188,6 @@ public class UpgradeBaseAlarm extends Upgrade {
 
   public GameContext getGame() {
     return this.gameCtx;
-  }
-
-  public TeamNew getPlacedTeam() {
-    return this.team;
   }
 
 }

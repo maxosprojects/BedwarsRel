@@ -3,6 +3,7 @@ package io.github.bedwarsrevolution.shop.upgrades;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import org.bukkit.Material;
 
 public abstract class Upgrade {
   public abstract UpgradeScope getScope();
@@ -46,4 +47,6 @@ public abstract class Upgrade {
   public boolean alreadyOwn(PlayerContext playerCtx) {
     return false;
   };
+
+  public abstract boolean isMaterial(Material type);
 }
