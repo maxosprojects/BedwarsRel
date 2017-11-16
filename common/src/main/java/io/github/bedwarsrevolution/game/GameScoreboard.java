@@ -17,15 +17,15 @@ public class GameScoreboard extends BedwarsScoreboard {
   private static final String BED_EXISTS = "&a\u2714";
   private static final String TEAM_ELIMINATED = "&c\u2718";
 
-  private final GameStageManager gameStageManager;
+  private final GamePhaseManager gamePhaseManager;
   private int titlePos;
   private int timePos;
   private final Map<String, Integer> teamsMap = new HashMap<>();
   private final String teamFormat;
 
-  public GameScoreboard(GameContext ctx, GameStageManager gameStageManager) {
+  public GameScoreboard(GameContext ctx, GamePhaseManager gamePhaseManager) {
     super(ctx);
-    this.gameStageManager = gameStageManager;
+    this.gamePhaseManager = gamePhaseManager;
 
     this.teamFormat = BedwarsRevol.getInstance().getStringConfig("scoreboard.format-team",
         "$color$&f $team$: $status$");
@@ -53,8 +53,8 @@ public class GameScoreboard extends BedwarsScoreboard {
     String region = "&fMap: &e" + this.ctx.getRegion().getName();
     this.addLine(region);
     this.addLine("");
-    this.titlePos = this.addLine("&b" + this.gameStageManager.getTitle());
-    this.timePos = this.addLine("&a" + this.gameStageManager.getTime());
+    this.titlePos = this.addLine("&b" + this.gamePhaseManager.getTitle());
+    this.timePos = this.addLine("&a" + this.gamePhaseManager.getTime());
     this.addLine("");
 
     for (TeamNew team : this.ctx.getTeams().values()) {
@@ -66,8 +66,8 @@ public class GameScoreboard extends BedwarsScoreboard {
 
   @Override
   public void update() {
-    this.updateLine(this.titlePos, "&b" + this.gameStageManager.getTitle());
-    this.updateLine(this.timePos, "&a" + this.gameStageManager.getTime());
+    this.updateLine(this.titlePos, "&b" + this.gamePhaseManager.getTitle());
+    this.updateLine(this.timePos, "&a" + this.gamePhaseManager.getTime());
 
     for (TeamNew team : this.ctx.getTeams().values()) {
       this.updateLine(this.teamsMap.get(team.getName()), this.formatTeam(team));

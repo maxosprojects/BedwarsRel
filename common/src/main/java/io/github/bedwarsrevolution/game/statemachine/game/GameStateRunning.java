@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.BedwarsScoreboard;
 import io.github.bedwarsrevolution.game.GameScoreboard;
-import io.github.bedwarsrevolution.game.GameStageManager;
+import io.github.bedwarsrevolution.game.GamePhaseManager;
 import io.github.bedwarsrevolution.game.RegionNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
@@ -80,7 +80,7 @@ import org.bukkit.util.Vector;
 public class GameStateRunning extends GameState {
   private static final String TRANSLATION = "running";
 
-  private GameStageManager gameStageManager;
+  private GamePhaseManager gamePhaseManager;
   private BedwarsScoreboard scoreboard;
 
   public GameStateRunning(GameContext ctx) {
@@ -1004,7 +1004,7 @@ public class GameStateRunning extends GameState {
     // If only one team is left then we got the winner
     if (notLostTeams.size() == 1) {
       this.runGameOver(notLostTeams.iterator().next(), false);
-    } else if (this.gameStageManager.isFinished()) {
+    } else if (this.gamePhaseManager.isFinished()) {
       this.runGameOver(null, false);
     }
   }
@@ -1053,7 +1053,7 @@ public class GameStateRunning extends GameState {
           title = TitleWriterNew.pluginMessage(
               BedwarsRevol._l(aPlayer, "ingame.title.draw-title"));
         } else {
-          int playTime = this.gameStageManager.getPlaytime();
+          int playTime = this.gamePhaseManager.getPlaytime();
           String formattedTime = UtilsNew.getFormattedTime(playTime);
           if (aPlayerCtx.getTeam() == winner) {
             title = TitleWriterNew.pluginMessage(
@@ -1169,14 +1169,14 @@ public class GameStateRunning extends GameState {
   }
 
   private void initStage() {
-    this.gameStageManager = new GameStageManager(this.ctx);
-    this.scoreboard = new GameScoreboard(this.ctx, this.gameStageManager);
+    this.gamePhaseManager = new GamePhaseManager(this.ctx);
+    this.scoreboard = new GameScoreboard(this.ctx, this.gamePhaseManager);
     this.scoreboard.init();
     BukkitRunnable task = new BukkitRunnable() {
 
       @Override
       public void run() {
-        GameStageManager manager = GameStateRunning.this.gameStageManager;
+        GamePhaseManager manager = GameStateRunning.this.gamePhaseManager;
         manager.tick();
         if (manager.isFinished()) {
           this.cancel();

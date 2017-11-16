@@ -19,20 +19,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 /**
  * Created by {maxos} 2017
  */
-public class GameStageManager {
+public class GamePhaseManager {
   private final GameContext ctx;
   private int timeLeft;
-  private GameStage currentStage;
+  private GamePhase currentStage;
   private int timeOverall = 0;
 
-  private enum GameStage {
+  private enum GamePhase {
     DIAMOND_II(5, "diamond", 15000, "Diamond Tier II", "&b&lDiamond Generators &6upgraded to &eTier II"),
     EMERALD_II(5, "emerald", 25000, "Emerald Tier II", "&a&lEmerald Generators &6upgraded to &eTier II"),
     DIAMOND_III(5, "diamond", 7000, "Diamond Tier III", "&b&lDiamond Generators &6upgraded to &eTier III"),
     EMERALD_III(5, "emerald", 12000, "Emerald Tier III", "&a&lEmerald Generators &6upgraded to &eTier III"),
     BED_DESTRUCTION(3, "Bed destruction") {
       @Override
-      protected void end(GameStageManager manager) {
+      protected void end(GamePhaseManager manager) {
         for (TeamNew team : manager.ctx.getTeams().values()) {
           team.getHeadTarget().breakNaturally();
           if (BedwarsRevol.getInstance().getCurrentVersion().startsWith("v1_12")) {
@@ -46,7 +46,7 @@ public class GameStageManager {
     },
     DRAGONS_ATTACK(3, "Dragons attack") {
       @Override
-      protected void end(GameStageManager manager) {
+      protected void end(GamePhaseManager manager) {
         Random rnd = new Random();
         for (TeamNew team : manager.ctx.getTeams().values()) {
           Set<Player> friendlyPlayers = new HashSet<>();
@@ -61,7 +61,7 @@ public class GameStageManager {
     },
     TIE(4, "Tie") {
       @Override
-      protected void end(GameStageManager manager) {
+      protected void end(GamePhaseManager manager) {
       }
     };
 
@@ -100,38 +100,38 @@ public class GameStageManager {
     private final String title;
     private String msg;
 
-    GameStage(int length, String resourceName, int newInterval, String title, String msg) {
+    GamePhase(int length, String resourceName, int newInterval, String title, String msg) {
       this(length, title);
       this.resourceName = resourceName;
       this.newInterval = newInterval;
       this.msg = msg;
     }
 
-    GameStage(int length, String title) {
+    GamePhase(int length, String title) {
       this.length = length * 60;
       this.title = title;
     }
 
-    public void tick(GameStageManager manager) {
+    public void tick(GamePhaseManager manager) {
       manager.timeLeft--;
       if (this.isFinished(manager)) {
         this.next(manager);
       }
     }
 
-    private boolean isFinished(GameStageManager manager) {
+    private boolean isFinished(GamePhaseManager manager) {
       return manager.timeLeft <= 0;
     }
 
-    private void next(GameStageManager manager) {
-      if (this.ordinal() < GameStage.values().length - 1) {
+    private void next(GamePhaseManager manager) {
+      if (this.ordinal() < GamePhase.values().length - 1) {
         this.end(manager);
-        manager.currentStage = GameStage.values()[this.ordinal() + 1];
+        manager.currentStage = GamePhase.values()[this.ordinal() + 1];
         manager.timeLeft = manager.currentStage.length;
       }
     }
 
-    protected void end(GameStageManager manager) {
+    protected void end(GamePhaseManager manager) {
       Map<String, Integer> map = ImmutableMap.of(this.resourceName, this.newInterval);
       manager.ctx.getResourceSpawnerManager().restart(map, null);
       this.tellAllPlayers(manager, this.msg);
@@ -141,20 +141,20 @@ public class GameStageManager {
       return this.title + " in:";
     }
 
-    public String getTime(GameStageManager manager) {
+    public String getTime(GamePhaseManager manager) {
       return UtilsNew.getFormattedTime(manager.timeLeft);
     }
 
-    protected void tellAllPlayers(GameStageManager manager, String string) {
+    protected void tellAllPlayers(GamePhaseManager manager, String string) {
       for (PlayerContext playerCtx : manager.ctx.getPlayers()) {
         playerCtx.getPlayer().sendMessage(ChatWriterNew.pluginMessage(string));
       }
     }
   }
 
-  public GameStageManager(GameContext ctx) {
+  public GamePhaseManager(GameContext ctx) {
     this.ctx = ctx;
-    this.currentStage = GameStage.DIAMOND_II;
+    this.currentStage = GamePhase.DIAMOND_II;
     this.timeLeft = this.currentStage.getLength();
   }
 
