@@ -124,17 +124,13 @@ public class Shop {
       return;
     }
 
-    if (clickedInventory == null) {
-      event.setCancelled(true);
-      return;
-    }
     if (inventoryAction == InventoryAction.MOVE_TO_OTHER_INVENTORY
         && (view.getTopInventory().getType() != InventoryType.CRAFTING)
         && this.isPermanentUpgrade(clickedStack.getType())) {
       event.setCancelled(true);
       return;
     }
-    if (clickedInventory.getType() != InventoryType.PLAYER
+    if ((clickedInventory == null || clickedInventory.getType() != InventoryType.PLAYER)
         && CHECKED_ACTIONS.contains(inventoryAction)
         && this.isPermanentUpgrade(cursorStack.getType())) {
       event.setCancelled(true);
