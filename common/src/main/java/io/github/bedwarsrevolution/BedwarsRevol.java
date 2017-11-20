@@ -3,6 +3,7 @@ package io.github.bedwarsrevolution;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.google.common.collect.ImmutableMap;
+import io.github.bedwarsrevolution.blockdiguise.BlockDisguiser;
 import io.github.bedwarsrevolution.commands.AddGameCommand;
 import io.github.bedwarsrevolution.commands.AddHoloCommand;
 import io.github.bedwarsrevolution.commands.AddTeamCommand;
@@ -881,6 +882,7 @@ public class BedwarsRevol extends JavaPlugin {
     new ChunkListenerNew();
     new InvisibilityPotionListenerNew().registerInterceptor();
     new SoundListenerNew().registerInterceptor();
+    new BlockDisguiser(this).registerListener();
 
     if (this.isSpigot()) {
       new PlayerSpigotListenerNew();
