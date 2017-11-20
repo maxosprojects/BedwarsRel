@@ -1,11 +1,16 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 
 /**
  * Created by {maxos} 2017
  */
 public class PaletteReader implements Iterator<Integer> {
+  private static int incr = 0;
+
   private int startIndex;
   private int currIndex;
   private byte[] data;
@@ -15,6 +20,21 @@ public class PaletteReader implements Iterator<Integer> {
   public static PaletteReader read(byte[] data, int offset) {
     PaletteReader palette = new PaletteReader();
     VarInt lengthVarInt = VarInt.read(data, offset);
+//    try {
+//      lengthVarInt = VarInt.read(data, offset);
+//    } catch (Exception e) {
+//      System.out.println("Exception occurred, offset: " + offset);
+//      try {
+//        OutputStream os = new FileOutputStream("packet-data-ex" + incr + ".bin");
+//        incr++;
+//        os.write(data);
+//        os.flush();
+//        os.close();
+//      } catch (java.io.IOException e1) {
+//        e1.printStackTrace();
+//      }
+//      throw e;
+//    }
     palette.data = data;
     palette.length = lengthVarInt.getResult();
     palette.startIndex = offset + lengthVarInt.getSize();

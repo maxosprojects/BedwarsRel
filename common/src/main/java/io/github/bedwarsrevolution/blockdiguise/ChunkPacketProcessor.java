@@ -54,9 +54,10 @@ public class ChunkPacketProcessor {
    * @param processor - section processor
    */
   public void process(SectionProcessor processor) {
+//    System.out.println(String.format("Starting to process chunk (%s,%s)", this.chunkX, this.chunkZ));
     Section section = Section.toSection(this.data, this.chunkMask, this.isOverworld(), this.isContinuous);
     for (int i = 0; i < SECTIONS_IN_CHUNK; i++) {
-      processor.processSection(this.chunkX, this.chunkZ, i, section);
+      processor.processSection(this.chunkX, i, this.chunkZ, section);
       if (i < SECTIONS_IN_CHUNK - 1) {
         section = section.nextSection();
       }

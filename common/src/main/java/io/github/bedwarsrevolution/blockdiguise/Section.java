@@ -45,6 +45,8 @@ public class Section {
       section = new EmptySection();
     } else {
       section = new Section();
+      section.bitsPerBlock = data[offset];
+      section.palette = PaletteReader.read(data, offset + 1);
     }
     section.data = data;
     section.mask = mask;
@@ -52,8 +54,6 @@ public class Section {
     section.overworld = overworld;
     section.sectionNumber = sectionNumber;
     section.offset = offset;
-    section.bitsPerBlock = data[offset];
-    section.palette = PaletteReader.read(data, offset + 1);
     return section;
   }
 

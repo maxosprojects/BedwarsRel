@@ -136,7 +136,7 @@ public class BlockDisguiser {
       @Override
       public void processSection(final int chunkX, final int sectionY, final int chunkZ, Section section) {
 
-        System.out.println(String.format("Processing section (%s,%s,%s)", chunkX, chunkZ, sectionY));
+//        System.out.println(String.format("Processing section (%s,%s,%s)", chunkX, sectionY, chunkZ));
 
         SectionTable sectionTable = chunksTable.getSectionTable(player.getWorld().getName(), chunkX, sectionY, chunkZ);
         sectionTable.process(new SectionExecutor() {
@@ -146,7 +146,7 @@ public class BlockDisguiser {
               return;
             }
 
-            System.out.println(String.format("Data found for section (%s,%s,%s)", chunkX, sectionY, chunkZ));
+//            System.out.println(String.format("Data found for section (%s,%s,%s)", chunkX, sectionY, chunkZ));
 
             final WrapperPlayServerMultiBlockChange packet = new WrapperPlayServerMultiBlockChange();
             ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair(chunkX, chunkZ);
@@ -162,7 +162,7 @@ public class BlockDisguiser {
               @Override
               public void run() {
 
-                System.out.println(String.format("Sending MultiBlockChange packet for (%s,%s,%s)", chunkX, sectionY, chunkZ));
+//                System.out.println(String.format("Sending MultiBlockChange packet for (%s,%s,%s)", chunkX, sectionY, chunkZ));
 
                 packet.sendPacket(player);
               }
@@ -180,7 +180,7 @@ public class BlockDisguiser {
     int y = location.getY();
     int z = location.getZ();
 
-    System.out.println(String.format("Processing Block change: (%s,%s,%s)", x, y, z));
+//    System.out.println(String.format("Processing Block change: (%s,%s,%s)", x, y, z));
 
     SectionTable sectionTable = chunksTable.getSectionTable(player.getWorld().getName(),
         x >> 4, y >> 4, z >> 4);
@@ -192,7 +192,7 @@ public class BlockDisguiser {
     data.setType(block.getType());
     wrapped.setBlockData(data);
 
-    System.out.println(String.format("Updated Block change: (%s,%s,%s) %s", x, y, z, block.getType()));
+//    System.out.println(String.format("Updated Block change: (%s,%s,%s) %s", x, y, z, block.getType()));
   }
 
   private void translateMultiBlockChange(ChunksTable chunksTable, Player player,
@@ -205,7 +205,7 @@ public class BlockDisguiser {
       int y = location.getBlockY();
       int z = location.getBlockZ();
 
-      System.out.println(String.format("Processing MultiBlock change: (%s,%s,%s)", x, y, z));
+//      System.out.println(String.format("Processing MultiBlock change: (%s,%s,%s)", x, y, z));
 
       SectionTable sectionTable = chunksTable.getSectionTable(player.getWorld().getName(),
           x >> 4, y >> 4, z >> 4);
@@ -217,7 +217,7 @@ public class BlockDisguiser {
       data.setType(block.getType());
       record.setData(data);
 
-      System.out.println(String.format("Updated MultiBlock change: (%s,%s,%s)", x, y, z));
+//      System.out.println(String.format("Updated MultiBlock change: (%s,%s,%s)", x, y, z));
     }
   }
 
@@ -243,7 +243,7 @@ public class BlockDisguiser {
           new BukkitRunnable() {
             @Override
             public void run() {
-              System.out.println(String.format("Sending BlockChange packet for (%s,%s,%s)", x, y, z));
+//              System.out.println(String.format("Sending BlockChange packet for (%s,%s,%s)", x, y, z));
               packet.sendPacket(player);
             }
           }.runTaskLater(plugin, 1);
