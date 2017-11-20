@@ -2,6 +2,7 @@ package io.github.bedwarsrevolution.game.statemachine.game;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.blockdiguise.BlockDisguiser;
 import io.github.bedwarsrevolution.game.BedwarsScoreboard;
 import io.github.bedwarsrevolution.game.GameScoreboard;
 import io.github.bedwarsrevolution.game.GamePhaseManager;
@@ -693,6 +694,25 @@ public class GameStateRunning extends GameState {
     if (block.getType() == Material.TNT) {
       event.setCancelled(true);
       this.spawnTnt(player, block);
+    } else if (block.getType() == Material.PISTON_STICKY_BASE) {
+      event.setCancelled(true);
+      this.placeLandmine(event, playerCtx);
+    }
+  }
+
+  private void placeLandmine(BlockPlaceEvent event, PlayerContext playerCtx) {
+    Block replacedBlock = event.getBlock().getRelative(BlockFace.DOWN);
+    final Player player = event.getPlayer();
+    BlockDisguiser disguiser = BedwarsRevol.getInstance().getBlockDisguiser();
+    if (disguiser.add(playerCtx.getTeam(), replacedBlock.getLocation(), Material.PISTON_STICKY_BASE)) {
+      new BukkitRunnable() {
+        public void run() {
+          PlayerInventory inv = player.getInventory();
+          int slot = inv.getHeldItemSlot();
+          ItemStack stack = inv.getItem(slot);
+          stack.setAmount(stack.getAmount() - 1);
+        }
+      }.runTaskLater(BedwarsRevol.getInstance(), 1L);
     }
   }
 

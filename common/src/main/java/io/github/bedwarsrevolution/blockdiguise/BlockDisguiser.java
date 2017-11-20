@@ -1,23 +1,32 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
+import com.comphenix.packetwrapper.WrapperPlayServerBlockChange;
+import com.comphenix.packetwrapper.WrapperPlayServerMultiBlockChange;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter.AdapterParameteters;
+import com.comphenix.protocol.wrappers.BlockPosition;
+import com.comphenix.protocol.wrappers.ChunkCoordIntPair;
+import com.comphenix.protocol.wrappers.MultiBlockChangeInfo;
+import com.comphenix.protocol.wrappers.WrappedBlockData;
 import io.github.bedwarsrevolution.BedwarsRevol;
 
+import io.github.bedwarsrevolution.game.TeamNew;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.reflect.FieldAccessException;
-import com.comphenix.protocol.reflect.StructureModifier;
-import com.google.common.collect.HashBasedTable;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Simple class that can be used to alter the apperance of a number of blocks.
@@ -27,27 +36,11 @@ import org.bukkit.entity.Player;
 public class BlockDisguiser {
 
   private final BedwarsRevol plugin;
-  private final Map<Player, HashBasedTable<ChunkCoordinate, BlockCoordinate, Integer>> translations = new HashMap<>();
+  private final Map<TeamNew, ChunksTable> chunksMap = new HashMap<>();
   private PacketAdapter listener;
 
   public BlockDisguiser(BedwarsRevol plugin) {
     this.plugin = plugin;
-  }
-
-  /**
-   * Create a new translated block that have a different block ID on the server and visually for a
-   * client.
-   *
-   * @param loc - the location of the block.
-   * @param replaceWith - the material this block will appear as on the client side.
-   */
-  public void setTranslatedBlock(Player player, Location loc, int replaceWith) {
-    HashBasedTable<ChunkCoordinate, BlockCoordinate, Integer> map = this.translations.get(player);
-    if (map == null) {
-      map = HashBasedTable.create();
-      this.translations.put(player, map);
-    }
-    map.put(ChunkCoordinate.fromBlock(loc), new BlockCoordinate(loc), replaceWith);
   }
 
   public void registerListener() {
@@ -57,43 +50,32 @@ public class BlockDisguiser {
         .listenerPriority(ListenerPriority.HIGHEST)
         .types(Server.BLOCK_CHANGE,
             Server.MULTI_BLOCK_CHANGE,
-            Server.MAP_CHUNK,
-            Server.MAP_CHUNK_BULK)) {
+            Server.MAP_CHUNK)) {
       @Override
       public void onPacketSending(PacketEvent event) {
-        PacketContainer packet = event.getPacket();
-        World world = event.getPlayer().getWorld();
-        PacketType type = event.getPacketType();
         Player player = event.getPlayer();
+        GameContext game = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+        if (game == null) {
+          return;
+        }
+        TeamNew team = game.getPlayerContext(player).getTeam();
+        if (team == null) {
+          return;
+        }
+        ChunksTable chunksTable = chunksMap.get(team);
+        if (chunksTable == null) {
+          return;
+        }
+        World world = event.getPlayer().getWorld();
+        PacketContainer packet = event.getPacket();
+        PacketType type = event.getPacketType();
         if (type == Server.BLOCK_CHANGE) {
-          translateBlockChange(player, packet, world);
+          translateBlockChange(chunksTable, player, packet);
         } else if (type == Server.MULTI_BLOCK_CHANGE) {
-          translateMultiBlockChange(player, packet, world);
+          translateMultiBlockChange(chunksTable, player, packet);
         } else if (type == Server.MAP_CHUNK) {
-          final SectionProcessor sectionProcessor = getSectionProcessor(player);
+          final SectionProcessor sectionProcessor = getSectionProcessor(chunksTable, player);
           ChunkPacketProcessor.read(packet, world).process(sectionProcessor);
-//          if (proc.chunkX == 0 && proc.chunkZ == 0) {
-//            StringBuilder sb = new StringBuilder();
-//            for (byte bite : proc.data) {
-//              sb.append(String.format("0x%02x ", bite));
-//            }
-//            System.out.println(String.format("bytes: %s, characters: %s", proc.data.length, sb.length()));
-//            System.out.println(sb);
-//            System.out.println(String.format("bytes: %s, isContinuous: %s, chunkMask: 0x%04x", proc.data.length, proc.isContinuous, proc.chunkMask));
-//            try {
-//              FileOutputStream os = new FileOutputStream("packet-data.bin");
-//              os.write(proc.data);
-//              os.flush();
-//              os.close();
-//            } catch (IOException e) {
-//              e.printStackTrace();
-//            }
-//          }
-        } else if (type == Server.MAP_CHUNK_BULK) {
-          // TODO: do something for 1.8
-//              for (ChunkPacketProcessor chunk : ChunkPacketProcessor.fromMapBulkPacket(packet, world)) {
-//                chunk.process(processor);
-//              }
         }
       }
     });
@@ -106,67 +88,121 @@ public class BlockDisguiser {
     }
   }
 
-  private SectionProcessor getSectionProcessor(final Player player) {
+  private SectionProcessor getSectionProcessor(final ChunksTable chunksTable, final Player player) {
     return new SectionProcessor() {
       @Override
-      public void processSection(int chunkX, int chunkZ, int sectionY, Section section) {
-        if (chunkX == 0 && chunkZ == 0 && sectionY == 3 && !section.isEmpty()) {
-//          DataManager data = section.getDataManager();
-//          int blockData = data.getBlockData(x, y, z);
-//          System.out.println(String.format("(%s,%s,%s, block: %d:%d",
-//              x, sectionY * 16 + y, z, blockData >> 4, blockData & 0x0f));
-//          data.setBlockData(x, y, z, 1);
-        }
+      public void processSection(final int chunkX, final int chunkZ, final int sectionY, Section section) {
+        SectionTable sectionTable = chunksTable.getSectionTable(player.getWorld().getName(), chunkX, chunkZ, sectionY);
+        sectionTable.process(new SectionExecutor() {
+          @Override
+          public void execute(Collection<BlockData> data) {
+            if (data.size() == 0) {
+              return;
+            }
+            final WrapperPlayServerMultiBlockChange packet = new WrapperPlayServerMultiBlockChange();
+            ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair(chunkX, chunkZ);
+            packet.setChunk(chunkCoords);
+            MultiBlockChangeInfo[] records = new MultiBlockChangeInfo[data.size()];
+            int index = 0;
+            for (BlockData block : data) {
+              records[index] = block.toChangeInfo(chunkCoords);
+              index++;
+            }
+            packet.setRecords(records);
+            new BukkitRunnable() {
+              @Override
+              public void run() {
+                System.out.println(String.format("Sending MultiBlockChange packet for (%s,%s,%s)", chunkX, sectionY, chunkZ));
+                packet.sendPacket(player);
+              }
+            }.runTaskLater(plugin, 1);
+          }
+        });
       }
     };
   }
 
-  private void translateBlockChange(Player player, PacketContainer packet, World world)
-      throws FieldAccessException {
-    StructureModifier<Integer> ints = packet.getIntegers();
-    int x = ints.read(0);
-    int y = ints.read(1);
-    int z = ints.read(2);
-    int blockID = ints.read(3);
+  private void translateBlockChange(ChunksTable chunksTable, Player player, PacketContainer packet) {
+    WrapperPlayServerBlockChange wrapped = new WrapperPlayServerBlockChange(packet);
+    BlockPosition location = wrapped.getLocation();
+    int x = location.getX();
+    int y = location.getY();
+    int z = location.getZ();
 
-    System.out.println("Block change: " + x + ", " + y + ", " + z);
-
-    // Convert using the tables
-    ints.write(3, translateBlockID(player, world, x, y, z, blockID));
-  }
-
-  private void translateMultiBlockChange(Player player, PacketContainer packet, World world)
-      throws FieldAccessException {
-//    StructureModifier<byte[]> byteArrays = packet.getByteArrays();
-//    StructureModifier<Integer> ints = packet.getIntegers();
-//
-//    int baseX = ints.read(0) << 4;
-//    int baseZ = ints.read(1) << 4;
-//    BlockChangeArray data = new BlockChangeArray(byteArrays.read(0));
-//
-//    for (int i = 0; i < data.getSize(); i++) {
-//      BlockChange change = data.getBlockChange(i);
-//      change.setBlockID(translateBlockID(
-//          player,
-//          world,
-//          baseX + change.getRelativeX(),
-//          change.getAbsoluteY(),
-//          baseZ + change.getRelativeZ(),
-//          change.getBlockID()
-//      ));
-//    }
-//    byteArrays.write(0, data.toByteArray());
-  }
-
-  private int translateBlockID(Player player, World world, int x, int y, int z, int blockID) {
-    HashBasedTable<ChunkCoordinate, BlockCoordinate, Integer> map = this.translations.get(player);
-    if (map == null) {
-      return blockID;
+    SectionTable sectionTable = chunksTable.getSectionTable(player.getWorld().getName(),
+        x >> 4, z >> 4, y >> 4);
+    BlockData block = sectionTable.get(x, y, z);
+    if (block == null) {
+      return;
     }
-    Integer translate = map.get(
-        ChunkCoordinate.fromBlock(world, x, z), new BlockCoordinate(x, y, z));
+    WrappedBlockData data = wrapped.getBlockData();
+    data.setType(block.getType());
+    wrapped.setBlockData(data);
 
-    // Use the existing block ID if not found
-    return translate == null ? blockID : translate;
+//    System.out.println(String.format("Block change: (%s,%s,%s) %s", x, y, z, block.getType()));
   }
+
+  private void translateMultiBlockChange(ChunksTable chunksTable, Player player,
+      PacketContainer packet) {
+    World world = player.getWorld();
+    WrapperPlayServerMultiBlockChange wrapped = new WrapperPlayServerMultiBlockChange(packet);
+    for (MultiBlockChangeInfo record : wrapped.getRecords()) {
+      Location location = record.getLocation(world);
+      int x = location.getBlockX();
+      int y = location.getBlockY();
+      int z = location.getBlockZ();
+      SectionTable sectionTable = chunksTable.getSectionTable(player.getWorld().getName(),
+          x >> 4, z >> 4, y >> 4);
+      BlockData block = sectionTable.get(x, y, z);
+      if (block == null) {
+        continue;
+      }
+      WrappedBlockData data = record.getData();
+      data.setType(block.getType());
+      record.setData(data);
+    }
+
+//    System.out.println(String.format("MultiBlock change: %s", wrapped.getChunk()));
+  }
+
+  public boolean add(TeamNew team, Location location, Material material) {
+    ChunksTable table = this.chunksMap.get(team);
+    if (table == null) {
+      table = new ChunksTable();
+      this.chunksMap.put(team, table);
+    }
+    boolean result = table.add(location, material);
+    if (result) {
+      final WrapperPlayServerBlockChange packet = new WrapperPlayServerBlockChange();
+      final int x = location.getBlockX();
+      final int y = location.getBlockY();
+      final int z = location.getBlockZ();
+      BlockPosition pos = new BlockPosition(x, y, z);
+      packet.setLocation(pos);
+      WrappedBlockData data = WrappedBlockData.createData(material);
+      packet.setBlockData(data);
+      for (PlayerContext playerCtx : team.getPlayers()) {
+        final Player player = playerCtx.getPlayer();
+        if (player.getWorld().isChunkLoaded(x >> 4, z >> 4)) {
+          new BukkitRunnable() {
+            @Override
+            public void run() {
+              System.out.println(String.format("Sending BlockChange packet for (%s,%s,%s)", x, y, z));
+              packet.sendPacket(player);
+            }
+          }.runTaskLater(plugin, 1);
+        }
+      }
+    }
+    return result;
+  }
+
+  public boolean remove(TeamNew team, Location location) {
+    ChunksTable table = this.chunksMap.get(team);
+    if (table == null) {
+      return false;
+    }
+    return table.remove(location);
+  }
+
 }
