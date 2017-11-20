@@ -11,8 +11,8 @@ import org.bukkit.Material;
 public class ChunksTable {
   private Map<SectionCoordinate, SectionTable> map = new HashMap<>();
 
-  public SectionTable getSectionTable(String world, int chunkX, int chunkZ, int sectionY) {
-    SectionTable section = this.map.get(SectionCoordinate.fromBlock(world, chunkX, chunkZ, sectionY));
+  public SectionTable getSectionTable(String world, int chunkX, int sectionY, int chunkZ) {
+    SectionTable section = this.map.get(SectionCoordinate.fromSection(world, chunkX, sectionY, chunkZ));
     if (section == null) {
       return EmptySectionTable.instance;
     }

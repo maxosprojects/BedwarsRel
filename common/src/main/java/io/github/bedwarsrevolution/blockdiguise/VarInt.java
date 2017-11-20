@@ -13,24 +13,24 @@ public class VarInt {
   }
 
   public static VarInt read(byte[] data, int startIndex) {
-    int result = 0;
     int index = startIndex;
-    int shift = 0;
+    int numRead = 0;
+    int result = 0;
     byte read;
 
     do {
       read = data[index];
-      result |= (read & 127) << (shift * 7);
+      int value = (read & 0b01111111);
+      result |= (value << (7 * numRead));
       index++;
-      shift++;
-      if (shift > 5) {
+      numRead++;
+      if (numRead > 5) {
         throw new RuntimeException("VarInt is too big");
       }
-    } while ((read & 128) != 0);
+    } while ((read & 0b10000000) != 0);
 
-    return new VarInt(result, shift);
+    return new VarInt(result, numRead);
   }
-
 
   public int getResult() {
     return result;
