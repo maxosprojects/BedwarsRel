@@ -48,7 +48,7 @@ public class RegularSectionTable implements SectionTable {
 
   private boolean add(BlockCoordinate coord, BlockData block) {
     BlockData existing = this.map.get(coord);
-    if (existing != null && existing.is(block.getType())) {
+    if (existing != null && existing.is(block.getType(), block.getMetaData())) {
       return false;
     }
     this.map.put(coord, block);

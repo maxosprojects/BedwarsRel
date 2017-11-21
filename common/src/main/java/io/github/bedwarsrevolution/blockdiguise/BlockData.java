@@ -14,14 +14,16 @@ public class BlockData {
   private final int y;
   private final int z;
   private final Material material;
+  private final int metaData;
   private final WrappedBlockData blockData;
   private final short compactLocation;
 
-  public BlockData(int x, int y, int z, Material material) {
+  public BlockData(int x, int y, int z, Material material, int metaData) {
     this.x = x;
     this.y = y;
     this.z = z;
     this.material = material;
+    this.metaData = metaData;
     this.blockData = WrappedBlockData.createData(material);
     this.compactLocation = this.getCompactLocation();
   }
@@ -39,6 +41,10 @@ public class BlockData {
     return this.material;
   }
 
+  public int getMetaData() {
+    return this.metaData;
+  }
+
   public MultiBlockChangeInfo toChangeInfo(ChunkCoordIntPair chunkCoord) {
     return new MultiBlockChangeInfo(this.compactLocation, blockData, chunkCoord);
   }
@@ -47,7 +53,7 @@ public class BlockData {
     return this.x == x && this.y == y && this.z == z;
   }
 
-  public boolean is(Material other) {
-    return other == this.material;
+  public boolean is(Material otherMaterial, int otherMetaData) {
+    return otherMaterial == this.material && otherMetaData == this.metaData;
   }
 }

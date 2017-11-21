@@ -190,6 +190,7 @@ public class BlockDisguiser {
     }
     WrappedBlockData data = wrapped.getBlockData();
     data.setType(block.getType());
+    data.setData(block.getMetaData());
     wrapped.setBlockData(data);
 
 //    System.out.println(String.format("Updated Block change: (%s,%s,%s) %s", x, y, z, block.getType()));
@@ -215,19 +216,20 @@ public class BlockDisguiser {
       }
       WrappedBlockData data = record.getData();
       data.setType(block.getType());
+      data.setData(block.getMetaData());
       record.setData(data);
 
 //      System.out.println(String.format("Updated MultiBlock change: (%s,%s,%s)", x, y, z));
     }
   }
 
-  public boolean add(TeamNew team, Location location, Material material) {
+  public boolean add(TeamNew team, Location location, Material material, int metaData) {
     ChunksTable table = this.chunksMap.get(team);
     if (table == null) {
       table = new ChunksTable();
       this.chunksMap.put(team, table);
     }
-    boolean result = table.add(location, material);
+    boolean result = table.add(location, material, metaData);
     if (result) {
       final WrapperPlayServerBlockChange packet = new WrapperPlayServerBlockChange();
       final int x = location.getBlockX();
@@ -235,7 +237,7 @@ public class BlockDisguiser {
       final int z = location.getBlockZ();
       BlockPosition pos = new BlockPosition(x, y, z);
       packet.setLocation(pos);
-      WrappedBlockData data = WrappedBlockData.createData(material);
+      WrappedBlockData data = WrappedBlockData.createData(material, metaData);
       packet.setBlockData(data);
       for (PlayerContext playerCtx : team.getPlayers()) {
         final Player player = playerCtx.getPlayer();

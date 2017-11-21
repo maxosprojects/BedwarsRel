@@ -23,13 +23,14 @@ public class ChunksTable {
    *
    * @param location
    * @param material
+   * @param metaData
    * @return true if added/replaced, false otherwise (if existed already)
    */
-  public boolean add(Location location, Material material) {
+  public boolean add(Location location, Material material, int metaData) {
     int x = location.getBlockX();
     int y = location.getBlockY();
     int z = location.getBlockZ();
-    BlockData block = new BlockData(x, y, z, material);
+    BlockData block = new BlockData(x, y, z, material, metaData);
 
     SectionCoordinate coord = SectionCoordinate.fromBlock(location);
     SectionTable section = this.map.get(coord);
