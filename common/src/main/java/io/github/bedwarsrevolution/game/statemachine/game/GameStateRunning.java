@@ -701,10 +701,15 @@ public class GameStateRunning extends GameState {
   }
 
   private void placeLandmine(BlockPlaceEvent event, PlayerContext playerCtx) {
-    Block replacedBlock = event.getBlock().getRelative(BlockFace.DOWN);
+    Block blockPlaced = event.getBlock();
+    Block blockPlacedAgainst = event.getBlockAgainst();
+    if (blockPlaced.getFace(blockPlacedAgainst) != BlockFace.DOWN
+        || !blockPlacedAgainst.getType().isOccluding()) {
+      return;
+    }
     final Player player = event.getPlayer();
     BlockDisguiser disguiser = BedwarsRevol.getInstance().getBlockDisguiser();
-    if (disguiser.add(playerCtx.getTeam(), replacedBlock.getLocation(), Material.PISTON_STICKY_BASE, 1)) {
+    if (disguiser.add(playerCtx.getTeam(), blockPlacedAgainst.getLocation(), Material.PISTON_STICKY_BASE, 1)) {
       new BukkitRunnable() {
         public void run() {
           PlayerInventory inv = player.getInventory();
@@ -713,6 +718,8 @@ public class GameStateRunning extends GameState {
           stack.setAmount(stack.getAmount() - 1);
         }
       }.runTaskLater(BedwarsRevol.getInstance(), 1L);
+    } else {
+      player.updateInventory();
     }
   }
 
