@@ -41,11 +41,11 @@ public class ChunksTable {
     return section.add(location, block);
   }
 
-  public boolean remove(Location location) {
+  public BlockData remove(Location location) {
     SectionCoordinate coord = SectionCoordinate.fromBlock(location);
     SectionTable section = this.map.get(coord);
     if (section == null) {
-      return false;
+      return null;
     }
     return section.remove(location);
   }

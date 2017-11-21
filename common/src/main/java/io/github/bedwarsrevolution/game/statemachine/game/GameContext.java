@@ -1,6 +1,9 @@
 package io.github.bedwarsrevolution.game.statemachine.game;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.blockdiguise.BlockCoordinate;
 import io.github.bedwarsrevolution.game.Cooldown;
 import io.github.bedwarsrevolution.game.GameCheckResult;
 import io.github.bedwarsrevolution.game.GameJoinSignNew;
@@ -9,6 +12,7 @@ import io.github.bedwarsrevolution.game.RegionNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerManager;
 import io.github.bedwarsrevolution.game.RespawnProtectionRunnableNew;
 import io.github.bedwarsrevolution.game.TeamNew;
+import io.github.bedwarsrevolution.game.Trigger;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.holo.FloatingItem;
 import io.github.bedwarsrevolution.shop.MerchantCategory;
@@ -33,6 +37,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -105,6 +110,7 @@ public class GameContext {
   private Map<String, Cooldown> cooldowns = new HashMap<>();
   private List<FloatingItem> floatingItems = new ArrayList<>();
   private Map<Material, ItemStack> shopItemsRegistry;
+  private Multimap<BlockCoordinate, Trigger> triggers = ArrayListMultimap.create();
 
   public GameContext(String name) {
     this.name = name;
@@ -260,6 +266,7 @@ public class GameContext {
 //    // clear protections
 //    this.clearProtections();
 
+    this.triggers = ArrayListMultimap.create();
     this.stopRunningTasks();
     this.resourceSpawnerManager.reset();
     this.resetRegion();
@@ -516,4 +523,39 @@ public class GameContext {
     this.state = new GameStateWaiting(this);
   }
 
+  public void addTrigger(Location loc, Trigger trigger) {
+    this.triggers.put(new BlockCoordinate(loc), trigger);
+  }
+
+  public void removeTrigger(Location loc, Trigger trigger) {
+    this.triggers.remove(new BlockCoordinate(loc), trigger);
+  }
+
+  public void removeTriggersAt(Location loc) {
+    this.triggers.removeAll(loc);
+  }
+
+  public void onLocationTrigger(final PlayerContext playerCtx, final Location loc) {
+    Collection<Trigger> matches = this.triggers.get(new BlockCoordinate(loc));
+    if (matches.isEmpty()) {
+      return;
+    }
+    boolean shouldTrigger = false;
+    TeamNew team = playerCtx.getTeam();
+    for (final Trigger trigger : matches) {
+      shouldTrigger = shouldTrigger || trigger.shouldTrigger(team);
+    }
+    if (!shouldTrigger) {
+      return;
+    }
+    BedwarsRevol.getInstance().getBlockDisguiser().removeAll(loc.getBlock().getRelative(BlockFace.DOWN).getLocation());
+    for (final Trigger trigger : this.triggers.removeAll(new BlockCoordinate(loc))) {
+      this.addRunningTask(new BukkitRunnable() {
+        @Override
+        public void run() {
+          trigger.activate(playerCtx, loc);
+        }
+      }.runTaskLater(BedwarsRevol.getInstance(), 1));
+    }
+  }
 }

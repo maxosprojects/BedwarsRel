@@ -32,16 +32,16 @@ public interface SectionTable {
    * @param x
    * @param y
    * @param z
-   * @return true if removed, false if did not exist
+   * @return {@link BlockData} if existed at the location, null otherwise
    */
-  boolean remove(int x, int y, int z);
+  BlockData remove(int x, int y, int z);
 
   /**
    *
    * @param location
-   * @return true if removed, false if did not exist
+   * @return {@link BlockData} if existed at the location, null otherwise
    */
-  boolean remove(Location location);
+  BlockData remove(Location location);
 
   BlockData get(int x, int y, int z);
 

@@ -28,6 +28,7 @@ import org.bukkit.World;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -260,7 +261,44 @@ public class BlockDisguiser {
     if (table == null) {
       return false;
     }
-    return table.remove(location);
+    BlockData result = table.remove(location);
+    if (result != null) {
+      this.resetBlock(team, location);
+    }
+    return result != null;
+  }
+
+  public void removeAll(Location location) {
+    for (TeamNew team : this.chunksMap.keySet()) {
+      ChunksTable table = this.chunksMap.get(team);
+      if (table.remove(location) != null) {
+        this.resetBlock(team, location);
+      }
+    }
+  }
+
+  private void resetBlock(TeamNew team, Location location) {
+    Block block = location.getWorld().getBlockAt(location);
+    final WrapperPlayServerBlockChange packet = new WrapperPlayServerBlockChange();
+    final int x = location.getBlockX();
+    final int y = location.getBlockY();
+    final int z = location.getBlockZ();
+    BlockPosition pos = new BlockPosition(x, y, z);
+    packet.setLocation(pos);
+    WrappedBlockData data = WrappedBlockData.createData(block.getType(), block.getData());
+    packet.setBlockData(data);
+    for (PlayerContext playerCtx : team.getPlayers()) {
+      final Player player = playerCtx.getPlayer();
+      if (player.getWorld().isChunkLoaded(x >> 4, z >> 4)) {
+        new BukkitRunnable() {
+          @Override
+          public void run() {
+//            System.out.println(String.format("Resetting with BlockChange packet for (%s,%s,%s)", x, y, z));
+            packet.sendPacket(player);
+          }
+        }.runTaskLater(plugin, 1);
+      }
+    }
   }
 
 }

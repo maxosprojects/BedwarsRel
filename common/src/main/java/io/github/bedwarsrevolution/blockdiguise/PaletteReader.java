@@ -19,22 +19,23 @@ public class PaletteReader implements Iterator<Integer> {
 
   public static PaletteReader read(byte[] data, int offset) {
     PaletteReader palette = new PaletteReader();
-    VarInt lengthVarInt = VarInt.read(data, offset);
-//    try {
-//      lengthVarInt = VarInt.read(data, offset);
-//    } catch (Exception e) {
-//      System.out.println("Exception occurred, offset: " + offset);
-//      try {
-//        OutputStream os = new FileOutputStream("packet-data-ex" + incr + ".bin");
-//        incr++;
-//        os.write(data);
-//        os.flush();
-//        os.close();
-//      } catch (java.io.IOException e1) {
-//        e1.printStackTrace();
-//      }
-//      throw e;
-//    }
+//    VarInt lengthVarInt = VarInt.read(data, offset);
+    VarInt lengthVarInt;
+    try {
+      lengthVarInt = VarInt.read(data, offset);
+    } catch (Exception e) {
+      System.out.println("Exception occurred, offset: " + offset);
+      try {
+        OutputStream os = new FileOutputStream("packet-data-ex" + incr + ".bin");
+        incr++;
+        os.write(data);
+        os.flush();
+        os.close();
+      } catch (java.io.IOException e1) {
+        e1.printStackTrace();
+      }
+      throw e;
+    }
     palette.data = data;
     palette.length = lengthVarInt.getResult();
     palette.startIndex = offset + lengthVarInt.getSize();

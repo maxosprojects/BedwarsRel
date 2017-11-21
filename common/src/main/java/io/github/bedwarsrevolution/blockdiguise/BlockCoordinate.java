@@ -7,7 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
-class BlockCoordinate implements Serializable {
+public class BlockCoordinate implements Serializable {
   private final int x;
   private final int y;
   private final int z;
@@ -29,14 +29,15 @@ class BlockCoordinate implements Serializable {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
+    }
 
     if (obj instanceof BlockCoordinate) {
       BlockCoordinate other = (BlockCoordinate) obj;
       return x == other.x && y == other.y && z == other.z;
     }
-    return true;
+    return false;
   }
 
   public int getX() {

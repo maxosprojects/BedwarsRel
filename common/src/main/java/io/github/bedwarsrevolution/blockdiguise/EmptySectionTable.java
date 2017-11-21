@@ -33,13 +33,13 @@ public class EmptySectionTable implements SectionTable {
   }
 
   @Override
-  public boolean remove(int x, int y, int z) {
-    return false;
+  public BlockData remove(int x, int y, int z) {
+    return null;
   }
 
   @Override
-  public boolean remove(Location location) {
-    return false;
+  public BlockData remove(Location location) {
+    return null;
   }
 
 }

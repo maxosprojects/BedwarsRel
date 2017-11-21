@@ -56,13 +56,13 @@ public class RegularSectionTable implements SectionTable {
   }
 
   @Override
-  public boolean remove(int x, int y, int z) {
-    return this.map.remove(new BlockCoordinate(x, y, z)) != null;
+  public BlockData remove(int x, int y, int z) {
+    return this.map.remove(new BlockCoordinate(x, y, z));
   }
 
   @Override
-  public boolean remove(Location location) {
-    return this.map.remove(new BlockCoordinate(location)) != null;
+  public BlockData remove(Location location) {
+    return this.map.remove(new BlockCoordinate(location));
   }
 
 }

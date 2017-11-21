@@ -8,6 +8,7 @@ import io.github.bedwarsrevolution.game.GameScoreboard;
 import io.github.bedwarsrevolution.game.GamePhaseManager;
 import io.github.bedwarsrevolution.game.RegionNew;
 import io.github.bedwarsrevolution.game.TeamNew;
+import io.github.bedwarsrevolution.game.Trigger;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerState;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerStatePlaying;
@@ -31,6 +32,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -700,9 +702,9 @@ public class GameStateRunning extends GameState {
     }
   }
 
-  private void placeLandmine(BlockPlaceEvent event, PlayerContext playerCtx) {
-    Block blockPlaced = event.getBlock();
-    Block blockPlacedAgainst = event.getBlockAgainst();
+  private void placeLandmine(BlockPlaceEvent event, final PlayerContext playerCtx) {
+    final Block blockPlaced = event.getBlock();
+    final Block blockPlacedAgainst = event.getBlockAgainst();
     if (blockPlaced.getFace(blockPlacedAgainst) != BlockFace.DOWN
         || !blockPlacedAgainst.getType().isOccluding()) {
       return;
@@ -710,17 +712,34 @@ public class GameStateRunning extends GameState {
     final Player player = event.getPlayer();
     BlockDisguiser disguiser = BedwarsRevol.getInstance().getBlockDisguiser();
     if (disguiser.add(playerCtx.getTeam(), blockPlacedAgainst.getLocation(), Material.PISTON_STICKY_BASE, 1)) {
-      new BukkitRunnable() {
+      this.ctx.addRunningTask(new BukkitRunnable() {
         public void run() {
           PlayerInventory inv = player.getInventory();
           int slot = inv.getHeldItemSlot();
           ItemStack stack = inv.getItem(slot);
           stack.setAmount(stack.getAmount() - 1);
+          addTrigger(blockPlaced.getLocation(), playerCtx);
         }
-      }.runTaskLater(BedwarsRevol.getInstance(), 1L);
+      }.runTaskLater(BedwarsRevol.getInstance(), 1L));
     } else {
       player.updateInventory();
     }
+  }
+
+  private void addTrigger(Location location, PlayerContext sourcePlayerCtx) {
+    final Player sourcePlayer = sourcePlayerCtx.getPlayer();
+    this.ctx.addTrigger(location, new Trigger(sourcePlayerCtx.getTeam()) {
+      @Override
+      public void activate(PlayerContext triggeredPlayerCtx, Location loc) {
+        World world = triggeredPlayerCtx.getPlayer().getWorld();
+//        // 4.0f is power of TNT
+//        world.createExplosion(loc, 4.0f);
+        Location location = loc.clone().add(0.5D, 0.0D, 0.5D);
+        TNTPrimed tnt = (TNTPrimed) world.spawnEntity(location, EntityType.PRIMED_TNT);
+        tnt.setFuseTicks(1);
+        NmsUtils.setTntSource(sourcePlayer, tnt);
+      }
+    });
   }
 
   private void spawnTnt(final Player player, Block block) {
@@ -896,6 +915,7 @@ public class GameStateRunning extends GameState {
         }
       }
     }
+    this.ctx.onLocationTrigger(playerCtx, event.getTo());
   }
 
   private boolean handleDestroyTargetMaterial(PlayerContext destroyingPlayerCtx, Block block) {
