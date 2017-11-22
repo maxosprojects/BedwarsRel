@@ -1,5 +1,6 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
+import io.github.bedwarsrevolution.game.TeamNew;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -66,5 +67,21 @@ public class ChunksTable {
 
   public Map<SectionCoordinate, SectionTable> getMap() {
     return Collections.unmodifiableMap(this.map);
+  }
+
+  public Map<BlockCoordinate,BlockData> getAllBlocks() {
+    ChunksTable res = new ChunksTable();
+    for (Entry<TeamNew, ChunksTable> chunkEntry : this.chunksMap.entrySet()) {
+      TeamNew team = chunkEntry.getKey();
+      ChunksTable teamTable = chunkEntry.getValue();
+      Map<BlockCoordinate, BlockData> teamBlocks = teamTable.getAllBlocks();
+      for (Entry<SectionCoordinate, SectionTable> entry : table.map.entrySet()) {
+        SectionCoordinate sectionCoord = entry.getKey();
+        for (BlockData block : entry.getValue().getAll()) {
+          res.add(sectionCoord.getWorld(), block.getX(), block.getY(), block.getZ(),
+              material, metaData);
+        }
+      }
+    }
   }
 }

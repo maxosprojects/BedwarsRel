@@ -312,7 +312,7 @@ public class BlockDisguiser {
 
   public void addGogglesUser(PlayerContext playerCtx) {
     Player player = playerCtx.getPlayer();
-    ChunksTable chunksTable = merge(this.chunksMap.values(), Material.REDSTONE_BLOCK, 0);
+    ChunksTable chunksTable = this.mergeChunks(playerCtx.getTeam(), Material.REDSTONE_BLOCK, 0);
     this.gogglesMap.put(player, chunksTable);
     Multimap<ChunkCoordinate, BlockData> chunks = ArrayListMultimap.create();
     for (Entry<SectionCoordinate, SectionTable> entry : chunksTable.getMap().entrySet()) {
@@ -327,10 +327,15 @@ public class BlockDisguiser {
     }
   }
 
-  public ChunksTable mergeChunks(Material material, int metaData) {
+  // Merges all teams' chunk tables into one.
+  // Priority is given to blocks that don't belong to the provided team (e.g. to see other
+  // teams' landmines when those are placed at the same spot as 
+  private ChunksTable mergeChunks(TeamNew team, Material material, int metaData) {
     ChunksTable res = new ChunksTable();
     for (Entry<TeamNew, ChunksTable> chunkEntry : this.chunksMap.entrySet()) {
       TeamNew team = chunkEntry.getKey();
+      ChunksTable teamTable = chunkEntry.getValue();
+      Map<BlockCoordinate, BlockData> teamBlocks = teamTable.getAllBlocks();
       for (Entry<SectionCoordinate, SectionTable> entry : table.map.entrySet()) {
         SectionCoordinate sectionCoord = entry.getKey();
         for (BlockData block : entry.getValue().getAll()) {
