@@ -19,8 +19,10 @@ import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -40,7 +42,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class BlockDisguiser {
 
   private final BedwarsRevol plugin;
-  private Map<TeamNew, ChunksTable> chunksMap = new HashMap<>();
+  private Map<TeamNew, ChunksTable> chunksMap = new ConcurrentHashMap<>();
+  private Map<Player, ChunksTable> gogglesMap = new ConcurrentHashMap<>();
   private PacketAdapter listener;
 
   public BlockDisguiser(BedwarsRevol plugin) {
@@ -224,7 +227,7 @@ public class BlockDisguiser {
     }
   }
 
-  public boolean add(TeamNew team, Location location, Material material, int metaData) {
+  public boolean addBlock(TeamNew team, Location location, Material material, int metaData) {
     ChunksTable table = this.chunksMap.get(team);
     if (table == null) {
       table = new ChunksTable();
@@ -237,9 +240,11 @@ public class BlockDisguiser {
       final int y = location.getBlockY();
       final int z = location.getBlockZ();
       BlockPosition pos = new BlockPosition(x, y, z);
+      pos = this.locationToPosition(location);
       packet.setLocation(pos);
       WrappedBlockData data = WrappedBlockData.createData(material, metaData);
       packet.setBlockData(data);
+      packet = this.makePacket(location, material, metaData);
       for (PlayerContext playerCtx : team.getPlayers()) {
         final Player player = playerCtx.getPlayer();
         if (player.getWorld().isChunkLoaded(x >> 4, z >> 4)) {
@@ -256,7 +261,7 @@ public class BlockDisguiser {
     return result;
   }
 
-  public boolean remove(TeamNew team, Location location) {
+  public boolean removeBlock(TeamNew team, Location location) {
     ChunksTable table = this.chunksMap.get(team);
     if (table == null) {
       return false;
@@ -264,44 +269,102 @@ public class BlockDisguiser {
     BlockData result = table.remove(location);
     if (result != null) {
       this.resetBlock(team, location);
+      this.removeGogglesUsers(location);
     }
     return result != null;
   }
 
-  public void removeAll(Location location) {
+  public void removeAllBlocks(Location location) {
     for (TeamNew team : this.chunksMap.keySet()) {
       ChunksTable table = this.chunksMap.get(team);
       if (table.remove(location) != null) {
         this.resetBlock(team, location);
       }
     }
+    this.removeGogglesUsers(location);
   }
 
   private void resetBlock(TeamNew team, Location location) {
     Block block = location.getWorld().getBlockAt(location);
     final WrapperPlayServerBlockChange packet = new WrapperPlayServerBlockChange();
-    final int x = location.getBlockX();
-    final int y = location.getBlockY();
-    final int z = location.getBlockZ();
-    BlockPosition pos = new BlockPosition(x, y, z);
+    BlockPosition pos = this.locationToPosition(location);
     packet.setLocation(pos);
     WrappedBlockData data = WrappedBlockData.createData(block.getType(), block.getData());
     packet.setBlockData(data);
     for (PlayerContext playerCtx : team.getPlayers()) {
       final Player player = playerCtx.getPlayer();
-      if (player.getWorld().isChunkLoaded(x >> 4, z >> 4)) {
-        new BukkitRunnable() {
-          @Override
-          public void run() {
-//            System.out.println(String.format("Resetting with BlockChange packet for (%s,%s,%s)", x, y, z));
-            packet.sendPacket(player);
-          }
-        }.runTaskLater(plugin, 1);
-      }
+      this.sendBlock(player, packet, pos);
+    }
+  }
+
+  private BlockPosition locationToPosition(Location location) {
+    final int x = location.getBlockX();
+    final int y = location.getBlockY();
+    final int z = location.getBlockZ();
+    return new BlockPosition(x, y, z);
+  }
+
+  private void sendBlock(Player player, Location location, Material material, int metaData) {
+    BlockPosition pos = this.locationToPosition(location);
+    this.sendBlock(player, pos, material, metaData);
+  }
+
+  private void sendBlock(final Player player, BlockPosition pos, Material material, int metaData) {
+    final WrapperPlayServerBlockChange packet = new WrapperPlayServerBlockChange();
+    packet.setLocation(pos);
+    WrappedBlockData data = WrappedBlockData.createData(material, metaData);
+    packet.setBlockData(data);
+    this.sendBlock(player, packet, pos);
+  }
+
+  private void sendBlock(final Player player, final WrapperPlayServerBlockChange packet,
+      BlockPosition pos) {
+    if (player.getWorld().isChunkLoaded(pos.getX() >> 4, pos.getZ() >> 4)) {
+      new BukkitRunnable() {
+        @Override
+        public void run() {
+          packet.sendPacket(player);
+        }
+      }.runTaskLater(plugin, 1);
     }
   }
 
   public void reset() {
-    this.chunksMap = new HashMap<>();
+    this.chunksMap = new ConcurrentHashMap<>();
+    this.gogglesMap = new ConcurrentHashMap<>();
+  }
+
+  private void removeGogglesUsers(Location location) {
+    boolean found = false;
+    String world = location.getWorld().getName();
+    int x = location.getBlockX() >> 4;
+    int y = location.getBlockY() >> 4;
+    int z = location.getBlockZ() >> 4;
+    for (ChunksTable table : chunksMap.values()) {
+      SectionTable section = table.getSectionTable(world, x, y, z);
+      if (section.get(location) != null) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      Iterator<Entry<Player, ChunksTable>> iter = this.gogglesMap.entrySet().iterator();
+      while (iter.hasNext()) {
+        Entry<Player, ChunksTable> entry = iter.next();
+        ChunksTable table = entry.getValue();
+        table.remove(location);
+        if (table.isEmpty()) {
+          iter.remove();
+        }
+      }
+    }
+  }
+
+  public void addGogglesUser(Player player) {
+    this.gogglesMap.put(player, ChunksTable.merge(this.chunksMap.values()));
+  }
+
+  public void removeGogglesUser(Player player) {
+    this.gogglesMap.remove(player);
   }
 }

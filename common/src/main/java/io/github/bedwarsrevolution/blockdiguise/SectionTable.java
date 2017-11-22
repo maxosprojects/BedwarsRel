@@ -47,4 +47,5 @@ public interface SectionTable {
 
   BlockData get(Location location);
 
+  boolean isEmpty();
 }

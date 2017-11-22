@@ -1,7 +1,8 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -9,7 +10,7 @@ import org.bukkit.Material;
  * Created by {maxos} 2017
  */
 public class ChunksTable {
-  private Map<SectionCoordinate, SectionTable> map = new HashMap<>();
+  private Map<SectionCoordinate, SectionTable> map = new ConcurrentHashMap<>();
 
   public SectionTable getSectionTable(String world, int chunkX, int sectionY, int chunkZ) {
     SectionTable section = this.map.get(SectionCoordinate.fromSection(world, chunkX, sectionY, chunkZ));
@@ -47,7 +48,18 @@ public class ChunksTable {
     if (section == null) {
       return null;
     }
-    return section.remove(location);
+    BlockData res = section.remove(location);
+    if (section.isEmpty()) {
+      this.map.remove(coord);
+    }
+    return res;
   }
 
+  public static ChunksTable merge() {
+    return Collections.unmodifiableMap(map);
+  }
+
+  public boolean isEmpty() {
+    return this.map.isEmpty();
+  }
 }

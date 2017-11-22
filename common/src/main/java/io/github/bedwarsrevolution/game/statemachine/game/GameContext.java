@@ -549,7 +549,7 @@ public class GameContext {
     if (!shouldTrigger) {
       return;
     }
-    BedwarsRevol.getInstance().getBlockDisguiser().removeAll(loc.getBlock().getRelative(BlockFace.DOWN).getLocation());
+    BedwarsRevol.getInstance().getBlockDisguiser().removeAllBlocks(loc.getBlock().getRelative(BlockFace.DOWN).getLocation());
     for (final Trigger trigger : this.triggers.removeAll(new BlockCoordinate(loc))) {
       this.addRunningTask(new BukkitRunnable() {
         @Override

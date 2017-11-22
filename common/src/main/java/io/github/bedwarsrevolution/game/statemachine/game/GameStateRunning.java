@@ -751,7 +751,7 @@ public class GameStateRunning extends GameState {
     }
     final Player player = event.getPlayer();
     BlockDisguiser disguiser = BedwarsRevol.getInstance().getBlockDisguiser();
-    if (disguiser.add(playerCtx.getTeam(), blockPlacedAgainst.getLocation(), Material.PISTON_STICKY_BASE, 1)) {
+    if (disguiser.addBlock(playerCtx.getTeam(), blockPlacedAgainst.getLocation(), Material.PISTON_STICKY_BASE, 1)) {
       this.ctx.addRunningTask(new BukkitRunnable() {
         public void run() {
           PlayerInventory inv = player.getInventory();

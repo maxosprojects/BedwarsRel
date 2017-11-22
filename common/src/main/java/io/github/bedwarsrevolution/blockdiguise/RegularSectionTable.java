@@ -1,7 +1,7 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import org.bukkit.Location;
 
@@ -11,7 +11,7 @@ import org.bukkit.Location;
 public class RegularSectionTable implements SectionTable {
   @Getter
   private final SectionCoordinate sectionCoordinate;
-  private final Map<BlockCoordinate, BlockData> map = new HashMap<>();
+  private final Map<BlockCoordinate, BlockData> map = new ConcurrentHashMap<>();
 
   public RegularSectionTable(Location location) {
     this.sectionCoordinate = SectionCoordinate.fromBlock(location);
@@ -63,6 +63,11 @@ public class RegularSectionTable implements SectionTable {
   @Override
   public BlockData remove(Location location) {
     return this.map.remove(new BlockCoordinate(location));
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return this.map.isEmpty();
   }
 
 }

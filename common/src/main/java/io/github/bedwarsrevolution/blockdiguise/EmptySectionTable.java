@@ -42,4 +42,9 @@ public class EmptySectionTable implements SectionTable {
     return null;
   }
 
+  @Override
+  public boolean isEmpty() {
+    return true;
+  }
+
 }
