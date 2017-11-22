@@ -40,7 +40,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class BlockDisguiser {
 
   private final BedwarsRevol plugin;
-  private final Map<TeamNew, ChunksTable> chunksMap = new HashMap<>();
+  private Map<TeamNew, ChunksTable> chunksMap = new HashMap<>();
   private PacketAdapter listener;
 
   public BlockDisguiser(BedwarsRevol plugin) {
@@ -301,4 +301,7 @@ public class BlockDisguiser {
     }
   }
 
+  public void reset() {
+    this.chunksMap = new HashMap<>();
+  }
 }

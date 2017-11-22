@@ -269,6 +269,7 @@ public class GameContext {
     this.triggers = ArrayListMultimap.create();
     this.stopRunningTasks();
     this.resourceSpawnerManager.reset();
+    BedwarsRevol.getInstance().getBlockDisguiser().reset();
     this.resetRegion();
   }
 
