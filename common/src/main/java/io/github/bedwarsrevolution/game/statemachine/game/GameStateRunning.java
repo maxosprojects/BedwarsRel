@@ -246,8 +246,16 @@ public class GameStateRunning extends GameState {
       }
     }
 
-    if (event.getItem() != null) {
-      switch (event.getItem().getType()) {
+    ItemStack item = event.getItem();
+    if (item == null) {
+      item = player.getInventory().getItemInMainHand();
+    }
+    if (item == null) {
+      item = player.getInventory().getItemInOffHand();
+    }
+
+    if (item != null) {
+      switch (item.getType()) {
         case FIREBALL:
           event.setCancelled(true);
           if (!playerCtx.useItem(Material.FIREBALL.name())) {
@@ -263,8 +271,40 @@ public class GameStateRunning extends GameState {
           }
           this.spawnGolem(playerCtx, event.getClickedBlock());
           break;
+        case SAPLING:
+          if (item.getDurability() == 4) {
+            event.setCancelled(true);
+            this.equipLandmineGoggles(playerCtx, item);
+          }
+          break;
       }
     }
+  }
+
+  private void equipLandmineGoggles(final PlayerContext playerCtx, final ItemStack newHelmet) {
+    final Player player = playerCtx.getPlayer();
+    if (playerCtx.getHelmet() != null) {
+      player.sendMessage(ChatWriterNew.pluginMessage("&cCurrently wearing goggles"));
+      return;
+    }
+    playerCtx.setHelmet(newHelmet.clone());
+    // Remove one goggles item from player's inventory
+    this.ctx.addRunningTask(new BukkitRunnable() {
+      public void run() {
+        newHelmet.setAmount(newHelmet.getAmount() - 1);
+      }
+    }.runTaskLater(BedwarsRevol.getInstance(), 1L));
+    this.ctx.addRunningTask(new BukkitRunnable() {
+      public void run() {
+        // Make sure player is still in the game
+        PlayerContext currentPlayerCtx = BedwarsRevol.getInstance().getGameManager()
+            .getGameOfPlayer(player).getPlayerContext(player);
+        if (currentPlayerCtx != null) {
+          currentPlayerCtx.restoreHelmet();
+          player.sendTitle("", TitleWriterNew.pluginMessage("&cAnti-Landmine Goggles expired"), 10, 70, 20);
+        }
+      }
+    }.runTaskLater(BedwarsRevol.getInstance(), 100L));
   }
 
   private void spawnGolem(PlayerContext playerCtx, Block block) {

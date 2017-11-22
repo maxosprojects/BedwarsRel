@@ -59,6 +59,8 @@ public class PlayerContext {
   @Getter
   // Whether player is still in a game
   private boolean active = true;
+  @Getter
+  private ItemStack helmet;
 
   public PlayerContext(Player player, GameContext gameContext) {
     this.player = player;
@@ -157,6 +159,7 @@ public class PlayerContext {
   }
 
   public void respawn() {
+    this.helmet = null;
     for (List<Upgrade> list : this.upgrades.values()) {
       for (Upgrade upgrade : list) {
         upgrade.activate(UpgradeScope.PLAYER, UpgradeCycle.RESPAWN);
@@ -287,5 +290,25 @@ public class PlayerContext {
 
   public void deactivate() {
     this.active = false;
+  }
+
+  /**
+   * Temporarily sets new helmet and stores current one
+   *
+   * @param newHelmet
+   */
+  public void setHelmet(ItemStack newHelmet) {
+    this.helmet = player.getInventory().getHelmet();
+    this.player.getInventory().setHelmet(newHelmet);
+  }
+
+  /**
+   * Restores previously stored helmet if it hasn't been reset
+   */
+  public void restoreHelmet() {
+    if (this.helmet != null) {
+      this.player.getInventory().setHelmet(this.helmet);
+      this.helmet = null;
+    }
   }
 }

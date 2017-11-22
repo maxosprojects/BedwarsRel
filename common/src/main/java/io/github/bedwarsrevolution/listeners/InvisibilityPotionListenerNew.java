@@ -19,6 +19,7 @@ import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import io.github.bedwarsrevolution.shop.CraftItemStack;
 import io.github.bedwarsrevolution.utils.NmsUtils;
+import io.github.bedwarsrevolution.utils.TitleWriterNew;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -76,6 +77,7 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
             invisibilityTasks.remove(player);
             try {
               InvisibilityPotionListenerNew.this.unhideArmor(player);
+              player.sendTitle("", TitleWriterNew.pluginMessage("Invisibility expired"), 10, 70, 20);
             } catch (InvocationTargetException | IllegalAccessException e) {
               e.printStackTrace();
             }
