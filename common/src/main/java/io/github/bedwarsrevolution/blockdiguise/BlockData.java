@@ -27,7 +27,7 @@ public class BlockData {
     this.z = z;
     this.material = material;
     this.metaData = metaData;
-    this.blockData = WrappedBlockData.createData(material);
+    this.blockData = WrappedBlockData.createData(material, metaData);
     this.compactLocation = this.getCompactLocation();
   }
 

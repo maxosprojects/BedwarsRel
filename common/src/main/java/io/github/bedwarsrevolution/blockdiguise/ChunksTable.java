@@ -60,20 +60,6 @@ public class ChunksTable {
     return res;
   }
 
-  public static ChunksTable merge(Collection<ChunksTable> tables) {
-    ChunksTable res = new ChunksTable();
-    for (ChunksTable table : tables) {
-      for (Entry<SectionCoordinate, SectionTable> entry : table.map.entrySet()) {
-        SectionCoordinate sectionCoord = entry.getKey();
-        for (BlockData block : entry.getValue().getAll()) {
-          res.add(sectionCoord.getWorld(), block.getX(), block.getY(), block.getZ(),
-              block.getType(), block.getMetaData());
-        }
-      }
-    }
-    return res;
-  }
-
   public boolean isEmpty() {
     return this.map.isEmpty();
   }

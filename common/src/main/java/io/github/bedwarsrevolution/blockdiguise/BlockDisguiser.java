@@ -312,7 +312,7 @@ public class BlockDisguiser {
 
   public void addGogglesUser(PlayerContext playerCtx) {
     Player player = playerCtx.getPlayer();
-    ChunksTable chunksTable = ChunksTable.merge(this.chunksMap.values());
+    ChunksTable chunksTable = merge(this.chunksMap.values(), Material.REDSTONE_BLOCK, 0);
     this.gogglesMap.put(player, chunksTable);
     Multimap<ChunkCoordinate, BlockData> chunks = ArrayListMultimap.create();
     for (Entry<SectionCoordinate, SectionTable> entry : chunksTable.getMap().entrySet()) {
@@ -325,6 +325,21 @@ public class BlockDisguiser {
       ChunkBlocksProcessor processor = this.getChunkBlocksProcessor(chunk.getChunkX(), chunk.getChunkZ(), player);
       processor.process(chunks.get(chunk));
     }
+  }
+
+  public ChunksTable mergeChunks(Material material, int metaData) {
+    ChunksTable res = new ChunksTable();
+    for (Entry<TeamNew, ChunksTable> chunkEntry : this.chunksMap.entrySet()) {
+      TeamNew team = chunkEntry.getKey();
+      for (Entry<SectionCoordinate, SectionTable> entry : table.map.entrySet()) {
+        SectionCoordinate sectionCoord = entry.getKey();
+        for (BlockData block : entry.getValue().getAll()) {
+          res.add(sectionCoord.getWorld(), block.getX(), block.getY(), block.getZ(),
+              material, metaData);
+        }
+      }
+    }
+    return res;
   }
 
   public void removeGogglesUser(PlayerContext playerCtx) {
@@ -346,15 +361,19 @@ public class BlockDisguiser {
         int x = blockData.getX();
         int y = blockData.getY();
         int z = blockData.getZ();
+        BlockData resetBlock = null;
         if (teamTable != null) {
           SectionTable teamSection = teamTable
               .getSectionTable(world.getName(), coord.getChunkX(), coord.getSectionY(), coord.getChunkZ());
+          resetBlock = teamSection.get(x, y, z);
           if (teamSection.get(x, y, z) != null) {
             continue;
           }
         }
         Block block = world.getBlockAt(x, y, z);
-        BlockData resetBlock = new BlockData(x, y, z, block.getType(), block.getData());
+        if (resetBlock == null) {
+          resetBlock = new BlockData(x, y, z, block.getType(), block.getData());
+        }
         chunks.put(ChunkCoordinate.fromChunk(coord.getWorld(), coord.getChunkX(), coord.getChunkZ()), resetBlock);
       }
     }
