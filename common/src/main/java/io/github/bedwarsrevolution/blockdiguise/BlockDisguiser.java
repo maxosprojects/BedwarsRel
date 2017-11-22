@@ -1,9 +1,7 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
 import com.comphenix.packetwrapper.WrapperPlayServerBlockChange;
-import com.comphenix.packetwrapper.WrapperPlayServerEntityDestroy;
 import com.comphenix.packetwrapper.WrapperPlayServerMultiBlockChange;
-import com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -12,7 +10,8 @@ import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.ChunkCoordIntPair;
 import com.comphenix.protocol.wrappers.MultiBlockChangeInfo;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 
 import io.github.bedwarsrevolution.game.TeamNew;
@@ -22,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -35,9 +35,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * Simple class that can be used to alter the apperance of a number of blocks.
- *
- * @author Kristian
+ * Created by {maxos} 2017
  */
 public class BlockDisguiser {
 
@@ -69,7 +67,10 @@ public class BlockDisguiser {
         if (team == null) {
           return;
         }
-        ChunksTable chunksTable = chunksMap.get(team);
+        ChunksTable chunksTable = gogglesMap.get(player);
+        if (chunksTable == null) {
+          chunksTable = chunksMap.get(team);
+        }
         if (chunksTable == null) {
           return;
         }
@@ -86,46 +87,6 @@ public class BlockDisguiser {
         }
       }
     });
-//    this.alsoRegister();
-  }
-
-  private void alsoRegister() {
-    PacketType[] types = Server.getInstance().values().toArray(new PacketType[0]);
-    final ImmutableSet<PacketType> notTypes = ImmutableSet.of(
-        Server.PLAYER_INFO,
-        Server.KEEP_ALIVE,
-        Server.UPDATE_TIME,
-        Server.REL_ENTITY_MOVE_LOOK,
-        Server.NAMED_SOUND_EFFECT,
-        Server.ENTITY_METADATA,
-        Server.SCOREBOARD_SCORE,
-        Server.ENTITY_VELOCITY,
-        Server.ENTITY_TELEPORT,
-        Server.REL_ENTITY_MOVE,
-        Server.ENTITY_HEAD_ROTATION);
-    this.plugin.getProtocolManager().addPacketListener(new PacketAdapter(new AdapterParameteters()
-        .plugin(this.plugin)
-        .serverSide()
-        .listenerPriority(ListenerPriority.HIGHEST)
-        .types(types)) {
-      @Override
-      public void onPacketSending(PacketEvent event) {
-        PacketContainer packet = event.getPacket();
-        PacketType type = event.getPacketType();
-        if (!notTypes.contains(type)) {
-          System.out.println(type);
-          if (type == Server.SPAWN_ENTITY) {
-            WrapperPlayServerSpawnEntity wrapped = new WrapperPlayServerSpawnEntity(packet);
-
-            System.out.println(String.format("type: %s, id: %s", wrapped.getType(), wrapped.getEntityID()));
-
-          } else if (type == Server.ENTITY_DESTROY) {
-            WrapperPlayServerEntityDestroy wrapped = new WrapperPlayServerEntityDestroy(packet);
-            System.out.println(wrapped.getEntityIDs().toString());
-          }
-        }
-      }
-    });
   }
 
   public void close() {
@@ -139,40 +100,37 @@ public class BlockDisguiser {
     return new SectionProcessor() {
       @Override
       public void processSection(final int chunkX, final int sectionY, final int chunkZ, Section section) {
-
-//        System.out.println(String.format("Processing section (%s,%s,%s)", chunkX, sectionY, chunkZ));
-
         SectionTable sectionTable = chunksTable.getSectionTable(player.getWorld().getName(), chunkX, sectionY, chunkZ);
-        sectionTable.process(new SectionExecutor() {
+        sectionTable.process(getChunkBlocksProcessor(chunkX, chunkZ, player));
+      }
+    };
+  }
+
+  private ChunkBlocksProcessor getChunkBlocksProcessor(final int chunkX, final int chunkZ, final Player player) {
+    return new ChunkBlocksProcessor() {
+      @Override
+      public void process(Collection<BlockData> data) {
+        if (data.size() == 0) {
+          return;
+        }
+        final WrapperPlayServerMultiBlockChange packet = new WrapperPlayServerMultiBlockChange();
+        ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair(chunkX, chunkZ);
+        packet.setChunk(chunkCoords);
+        MultiBlockChangeInfo[] records = new MultiBlockChangeInfo[data.size()];
+        int index = 0;
+        for (BlockData block : data) {
+          records[index] = block.toChangeInfo(chunkCoords);
+          index++;
+        }
+        packet.setRecords(records);
+        new BukkitRunnable() {
           @Override
-          public void execute(Collection<BlockData> data) {
-            if (data.size() == 0) {
-              return;
+          public void run() {
+            if (player.getWorld().isChunkLoaded(chunkX, chunkZ)) {
+              packet.sendPacket(player);
             }
-
-//            System.out.println(String.format("Data found for section (%s,%s,%s)", chunkX, sectionY, chunkZ));
-
-            final WrapperPlayServerMultiBlockChange packet = new WrapperPlayServerMultiBlockChange();
-            ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair(chunkX, chunkZ);
-            packet.setChunk(chunkCoords);
-            MultiBlockChangeInfo[] records = new MultiBlockChangeInfo[data.size()];
-            int index = 0;
-            for (BlockData block : data) {
-              records[index] = block.toChangeInfo(chunkCoords);
-              index++;
-            }
-            packet.setRecords(records);
-            new BukkitRunnable() {
-              @Override
-              public void run() {
-
-//                System.out.println(String.format("Sending MultiBlockChange packet for (%s,%s,%s)", chunkX, sectionY, chunkZ));
-
-                packet.sendPacket(player);
-              }
-            }.runTaskLater(plugin, 1);
           }
-        });
+        }.runTaskLater(plugin, 1);
       }
     };
   }
@@ -180,15 +138,7 @@ public class BlockDisguiser {
   private void translateBlockChange(ChunksTable chunksTable, Player player, PacketContainer packet) {
     WrapperPlayServerBlockChange wrapped = new WrapperPlayServerBlockChange(packet);
     BlockPosition location = wrapped.getLocation();
-    int x = location.getX();
-    int y = location.getY();
-    int z = location.getZ();
-
-//    System.out.println(String.format("Processing Block change: (%s,%s,%s)", x, y, z));
-
-    SectionTable sectionTable = chunksTable.getSectionTable(player.getWorld().getName(),
-        x >> 4, y >> 4, z >> 4);
-    BlockData block = sectionTable.get(x, y, z);
+    BlockData block = this.getBlockData(chunksTable, player.getWorld(), location);
     if (block == null) {
       return;
     }
@@ -196,25 +146,14 @@ public class BlockDisguiser {
     data.setType(block.getType());
     data.setData(block.getMetaData());
     wrapped.setBlockData(data);
-
-//    System.out.println(String.format("Updated Block change: (%s,%s,%s) %s", x, y, z, block.getType()));
   }
 
-  private void translateMultiBlockChange(ChunksTable chunksTable, Player player,
-      PacketContainer packet) {
+  private void translateMultiBlockChange(ChunksTable chunksTable, Player player, PacketContainer packet) {
     World world = player.getWorld();
     WrapperPlayServerMultiBlockChange wrapped = new WrapperPlayServerMultiBlockChange(packet);
     for (MultiBlockChangeInfo record : wrapped.getRecords()) {
       Location location = record.getLocation(world);
-      int x = location.getBlockX();
-      int y = location.getBlockY();
-      int z = location.getBlockZ();
-
-//      System.out.println(String.format("Processing MultiBlock change: (%s,%s,%s)", x, y, z));
-
-      SectionTable sectionTable = chunksTable.getSectionTable(player.getWorld().getName(),
-          x >> 4, y >> 4, z >> 4);
-      BlockData block = sectionTable.get(x, y, z);
+      BlockData block = getBlockData(chunksTable, world, location);
       if (block == null) {
         continue;
       }
@@ -222,9 +161,27 @@ public class BlockDisguiser {
       data.setType(block.getType());
       data.setData(block.getMetaData());
       record.setData(data);
-
-//      System.out.println(String.format("Updated MultiBlock change: (%s,%s,%s)", x, y, z));
     }
+  }
+
+  private BlockData getBlockData(ChunksTable chunksTable, World world, Location location) {
+    int x = location.getBlockX();
+    int y = location.getBlockY();
+    int z = location.getBlockZ();
+    return this.getBlockData(chunksTable, world, x, y, z);
+  }
+
+  private BlockData getBlockData(ChunksTable chunksTable, World world, BlockPosition location) {
+    int x = location.getX();
+    int y = location.getY();
+    int z = location.getZ();
+    return this.getBlockData(chunksTable, world, x, y, z);
+  }
+
+  private BlockData getBlockData(ChunksTable chunksTable, World world, int x, int y, int z) {
+    SectionTable sectionTable = chunksTable.getSectionTable(world.getName(),
+        x >> 4, y >> 4, z >> 4);
+    return sectionTable.get(x, y, z);
   }
 
   public boolean addBlock(TeamNew team, Location location, Material material, int metaData) {
@@ -235,26 +192,17 @@ public class BlockDisguiser {
     }
     boolean result = table.add(location, material, metaData);
     if (result) {
-      final WrapperPlayServerBlockChange packet = new WrapperPlayServerBlockChange();
-      final int x = location.getBlockX();
-      final int y = location.getBlockY();
-      final int z = location.getBlockZ();
-      BlockPosition pos = new BlockPosition(x, y, z);
-      pos = this.locationToPosition(location);
-      packet.setLocation(pos);
-      WrappedBlockData data = WrappedBlockData.createData(material, metaData);
-      packet.setBlockData(data);
-      packet = this.makePacket(location, material, metaData);
+      BlockPosition pos = this.locationToPosition(location);
+      WrapperPlayServerBlockChange packet = this.makePacket(pos, material, metaData);
+      Set<Player> served = this.gogglesMap.keySet();
+      for (Player player : served) {
+        this.gogglesMap.get(player).add(location, material, metaData);
+        this.sendBlock(player, packet, pos);
+      }
       for (PlayerContext playerCtx : team.getPlayers()) {
         final Player player = playerCtx.getPlayer();
-        if (player.getWorld().isChunkLoaded(x >> 4, z >> 4)) {
-          new BukkitRunnable() {
-            @Override
-            public void run() {
-//              System.out.println(String.format("Sending BlockChange packet for (%s,%s,%s)", x, y, z));
-              packet.sendPacket(player);
-            }
-          }.runTaskLater(plugin, 1);
+        if (!served.contains(player)) {
+          this.sendBlock(player, packet, pos);
         }
       }
     }
@@ -269,7 +217,7 @@ public class BlockDisguiser {
     BlockData result = table.remove(location);
     if (result != null) {
       this.resetBlock(team, location);
-      this.removeGogglesUsers(location);
+      this.removeAllGogglesUsers(location);
     }
     return result != null;
   }
@@ -281,16 +229,13 @@ public class BlockDisguiser {
         this.resetBlock(team, location);
       }
     }
-    this.removeGogglesUsers(location);
+    this.removeAllGogglesUsers(location);
   }
 
   private void resetBlock(TeamNew team, Location location) {
     Block block = location.getWorld().getBlockAt(location);
-    final WrapperPlayServerBlockChange packet = new WrapperPlayServerBlockChange();
     BlockPosition pos = this.locationToPosition(location);
-    packet.setLocation(pos);
-    WrappedBlockData data = WrappedBlockData.createData(block.getType(), block.getData());
-    packet.setBlockData(data);
+    WrapperPlayServerBlockChange packet = this.makePacket(pos, block.getType(), block.getData());
     for (PlayerContext playerCtx : team.getPlayers()) {
       final Player player = playerCtx.getPlayer();
       this.sendBlock(player, packet, pos);
@@ -304,21 +249,25 @@ public class BlockDisguiser {
     return new BlockPosition(x, y, z);
   }
 
-  private void sendBlock(Player player, Location location, Material material, int metaData) {
-    BlockPosition pos = this.locationToPosition(location);
-    this.sendBlock(player, pos, material, metaData);
-  }
-
-  private void sendBlock(final Player player, BlockPosition pos, Material material, int metaData) {
+  private WrapperPlayServerBlockChange makePacket(BlockPosition pos, Material material, int metaData) {
     final WrapperPlayServerBlockChange packet = new WrapperPlayServerBlockChange();
     packet.setLocation(pos);
     WrappedBlockData data = WrappedBlockData.createData(material, metaData);
     packet.setBlockData(data);
-    this.sendBlock(player, packet, pos);
+    return packet;
   }
 
-  private void sendBlock(final Player player, final WrapperPlayServerBlockChange packet,
-      BlockPosition pos) {
+//  private void sendBlock(Player player, Location location, Material material, int metaData) {
+//    BlockPosition pos = this.locationToPosition(location);
+//    this.sendBlock(player, pos, material, metaData);
+//  }
+//
+//  private void sendBlock(final Player player, BlockPosition pos, Material material, int metaData) {
+//    final WrapperPlayServerBlockChange packet = this.makePacket(pos, material, metaData);
+//    this.sendBlock(player, packet, pos);
+//  }
+
+  private void sendBlock(final Player player, final WrapperPlayServerBlockChange packet, BlockPosition pos) {
     if (player.getWorld().isChunkLoaded(pos.getX() >> 4, pos.getZ() >> 4)) {
       new BukkitRunnable() {
         @Override
@@ -334,25 +283,26 @@ public class BlockDisguiser {
     this.gogglesMap = new ConcurrentHashMap<>();
   }
 
-  private void removeGogglesUsers(Location location) {
+  private void removeAllGogglesUsers(Location location) {
     boolean found = false;
-    String world = location.getWorld().getName();
-    int x = location.getBlockX() >> 4;
-    int y = location.getBlockY() >> 4;
-    int z = location.getBlockZ() >> 4;
-    for (ChunksTable table : chunksMap.values()) {
-      SectionTable section = table.getSectionTable(world, x, y, z);
-      if (section.get(location) != null) {
+    for (ChunksTable table : this.chunksMap.values()) {
+      if (this.getBlockData(table, location.getWorld(), location) != null) {
         found = true;
         break;
       }
     }
     if (!found) {
       Iterator<Entry<Player, ChunksTable>> iter = this.gogglesMap.entrySet().iterator();
+      Block block = location.getWorld().getBlockAt(location);
+      BlockPosition pos = this.locationToPosition(location);
+      WrapperPlayServerBlockChange packet = this.makePacket(pos, block.getType(), block.getData());
       while (iter.hasNext()) {
         Entry<Player, ChunksTable> entry = iter.next();
         ChunksTable table = entry.getValue();
-        table.remove(location);
+        BlockData removed = table.remove(location);
+        if (removed != null) {
+          this.sendBlock(entry.getKey(), packet, pos);
+        }
         if (table.isEmpty()) {
           iter.remove();
         }
@@ -360,11 +310,46 @@ public class BlockDisguiser {
     }
   }
 
-  public void addGogglesUser(Player player) {
-    this.gogglesMap.put(player, ChunksTable.merge(this.chunksMap.values()));
+  public void addGogglesUser(PlayerContext playerCtx) {
+    Player player = playerCtx.getPlayer();
+    ChunksTable chunksTable = ChunksTable.merge(this.chunksMap.values());
+    this.gogglesMap.put(player, chunksTable);
+    Multimap<ChunkCoordinate, BlockData> chunks = ArrayListMultimap.create();
+    for (Entry<SectionCoordinate, SectionTable> entry : chunksTable.getMap().entrySet()) {
+      SectionCoordinate coord = entry.getKey();
+      for (BlockData block : entry.getValue().getAll()) {
+        chunks.put(ChunkCoordinate.fromChunk(coord.getWorld(), coord.getChunkX(), coord.getChunkZ()), block);
+      }
+    }
+    for (ChunkCoordinate coord : chunks.keySet()) {
+      ChunkBlocksProcessor processor = this.getChunkBlocksProcessor(coord.getChunkX(), coord.getChunkZ(), player);
+      processor.process(chunks.get(coord));
+    }
   }
 
-  public void removeGogglesUser(Player player) {
-    this.gogglesMap.remove(player);
+  public void removeGogglesUser(PlayerContext playerCtx) {
+    Player player = playerCtx.getPlayer();
+    ChunksTable chunksTable = this.gogglesMap.remove(player);
+    if (chunksTable == null) {
+      return;
+    }
+    World world = player.getWorld();
+    Multimap<ChunkCoordinate, BlockData> chunks = ArrayListMultimap.create();
+    for (Entry<SectionCoordinate, SectionTable> entry : chunksTable.getMap().entrySet()) {
+      SectionCoordinate coord = entry.getKey();
+      if (!coord.getWorld().equals(world.getName())) {
+        continue;
+      }
+      for (BlockData blockData : entry.getValue().getAll()) {
+        Block block = world.getBlockAt(blockData.getX(), blockData.getY(), blockData.getZ());
+        BlockData resetBlock = new BlockData(blockData.getX(), blockData.getY(), blockData.getZ(),
+            block.getType(), block.getData());
+        chunks.put(ChunkCoordinate.fromChunk(coord.getWorld(), coord.getChunkX(), coord.getChunkZ()), resetBlock);
+      }
+    }
+    for (ChunkCoordinate coord : chunks.keySet()) {
+      ChunkBlocksProcessor processor = this.getChunkBlocksProcessor(coord.getChunkX(), coord.getChunkZ(), player);
+      processor.process(chunks.get(coord));
+    }
   }
 }

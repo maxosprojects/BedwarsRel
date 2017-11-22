@@ -3,15 +3,18 @@ package io.github.bedwarsrevolution.blockdiguise;
 import com.comphenix.protocol.wrappers.ChunkCoordIntPair;
 import com.comphenix.protocol.wrappers.MultiBlockChangeInfo;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
+import lombok.Getter;
 import org.bukkit.Material;
 
 /**
  * Created by {maxos} 2017
  */
 public class BlockData {
-
+  @Getter
   private final int x;
+  @Getter
   private final int y;
+  @Getter
   private final int z;
   private final Material material;
   private final int metaData;

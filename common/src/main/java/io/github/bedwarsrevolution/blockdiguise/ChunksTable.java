@@ -1,7 +1,9 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,15 +33,18 @@ public class ChunksTable {
     int x = location.getBlockX();
     int y = location.getBlockY();
     int z = location.getBlockZ();
-    BlockData block = new BlockData(x, y, z, material, metaData);
+    return this.add(location.getWorld().getName(), x, y, z, material, metaData);
+  }
 
-    SectionCoordinate coord = SectionCoordinate.fromBlock(location);
+  private boolean add(String world, int x, int y, int z, Material material, int metaData) {
+    BlockData block = new BlockData(x, y, z, material, metaData);
+    SectionCoordinate coord = SectionCoordinate.fromBlock(world, x, y, z);
     SectionTable section = this.map.get(coord);
     if (section == null) {
       section = new RegularSectionTable(coord);
       this.map.put(coord, section);
     }
-    return section.add(location, block);
+    return section.add(x, y, z, block);
   }
 
   public BlockData remove(Location location) {
@@ -55,11 +60,25 @@ public class ChunksTable {
     return res;
   }
 
-  public static ChunksTable merge() {
-    return Collections.unmodifiableMap(map);
+  public static ChunksTable merge(Collection<ChunksTable> tables) {
+    ChunksTable res = new ChunksTable();
+    for (ChunksTable table : tables) {
+      for (Entry<SectionCoordinate, SectionTable> entry : table.map.entrySet()) {
+        SectionCoordinate sectionCoord = entry.getKey();
+        for (BlockData block : entry.getValue().getAll()) {
+          res.add(sectionCoord.getWorld(), block.getX(), block.getY(), block.getZ(),
+              block.getType(), block.getMetaData());
+        }
+      }
+    }
+    return res;
   }
 
   public boolean isEmpty() {
     return this.map.isEmpty();
+  }
+
+  public Map<SectionCoordinate, SectionTable> getMap() {
+    return Collections.unmodifiableMap(this.map);
   }
 }

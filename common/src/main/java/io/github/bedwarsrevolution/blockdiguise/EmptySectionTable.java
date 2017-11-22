@@ -1,5 +1,7 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
+import java.util.Collection;
+import java.util.Collections;
 import org.bukkit.Location;
 
 /**
@@ -9,7 +11,7 @@ public class EmptySectionTable implements SectionTable {
   public static final EmptySectionTable instance = new EmptySectionTable();
 
   @Override
-  public void process(SectionExecutor sectionExecutor) {
+  public void process(ChunkBlocksProcessor chunkBlocksProcessor) {
   }
 
   @Override
@@ -45,6 +47,11 @@ public class EmptySectionTable implements SectionTable {
   @Override
   public boolean isEmpty() {
     return true;
+  }
+
+  @Override
+  public Collection<BlockData> getAll() {
+    return Collections.emptyList();
   }
 
 }

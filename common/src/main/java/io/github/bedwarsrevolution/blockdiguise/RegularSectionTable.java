@@ -1,5 +1,6 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
@@ -22,8 +23,8 @@ public class RegularSectionTable implements SectionTable {
   }
 
   @Override
-  public void process(SectionExecutor sectionExecutor) {
-    sectionExecutor.execute(this.map.values());
+  public void process(ChunkBlocksProcessor chunkBlocksProcessor) {
+    chunkBlocksProcessor.process(this.map.values());
   }
 
   @Override
@@ -68,6 +69,11 @@ public class RegularSectionTable implements SectionTable {
   @Override
   public boolean isEmpty() {
     return this.map.isEmpty();
+  }
+
+  @Override
+  public Collection<BlockData> getAll() {
+    return this.map.values();
   }
 
 }

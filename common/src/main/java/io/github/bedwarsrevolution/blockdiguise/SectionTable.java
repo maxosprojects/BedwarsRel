@@ -1,5 +1,6 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
+import java.util.Collection;
 import org.bukkit.Location;
 
 /**
@@ -7,7 +8,7 @@ import org.bukkit.Location;
  */
 public interface SectionTable {
 
-  void process(SectionExecutor sectionExecutor);
+  void process(ChunkBlocksProcessor chunkBlocksProcessor);
 
   /**
    *
@@ -48,4 +49,6 @@ public interface SectionTable {
   BlockData get(Location location);
 
   boolean isEmpty();
+
+  Collection<BlockData> getAll();
 }
