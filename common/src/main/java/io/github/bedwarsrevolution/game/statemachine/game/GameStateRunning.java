@@ -287,6 +287,7 @@ public class GameStateRunning extends GameState {
       player.sendMessage(ChatWriterNew.pluginMessage("&cCurrently wearing goggles"));
       return;
     }
+    BedwarsRevol.getInstance().getBlockDisguiser().addGogglesUser(playerCtx);
     playerCtx.setHelmet(newHelmet.clone());
     // Remove one goggles item from player's inventory
     this.ctx.addRunningTask(new BukkitRunnable() {
@@ -300,6 +301,7 @@ public class GameStateRunning extends GameState {
         PlayerContext currentPlayerCtx = BedwarsRevol.getInstance().getGameManager()
             .getGameOfPlayer(player).getPlayerContext(player);
         if (currentPlayerCtx != null) {
+          BedwarsRevol.getInstance().getBlockDisguiser().removeGogglesUser(playerCtx);
           currentPlayerCtx.restoreHelmet();
           player.sendTitle("", TitleWriterNew.pluginMessage("&cAnti-Landmine Goggles expired"), 10, 70, 20);
         }

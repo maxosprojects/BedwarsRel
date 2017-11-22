@@ -321,19 +321,21 @@ public class BlockDisguiser {
         chunks.put(ChunkCoordinate.fromChunk(coord.getWorld(), coord.getChunkX(), coord.getChunkZ()), block);
       }
     }
-    for (ChunkCoordinate coord : chunks.keySet()) {
-      ChunkBlocksProcessor processor = this.getChunkBlocksProcessor(coord.getChunkX(), coord.getChunkZ(), player);
-      processor.process(chunks.get(coord));
+    for (ChunkCoordinate chunk : chunks.keySet()) {
+      ChunkBlocksProcessor processor = this.getChunkBlocksProcessor(chunk.getChunkX(), chunk.getChunkZ(), player);
+      processor.process(chunks.get(chunk));
     }
   }
 
   public void removeGogglesUser(PlayerContext playerCtx) {
     Player player = playerCtx.getPlayer();
+    ChunksTable teamTable = this.chunksMap.get(playerCtx.getTeam());
+    World world = player.getWorld();
+
     ChunksTable chunksTable = this.gogglesMap.remove(player);
     if (chunksTable == null) {
       return;
     }
-    World world = player.getWorld();
     Multimap<ChunkCoordinate, BlockData> chunks = ArrayListMultimap.create();
     for (Entry<SectionCoordinate, SectionTable> entry : chunksTable.getMap().entrySet()) {
       SectionCoordinate coord = entry.getKey();
@@ -341,15 +343,24 @@ public class BlockDisguiser {
         continue;
       }
       for (BlockData blockData : entry.getValue().getAll()) {
-        Block block = world.getBlockAt(blockData.getX(), blockData.getY(), blockData.getZ());
-        BlockData resetBlock = new BlockData(blockData.getX(), blockData.getY(), blockData.getZ(),
-            block.getType(), block.getData());
+        int x = blockData.getX();
+        int y = blockData.getY();
+        int z = blockData.getZ();
+        if (teamTable != null) {
+          SectionTable teamSection = teamTable
+              .getSectionTable(world.getName(), coord.getChunkX(), coord.getSectionY(), coord.getChunkZ());
+          if (teamSection.get(x, y, z) != null) {
+            continue;
+          }
+        }
+        Block block = world.getBlockAt(x, y, z);
+        BlockData resetBlock = new BlockData(x, y, z, block.getType(), block.getData());
         chunks.put(ChunkCoordinate.fromChunk(coord.getWorld(), coord.getChunkX(), coord.getChunkZ()), resetBlock);
       }
     }
-    for (ChunkCoordinate coord : chunks.keySet()) {
-      ChunkBlocksProcessor processor = this.getChunkBlocksProcessor(coord.getChunkX(), coord.getChunkZ(), player);
-      processor.process(chunks.get(coord));
+    for (ChunkCoordinate chunk : chunks.keySet()) {
+      ChunkBlocksProcessor processor = this.getChunkBlocksProcessor(chunk.getChunkX(), chunk.getChunkZ(), player);
+      processor.process(chunks.get(chunk));
     }
   }
 }
