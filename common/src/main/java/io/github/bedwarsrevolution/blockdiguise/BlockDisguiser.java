@@ -18,6 +18,7 @@ import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -192,19 +193,45 @@ public class BlockDisguiser {
       this.chunksMap.put(team, table);
     }
     boolean result = table.add(location, material, metaData);
-    if (result) {
-      BlockPosition pos = this.locationToPosition(location);
-      WrapperPlayServerBlockChange packet = this.makePacket(pos, material, metaData);
-      Set<Player> served = this.gogglesMap.keySet();
-      for (Player player : served) {
-        this.gogglesMap.get(player).add(location, material, metaData);
-        this.sendBlock(player, packet, pos);
+    if (!result) {
+      return result;
+    }
+
+    // Find if any other team has a block at this location
+    boolean otherTeamHas = false;
+    Iterator<Entry<TeamNew, ChunksTable>> tableIter = this.chunksMap.entrySet().iterator();
+    for (Entry<TeamNew, ChunksTable> entry : this.chunksMap.entrySet()) {
+      if (entry.getKey() == team) {
+        continue;
       }
-      for (PlayerContext playerCtx : team.getPlayers()) {
-        final Player player = playerCtx.getPlayer();
-        if (!served.contains(player)) {
-          this.sendBlock(player, packet, pos);
-        }
+      if (entry.getValue().getBlock(location) != null) {
+        otherTeamHas = true;
+        break;
+      }
+    }
+
+    BlockPosition pos = this.locationToPosition(location);
+    WrapperPlayServerBlockChange ownPacket = this.makePacket(pos, material, metaData);
+    WrapperPlayServerBlockChange hostilePacket = this.makePacket(pos, Material.REDSTONE_BLOCK, 0);
+    Set<Player> served = this.gogglesMap.keySet();
+    Set<Player> teamPlayers = new HashSet<>();
+    for (PlayerContext playerCtx : team.getPlayers()) {
+      teamPlayers.add(playerCtx.getPlayer());
+    }
+    for (Player player : served) {
+      // If player is oon the team that added landmine and no other team has a landmine at this location
+      if (!otherTeamHas && teamPlayers.contains(player)) {
+        this.gogglesMap.get(player).add(location, material, metaData);
+        this.sendBlock(player, ownPacket, pos);
+      } else {
+        this.gogglesMap.get(player).add(location, Material.REDSTONE_BLOCK, 0);
+        this.sendBlock(player, hostilePacket, pos);
+      }
+    }
+    for (PlayerContext playerCtx : team.getPlayers()) {
+      final Player player = playerCtx.getPlayer();
+      if (!served.contains(player)) {
+        this.sendBlock(player, ownPacket, pos);
       }
     }
     return result;

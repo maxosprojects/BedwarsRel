@@ -12,16 +12,21 @@ import org.bukkit.Material;
 public class ChunksTable {
   private Map<SectionCoordinate, SectionTable> map = new ConcurrentHashMap<>();
 
+  public BlockData getBlock(Location location) {
+    SectionTable section = this.getSectionTable(SectionCoordinate.fromBlock(location));
+    return section.get(location);
+  }
+
   public SectionTable getSectionTable(String world, int chunkX, int sectionY, int chunkZ) {
-    SectionTable section = this.map.get(SectionCoordinate.fromSection(world, chunkX, sectionY, chunkZ));
+    return this.getSectionTable(SectionCoordinate.fromSection(world, chunkX, sectionY, chunkZ));
+  }
+
+  public SectionTable getSectionTable(SectionCoordinate coord) {
+    SectionTable section = this.map.get(coord);
     if (section == null) {
       return EmptySectionTable.instance;
     }
     return section;
-  }
-
-  public SectionTable getSectionTable(SectionCoordinate coord) {
-    return this.getSectionTable(coord.getWorld(), coord.getChunkX(), coord.getSectionY(), coord.getChunkZ());
   }
 
   /**
