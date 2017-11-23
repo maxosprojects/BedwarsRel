@@ -289,24 +289,27 @@ public class GameStateRunning extends GameState {
     }
     BedwarsRevol.getInstance().getBlockDisguiser().addGogglesUser(playerCtx);
     playerCtx.setHelmet(newHelmet.clone());
+
     // Remove one goggles item from player's inventory
     this.ctx.addRunningTask(new BukkitRunnable() {
       public void run() {
         newHelmet.setAmount(newHelmet.getAmount() - 1);
       }
     }.runTaskLater(BedwarsRevol.getInstance(), 1L));
+
+    final long wearingTime = System.currentTimeMillis();
     this.ctx.addRunningTask(new BukkitRunnable() {
       public void run() {
-        // Make sure player is still in the game
+        // Make sure player is still in the game and hasn't died since goggles were put on
         PlayerContext currentPlayerCtx = BedwarsRevol.getInstance().getGameManager()
             .getGameOfPlayer(player).getPlayerContext(player);
-        if (currentPlayerCtx != null) {
+        if (currentPlayerCtx != null && currentPlayerCtx.getLastDeath() <= wearingTime) {
           BedwarsRevol.getInstance().getBlockDisguiser().removeGogglesUser(playerCtx);
           currentPlayerCtx.restoreHelmet();
-          player.sendTitle("", TitleWriterNew.pluginMessage("&cAnti-Landmine Goggles expired"), 10, 70, 20);
+          player.sendTitle("", TitleWriterNew.pluginMessage("&cLandmine Goggles expired"), 10, 70, 20);
         }
       }
-    }.runTaskLater(BedwarsRevol.getInstance(), 100L));
+    }.runTaskLater(BedwarsRevol.getInstance(), 600L));
   }
 
   private void spawnGolem(PlayerContext playerCtx, Block block) {

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.DamageHolder;
+import io.github.bedwarsrevolution.listeners.InvisibilityPotionListenerNew;
 import io.github.bedwarsrevolution.shop.Shop;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.NmsUtils;
@@ -118,6 +119,10 @@ public class PlayerStatePlaying extends PlayerState {
 //                    .getIntConfig("statistics.scores.kill", 10))));
 //      }
 //    }
+
+    BedwarsRevol.getInstance().getInvisibilityPotionListener().unhideArmor(this.playerCtx);
+    BedwarsRevol.getInstance().getBlockDisguiser().removeGogglesUser(this.playerCtx);
+    this.playerCtx.died();
 
     for (PlayerContext aPlayerCtx : this.playerCtx.getGameContext().getPlayers()) {
       Player aPlayer = aPlayerCtx.getPlayer();

@@ -1,6 +1,7 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
@@ -72,8 +73,8 @@ public class RegularSectionTable implements SectionTable {
   }
 
   @Override
-  public Collection<BlockData> getAll() {
-    return this.map.values();
+  public Map<BlockCoordinate, BlockData> getMap() {
+    return Collections.unmodifiableMap(this.map);
   }
 
 }

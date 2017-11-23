@@ -1,7 +1,7 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import org.bukkit.Location;
 
 /**
@@ -50,8 +50,8 @@ public class EmptySectionTable implements SectionTable {
   }
 
   @Override
-  public Collection<BlockData> getAll() {
-    return Collections.emptyList();
+  public Map<BlockCoordinate, BlockData> getMap() {
+    return Collections.emptyMap();
   }
 
 }

@@ -61,6 +61,8 @@ public class PlayerContext {
   private boolean active = true;
   @Getter
   private ItemStack helmet;
+  @Getter
+  private long lastDeath;
 
   public PlayerContext(Player player, GameContext gameContext) {
     this.player = player;
@@ -310,5 +312,9 @@ public class PlayerContext {
       this.player.getInventory().setHelmet(this.helmet);
       this.helmet = null;
     }
+  }
+
+  public void died() {
+    this.lastDeath = System.currentTimeMillis();
   }
 }

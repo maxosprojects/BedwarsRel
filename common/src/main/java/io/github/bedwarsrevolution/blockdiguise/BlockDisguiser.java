@@ -48,7 +48,7 @@ public class BlockDisguiser {
     this.plugin = plugin;
   }
 
-  public void registerListener() {
+  public BlockDisguiser registerInterceptor() {
     this.plugin.getProtocolManager().addPacketListener(new PacketAdapter(new AdapterParameteters()
         .plugin(this.plugin)
         .serverSide()
@@ -87,6 +87,7 @@ public class BlockDisguiser {
         }
       }
     });
+    return this;
   }
 
   public void close() {
@@ -312,12 +313,12 @@ public class BlockDisguiser {
 
   public void addGogglesUser(PlayerContext playerCtx) {
     Player player = playerCtx.getPlayer();
-    ChunksTable chunksTable = this.mergeChunks(playerCtx.getTeam(), Material.REDSTONE_BLOCK, 0);
+    ChunksTable chunksTable = this.mergeChunkTables(playerCtx.getTeam(), Material.REDSTONE_BLOCK, 0);
     this.gogglesMap.put(player, chunksTable);
     Multimap<ChunkCoordinate, BlockData> chunks = ArrayListMultimap.create();
     for (Entry<SectionCoordinate, SectionTable> entry : chunksTable.getMap().entrySet()) {
       SectionCoordinate coord = entry.getKey();
-      for (BlockData block : entry.getValue().getAll()) {
+      for (BlockData block : entry.getValue().getMap().values()) {
         chunks.put(ChunkCoordinate.fromChunk(coord.getWorld(), coord.getChunkX(), coord.getChunkZ()), block);
       }
     }
@@ -329,18 +330,23 @@ public class BlockDisguiser {
 
   // Merges all teams' chunk tables into one.
   // Priority is given to blocks that don't belong to the provided team (e.g. to see other
-  // teams' landmines when those are placed at the same spot as 
-  private ChunksTable mergeChunks(TeamNew team, Material material, int metaData) {
+  // teams' landmines when those are placed at the same spot as own)
+  private ChunksTable mergeChunkTables(TeamNew team, Material material, int metaData) {
     ChunksTable res = new ChunksTable();
     for (Entry<TeamNew, ChunksTable> chunkEntry : this.chunksMap.entrySet()) {
-      TeamNew team = chunkEntry.getKey();
+      boolean sameTeam = chunkEntry.getKey() == team;
       ChunksTable teamTable = chunkEntry.getValue();
-      Map<BlockCoordinate, BlockData> teamBlocks = teamTable.getAllBlocks();
-      for (Entry<SectionCoordinate, SectionTable> entry : table.map.entrySet()) {
+      for (Entry<SectionCoordinate, SectionTable> entry : teamTable.getMap().entrySet()) {
         SectionCoordinate sectionCoord = entry.getKey();
-        for (BlockData block : entry.getValue().getAll()) {
-          res.add(sectionCoord.getWorld(), block.getX(), block.getY(), block.getZ(),
-              material, metaData);
+        for (BlockData block : entry.getValue().getMap().values()) {
+          if (sameTeam) {
+            if (res.getSectionTable(sectionCoord).get(block.getX(), block.getY(), block.getZ()) == null) {
+              res.add(sectionCoord.getWorld(), block.getX(), block.getY(), block.getZ(),
+                  block.getType(), block.getMetaData());
+            }
+          } else {
+            res.add(sectionCoord.getWorld(), block.getX(), block.getY(), block.getZ(), material, metaData);
+          }
         }
       }
     }
@@ -362,7 +368,7 @@ public class BlockDisguiser {
       if (!coord.getWorld().equals(world.getName())) {
         continue;
       }
-      for (BlockData blockData : entry.getValue().getAll()) {
+      for (BlockData blockData : entry.getValue().getMap().values()) {
         int x = blockData.getX();
         int y = blockData.getY();
         int z = blockData.getZ();
@@ -371,12 +377,9 @@ public class BlockDisguiser {
           SectionTable teamSection = teamTable
               .getSectionTable(world.getName(), coord.getChunkX(), coord.getSectionY(), coord.getChunkZ());
           resetBlock = teamSection.get(x, y, z);
-          if (teamSection.get(x, y, z) != null) {
-            continue;
-          }
         }
-        Block block = world.getBlockAt(x, y, z);
         if (resetBlock == null) {
+          Block block = world.getBlockAt(x, y, z);
           resetBlock = new BlockData(x, y, z, block.getType(), block.getData());
         }
         chunks.put(ChunkCoordinate.fromChunk(coord.getWorld(), coord.getChunkX(), coord.getChunkZ()), resetBlock);

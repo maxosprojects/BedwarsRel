@@ -54,6 +54,7 @@ public abstract class PlayerState {
   public abstract void onInventoryClick(InventoryClickEvent event);
 
   public void leave(boolean kicked) {
+    BedwarsRevol.getInstance().getBlockDisguiser().removeGogglesUser(this.playerCtx);
     for (PlayerContext aPlayerCtx : this.playerCtx.getGameContext().getPlayers()) {
       Player aPlayer = aPlayerCtx.getPlayer();
       if (aPlayer != this.playerCtx && aPlayer.isOnline()) {

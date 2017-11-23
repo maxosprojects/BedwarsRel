@@ -56,6 +56,11 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onConsumeEvent(PlayerItemConsumeEvent event) {
     final Player player = event.getPlayer();
+    PlayerContext playerCtx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player)
+        .getPlayerContext(player);
+    if (playerCtx == null) {
+      return;
+    }
     ItemStack item = event.getItem();
     if (item.getType() == Material.POTION) {
       PotionMeta meta = (PotionMeta) item.getItemMeta();
@@ -71,13 +76,19 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
         if (invisibilityTasks.containsKey(player)) {
           invisibilityTasks.get(player).cancel();
         }
+        final long consumptionTime = System.currentTimeMillis();
         invisibilityTasks.put(player, new BukkitRunnable() {
           @Override
           public void run() {
             invisibilityTasks.remove(player);
             try {
               InvisibilityPotionListenerNew.this.unhideArmor(player);
-              player.sendTitle("", TitleWriterNew.pluginMessage("Invisibility expired"), 10, 70, 20);
+              // Make sure player is still in the game and hasn't died since potion was consumed
+              PlayerContext playerCtx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player)
+                  .getPlayerContext(player);
+              if (playerCtx != null && playerCtx.getLastDeath() <= consumptionTime) {
+                player.sendTitle("", TitleWriterNew.pluginMessage("&cInvisibility expired"), 10, 70, 20);
+              }
             } catch (InvocationTargetException | IllegalAccessException e) {
               e.printStackTrace();
             }
@@ -139,6 +150,14 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
           this.tableLock.unlock();
         }
       }
+    }
+  }
+
+  public void unhideArmor(PlayerContext playerCtx) {
+    try {
+      unhideArmor(playerCtx.getPlayer());
+    } catch (InvocationTargetException | IllegalAccessException e) {
+      e.printStackTrace();
     }
   }
 

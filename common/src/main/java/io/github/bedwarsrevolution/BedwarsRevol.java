@@ -122,6 +122,8 @@ public class BedwarsRevol extends JavaPlugin {
   private ProtocolManager protocolManager;
   @Getter
   private BlockDisguiser blockDisguiser;
+  @Getter
+  private InvisibilityPotionListenerNew invisibilityPotionListener;
 
   public static String _l(CommandSender commandSender, String key, String singularValue,
       Map<String, String> params) {
@@ -882,10 +884,9 @@ public class BedwarsRevol extends JavaPlugin {
     new ServerListenerNew();
     new SignListenerNew();
     new ChunkListenerNew();
-    new InvisibilityPotionListenerNew().registerInterceptor();
     new SoundListenerNew().registerInterceptor();
-    this.blockDisguiser = new BlockDisguiser(this);
-    blockDisguiser.registerListener();
+    this.invisibilityPotionListener = new InvisibilityPotionListenerNew().registerInterceptor();
+    this.blockDisguiser = new BlockDisguiser(this).registerInterceptor();
 
     if (this.isSpigot()) {
       new PlayerSpigotListenerNew();

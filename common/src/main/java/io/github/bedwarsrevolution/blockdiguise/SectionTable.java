@@ -1,6 +1,6 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
-import java.util.Collection;
+import java.util.Map;
 import org.bukkit.Location;
 
 /**
@@ -50,5 +50,5 @@ public interface SectionTable {
 
   boolean isEmpty();
 
-  Collection<BlockData> getAll();
+  Map<BlockCoordinate, BlockData> getMap();
 }

@@ -1,10 +1,7 @@
 package io.github.bedwarsrevolution.blockdiguise;
 
-import io.github.bedwarsrevolution.game.TeamNew;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,6 +20,10 @@ public class ChunksTable {
     return section;
   }
 
+  public SectionTable getSectionTable(SectionCoordinate coord) {
+    return this.getSectionTable(coord.getWorld(), coord.getChunkX(), coord.getSectionY(), coord.getChunkZ());
+  }
+
   /**
    *
    * @param location
@@ -37,7 +38,7 @@ public class ChunksTable {
     return this.add(location.getWorld().getName(), x, y, z, material, metaData);
   }
 
-  private boolean add(String world, int x, int y, int z, Material material, int metaData) {
+  public boolean add(String world, int x, int y, int z, Material material, int metaData) {
     BlockData block = new BlockData(x, y, z, material, metaData);
     SectionCoordinate coord = SectionCoordinate.fromBlock(world, x, y, z);
     SectionTable section = this.map.get(coord);
@@ -69,19 +70,4 @@ public class ChunksTable {
     return Collections.unmodifiableMap(this.map);
   }
 
-  public Map<BlockCoordinate,BlockData> getAllBlocks() {
-    ChunksTable res = new ChunksTable();
-    for (Entry<TeamNew, ChunksTable> chunkEntry : this.chunksMap.entrySet()) {
-      TeamNew team = chunkEntry.getKey();
-      ChunksTable teamTable = chunkEntry.getValue();
-      Map<BlockCoordinate, BlockData> teamBlocks = teamTable.getAllBlocks();
-      for (Entry<SectionCoordinate, SectionTable> entry : table.map.entrySet()) {
-        SectionCoordinate sectionCoord = entry.getKey();
-        for (BlockData block : entry.getValue().getAll()) {
-          res.add(sectionCoord.getWorld(), block.getX(), block.getY(), block.getZ(),
-              material, metaData);
-        }
-      }
-    }
-  }
 }
