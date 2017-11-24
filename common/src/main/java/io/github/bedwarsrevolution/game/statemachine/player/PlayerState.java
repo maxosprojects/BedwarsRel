@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -98,4 +99,7 @@ public abstract class PlayerState {
     this.playerCtx.setTeleporting(false);
   }
 
+  protected String takeResources(PlayerContext playerCtx) {
+    return StringUtils.EMPTY;
+  }
 }

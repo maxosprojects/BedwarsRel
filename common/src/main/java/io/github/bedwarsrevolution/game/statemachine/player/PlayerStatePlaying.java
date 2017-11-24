@@ -78,9 +78,6 @@ public class PlayerStatePlaying extends PlayerState {
 //      }
 //    }
 
-    DamageHolder damage = this.playerCtx.getLastDamagedBy();
-    boolean damageCausedRecently = (damage != null && damage.wasCausedRecently());
-
 //    PlayerStatistic diedPlayerStats = null;
 //    PlayerStatistic killerPlayerStats = null;
 //    if (BedwarsRevol.getInstance().statisticsEnabled()) {
@@ -120,6 +117,9 @@ public class PlayerStatePlaying extends PlayerState {
 //      }
 //    }
 
+    DamageHolder damage = this.playerCtx.getLastDamagedBy();
+    boolean damageCausedRecently = (damage != null && damage.wasCausedRecently());
+
     BedwarsRevol.getInstance().getInvisibilityPotionListener().unhideArmor(this.playerCtx);
     BedwarsRevol.getInstance().getBlockDisguiser().removeGogglesUser(this.playerCtx);
     this.playerCtx.died();
@@ -146,7 +146,7 @@ public class PlayerStatePlaying extends PlayerState {
       Player damager = damage.getDamager();
       PlayerContext damagerCtx = this.playerCtx.getGameContext().getPlayerContext(damager);
       if (damagerCtx != null) {
-        String resources = this.transferResources(damagerCtx);
+        String resources = damagerCtx.getState().takeResources(this.playerCtx);
         if (!resources.isEmpty()) {
           damager.sendMessage(ChatWriterNew.pluginMessage(BedwarsRevol._l(
               damager, "ingame.player.gotresources",
@@ -212,12 +212,13 @@ public class PlayerStatePlaying extends PlayerState {
     }
   }
 
-  private String transferResources(PlayerContext to) {
-    PlayerInventory destInv = to.getPlayer().getInventory();
+  @Override
+  protected String takeResources(PlayerContext from) {
+    PlayerInventory destInv = this.playerCtx.getPlayer().getInventory();
     Multimap<Material, ItemStack> map = ArrayListMultimap.create();
-    Set<Material> types = this.playerCtx.getGameContext().getResourceSpawnerManager().getTypes();
+    Set<Material> types = from.getGameContext().getResourceSpawnerManager().getTypes();
     // Collect resources into map
-    for (ItemStack item : this.playerCtx.getPlayer().getInventory().getContents()) {
+    for (ItemStack item : from.getPlayer().getInventory().getContents()) {
       if (item != null && types.contains(item.getType())) {
         map.put(item.getType(), item);
       }
@@ -235,7 +236,7 @@ public class PlayerStatePlaying extends PlayerState {
       } else {
         name = StringUtils.capitalize(item.getType().toString().toLowerCase());
       }
-      counts.add(BedwarsRevol._l(to.getPlayer(), "ingame.player.resource",
+      counts.add(BedwarsRevol._l(this.playerCtx.getPlayer(), "ingame.player.resource",
           ImmutableMap.of("resource", name, "amount", countItems(toPack).toString())));
     }
     return StringUtils.join(counts, ", ");
