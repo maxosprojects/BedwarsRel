@@ -44,6 +44,7 @@ import io.github.bedwarsrevolution.game.GameManagerNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.listeners.ArrowListenerNew;
 import io.github.bedwarsrevolution.listeners.BlockListenerNew;
 import io.github.bedwarsrevolution.listeners.ChunkListenerNew;
 import io.github.bedwarsrevolution.listeners.EntityListenerNew;
@@ -886,6 +887,7 @@ public class BedwarsRevol extends JavaPlugin {
     new ChunkListenerNew();
     new SoundListenerNew().registerInterceptor();
     this.invisibilityPotionListener = new InvisibilityPotionListenerNew().registerInterceptor();
+    new ArrowListenerNew().registerInterceptor();
     this.blockDisguiser = new BlockDisguiser(this).registerInterceptor();
 
     if (this.isSpigot()) {
