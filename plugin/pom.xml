@@ -9,7 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <version>${versionstring}</version>
+  <!-- <version>${versionstring}</version> -->
 
   <artifactId>BedwarsRel</artifactId>
 
