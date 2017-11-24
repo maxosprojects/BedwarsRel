@@ -123,9 +123,12 @@ public class Shop {
       }
       return;
     }
-
+    if (isShop && inventoryAction == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+      event.setCancelled(true);
+      return;
+    }
     if (inventoryAction == InventoryAction.MOVE_TO_OTHER_INVENTORY
-        && (view.getTopInventory().getType() != InventoryType.CRAFTING)
+        && view.getTopInventory().getType() != InventoryType.CRAFTING
         && this.isPermanentUpgrade(clickedStack.getType())) {
       event.setCancelled(true);
       return;
