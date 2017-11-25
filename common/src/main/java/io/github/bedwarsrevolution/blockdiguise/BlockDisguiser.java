@@ -253,7 +253,7 @@ public class BlockDisguiser {
   public void removeAllBlocks(Location location) {
     for (TeamNew team : this.chunksMap.keySet()) {
       ChunksTable table = this.chunksMap.get(team);
-      if (table.remove(location) != null) {
+      if (table != null && table.remove(location) != null) {
         this.resetBlock(team, location);
       }
     }
