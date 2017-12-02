@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import lombok.Getter;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -46,7 +47,9 @@ public class RegionNew {
   private HashMap<Block, Integer> brokendBlockTypes = null;
   private List<Block> brokenBlocks = null;
   private List<Inventory> inventories = null;
+  @Getter
   private Location maxCorner = null;
+  @Getter
   private Location minCorner = null;
   private String name = null;
   private List<Block> placedBlocks = null;
@@ -103,8 +106,10 @@ public class RegionNew {
   }
 
   @SuppressWarnings("deprecation")
-  public void addPlacedBlock(Block placeBlock, BlockState replacedBlock) {
-    this.placedBlocks.add(placeBlock);
+  public void addPlacedBlock(Block placedBlock, BlockState replacedBlock) {
+    this.placedBlocks.add(placedBlock);
+    BedwarsRevol.getInstance().getMapsManager().update(placedBlock);
+
     if (replacedBlock != null) {
       if (replacedBlock.getData() instanceof Directional) {
         this.brokenBlockFace.put(replacedBlock.getBlock(),
@@ -220,6 +225,7 @@ public class RegionNew {
 
   public void removePlacedBlock(Block block) {
     this.placedBlocks.remove(block);
+    BedwarsRevol.getInstance().getMapsManager().update(block);
   }
 
   public void removePlacedUnbreakableBlock(Block block) {
@@ -245,6 +251,7 @@ public class RegionNew {
 
       if (blockInWorld.equals(placed)) {
         blockInWorld.setType(Material.AIR);
+        BedwarsRevol.getInstance().getMapsManager().update(placed);
       }
     }
 
@@ -289,6 +296,8 @@ public class RegionNew {
       } else {
         theBlock.getState().update(true, true);
       }
+
+      BedwarsRevol.getInstance().getMapsManager().update(block);
     }
 
     this.brokenBlocks.clear();

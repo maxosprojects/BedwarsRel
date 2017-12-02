@@ -18,6 +18,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -772,4 +773,7 @@ public final class UtilsNew {
     return String.format("%.1f", health);
   }
 
+  public static String join(String delimeter, Object...elements) {
+    return StringUtils.join(elements, delimeter);
+  }
 }

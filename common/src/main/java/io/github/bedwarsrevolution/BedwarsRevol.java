@@ -40,6 +40,7 @@ import io.github.bedwarsrevolution.commands.SetTeamChestCommand;
 import io.github.bedwarsrevolution.commands.StartGameCommand;
 import io.github.bedwarsrevolution.commands.StatsCommand;
 import io.github.bedwarsrevolution.commands.StopGameCommand;
+import io.github.bedwarsrevolution.commands.MapCommand;
 import io.github.bedwarsrevolution.game.GameManagerNew;
 import io.github.bedwarsrevolution.game.ResourceSpawnerNew;
 import io.github.bedwarsrevolution.game.TeamNew;
@@ -60,6 +61,7 @@ import io.github.bedwarsrevolution.listeners.EntityPickupItemEventListenerNew;
 import io.github.bedwarsrevolution.listeners.PlayerPickUpItemEventListenerNew;
 import io.github.bedwarsrevolution.listeners.PlayerSwapHandItemsEventListenerNew;
 import io.github.bedwarsrevolution.localization.LocalizationConfigNew;
+import io.github.bedwarsrevolution.maps.MapsManager;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeRegistry;
 import io.github.bedwarsrevolution.updater.ConfigUpdaterNew;
 import io.github.bedwarsrevolution.utils.BedwarsCommandExecutorNew;
@@ -90,6 +92,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.ScoreboardManager;
+import org.dynmap.DynmapAPI;
 
 public class BedwarsRevol extends JavaPlugin {
 
@@ -125,6 +128,10 @@ public class BedwarsRevol extends JavaPlugin {
   private BlockDisguiser blockDisguiser;
   @Getter
   private InvisibilityPotionListenerNew invisibilityPotionListener;
+  @Getter
+  private DynmapAPI dynmap;
+  @Getter
+  private MapsManager mapsManager;
 
   public static String _l(CommandSender commandSender, String key, String singularValue,
       Map<String, String> params) {
@@ -669,7 +676,7 @@ public class BedwarsRevol extends JavaPlugin {
   }
 
   public void loadShop() {
-    File file = new File(BedwarsRevol.getInstance().getDataFolder(), "shop.yml");
+    File file = new File(this.getDataFolder(), "shop.yml");
     if (!file.exists()) {
       // create default file
       this.saveResource("shop.yml", false);
@@ -728,6 +735,9 @@ public class BedwarsRevol extends JavaPlugin {
   @Override
   public void onEnable() {
     BedwarsRevol.instance = this;
+
+    this.dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("dynmap");
+    this.mapsManager = new MapsManager(false);
 
     if (this.getDescription().getVersion().contains("-SNAPSHOT")
         && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
@@ -855,6 +865,7 @@ public class BedwarsRevol extends JavaPlugin {
     this.commands.add(new RemoveHoloCommand(this));
     this.commands.add(new DebugPasteCommand(this));
     this.commands.add(new ItemsPasteCommand(this));
+    this.commands.add(new MapCommand(this));
 
     this.getCommand("bw").setExecutor(executor);
   }
@@ -904,7 +915,7 @@ public class BedwarsRevol extends JavaPlugin {
   }
 
   public void saveConfiguration() {
-    File file = new File(BedwarsRevol.getInstance().getDataFolder(), "config.yml");
+    File file = new File(this.getDataFolder(), "config.yml");
     try {
       file.mkdirs();
 
