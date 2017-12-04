@@ -4,6 +4,8 @@ import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import org.bukkit.Material;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 public abstract class Upgrade {
   public abstract UpgradeScope getScope();
@@ -31,6 +33,15 @@ public abstract class Upgrade {
    * @return whether item initialization was successful (e.g. was successfully added to the game).
    */
   public abstract boolean activate(UpgradeScope scope, UpgradeCycle cycle);
+
+  /**
+   * Is called when an item is used (e.g. egg is thrown or landmine glasses are used)
+   *
+   * @return whether the item has been processed and and no further processing should be done for the item
+   */
+  public boolean use(PlayerContext playerCtx, ItemStack item, PlayerInteractEvent event) {
+    return false;
+  }
 
   public abstract String getType();
 

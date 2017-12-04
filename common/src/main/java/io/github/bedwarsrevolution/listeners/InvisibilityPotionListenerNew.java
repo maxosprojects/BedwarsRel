@@ -56,8 +56,11 @@ public class InvisibilityPotionListenerNew extends BaseListenerNew {
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onConsumeEvent(PlayerItemConsumeEvent event) {
     final Player player = event.getPlayer();
-    PlayerContext playerCtx = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player)
-        .getPlayerContext(player);
+    GameContext game = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    if (game == null) {
+      return;
+    }
+    PlayerContext playerCtx = game.getPlayerContext(player);
     if (playerCtx == null) {
       return;
     }

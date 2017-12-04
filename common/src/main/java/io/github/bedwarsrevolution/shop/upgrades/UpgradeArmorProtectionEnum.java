@@ -44,8 +44,9 @@ public enum UpgradeArmorProtectionEnum implements UpgradeEnum {
     Enchantment enchant = Enchantment.PROTECTION_ENVIRONMENTAL;
     for (ItemStack item : playerCtx.getPlayer().getInventory().getArmorContents()) {
       // If player wears goggles at the moment, update stored helmet instead.
-      // Otherwise an exception will be thrown as certain enchants can't be applied to sapling
-      if (item.getType() == Material.SAPLING) {
+      // Otherwise an exception will be thrown as certain enchants can't be applied to
+      // shovel which is used for bedwars items
+      if (item.getType() == Material.DIAMOND_SPADE) {
         item = playerCtx.getHelmet();
       }
       ItemMeta meta = item.getItemMeta();

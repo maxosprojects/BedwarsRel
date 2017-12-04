@@ -1,13 +1,15 @@
 package io.github.bedwarsrevolution.shop.upgrades;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import io.github.bedwarsrevolution.BedwarsRevol;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
+import java.util.Iterator;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 
 public class UpgradeRegistry {
-  private static Map<String, List<Upgrade>> upgrades = new HashMap<>();
+  private static Multimap<String, Upgrade> upgrades = ArrayListMultimap.create();
 
   public static void loadUpgrades() {
     BedwarsRevol.getInstance().getServer().getPluginManager().
@@ -39,23 +41,19 @@ public class UpgradeRegistry {
     addUpgrade(new UpgradeSwordItem(1));
     addUpgrade(new UpgradeSwordItem(2));
     addUpgrade(new UpgradeSwordItem(3));
+
+    addUpgrade(new UpgradeItemFireball());
+    addUpgrade(new UpgradeItemMonsterEgg());
+    addUpgrade(new UpgradeItemLandmineGoggles());
+    addUpgrade(new UpgradeItemCopter());
   }
 
   private static void addUpgrade(Upgrade upgrade) {
-    List<Upgrade> list = upgrades.get(upgrade.getType());
-    if (list == null) {
-      list = new ArrayList<>();
-      upgrades.put(upgrade.getType(), list);
-    }
-    list.add(upgrade);
+    upgrades.put(upgrade.getType(), upgrade);
   }
 
   public static Upgrade getUpgrade(String type, int level) {
-    List<Upgrade> typeUpgrades = upgrades.get(type);
-    if (typeUpgrades == null) {
-      return null;
-    }
-    for (Upgrade upgrade : typeUpgrades) {
+    for (Upgrade upgrade : upgrades.get(type)) {
       if (upgrade.isLevel(level)) {
         return upgrade;
       }
@@ -63,4 +61,12 @@ public class UpgradeRegistry {
     return null;
   }
 
+  public static boolean use(PlayerContext playerCtx, ItemStack item, PlayerInteractEvent event) {
+    for (Upgrade upgrade : upgrades.values()) {
+      if (upgrade.use(playerCtx, item, event)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
