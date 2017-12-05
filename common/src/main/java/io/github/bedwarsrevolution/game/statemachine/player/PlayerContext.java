@@ -6,6 +6,7 @@ import io.github.bedwarsrevolution.game.PlayerStorageNew;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
 import io.github.bedwarsrevolution.shop.Shop;
+import io.github.bedwarsrevolution.shop.upgrades.Mountable;
 import io.github.bedwarsrevolution.shop.upgrades.Upgrade;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeCycle;
 import io.github.bedwarsrevolution.shop.upgrades.UpgradeScope;
@@ -63,6 +64,7 @@ public class PlayerContext {
   private ItemStack helmet;
   @Getter
   private long lastDeath;
+  private Mountable mounted;
 
   public PlayerContext(Player player, GameContext gameContext) {
     this.player = player;
@@ -316,5 +318,16 @@ public class PlayerContext {
 
   public void died() {
     this.lastDeath = System.currentTimeMillis();
+  }
+
+  public void unmount() {
+    if (this.mounted != null) {
+      this.mounted.unmount(this);
+      this.mounted = null;
+    }
+  }
+
+  public void mount(Mountable mountable) {
+    this.mounted = mountable;
   }
 }

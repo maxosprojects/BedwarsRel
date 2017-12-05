@@ -3,7 +3,9 @@ package io.github.bedwarsrevolution.listeners;
 import com.google.common.collect.ImmutableSet;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.game.statemachine.player.PlayerContext;
 import java.util.Set;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,6 +17,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.spigotmc.event.entity.EntityDismountEvent;
 
 public class EntityListenerNew extends BaseListenerNew {
   private static final Set<EntityType> preventDropsFrom = ImmutableSet.of(
@@ -38,6 +41,24 @@ public class EntityListenerNew extends BaseListenerNew {
         || type == EntityType.DRAGON_FIREBALL) {
       event.setCancelled(true);
     }
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onEntityDismount(EntityDismountEvent event) {
+    Entity entity = event.getEntity();
+    if (entity.getType() != EntityType.PLAYER) {
+      return;
+    }
+    Player player = (Player) entity;
+    GameContext game = BedwarsRevol.getInstance().getGameManager().getGameOfPlayer(player);
+    if (game == null) {
+      return;
+    }
+    PlayerContext playerCtx = game.getPlayerContext(player);
+    if (playerCtx == null) {
+      return;
+    }
+    playerCtx.unmount();
   }
 
 //  @EventHandler(priority = EventPriority.HIGHEST)
