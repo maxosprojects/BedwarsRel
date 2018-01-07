@@ -2,6 +2,8 @@ package io.github.bedwarsrevolution.commands;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.bedwarsrevolution.BedwarsRevol;
+import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
@@ -16,43 +18,37 @@ public class StopGameCommand extends BaseCommand implements ICommand {
 
   @Override
   public boolean execute(CommandSender sender, List<String> args) {
-//    if (!sender.hasPermission("bw." + this.getPermission())) {
-//      return false;
-//    }
-//
-//    Game game = null;
-//
-//    if (args.size() == 0) {
-//      game = this.getPlugin().getGameManager().getGameOfPlayer((Player) sender);
-//
-//      if (game == null) {
-//        sender.sendMessage(
-//            ChatWriter.pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.notingame")));
-//        return false;
-//      }
-//    }
-//
-//    if (args.size() != 0) {
-//      game = this.getPlugin().getGameManager().getGameContext(args.get(0));
-//
-//      if (game == null) {
-//        sender.sendMessage(ChatWriter.pluginMessage(ChatColor.RED
-//            + BedwarsRel
-//            ._l(sender, "errors.gamenotfound", ImmutableMap.of("game", args.get(0).toString()))));
-//        return false;
-//      }
-//    }
-//
-//    if (!game.stop()) {
-//      sender
-//          .sendMessage(
-//              ChatWriter
-//                  .pluginMessage(ChatColor.RED + BedwarsRel._l(sender, "errors.gamenotrunning")));
-//      return false;
-//    }
-//
-//    sender.sendMessage(
-//        ChatWriter.pluginMessage(ChatColor.GREEN + BedwarsRel._l(sender, "success.stopped")));
+    if (!sender.hasPermission("bw." + this.getPermission())) {
+      return false;
+    }
+
+    GameContext game = null;
+
+    if (args.size() == 0) {
+      game = this.getPlugin().getGameManager().getGameOfPlayer((Player) sender);
+
+      if (game == null) {
+        sender.sendMessage(
+            ChatWriterNew.pluginMessage(ChatColor.RED + BedwarsRevol._l(sender, "errors.notingame")));
+        return false;
+      }
+    }
+
+    if (args.size() != 0) {
+      game = this.getPlugin().getGameManager().getGameContext(args.get(0));
+
+      if (game == null) {
+        sender.sendMessage(ChatWriterNew.pluginMessage(ChatColor.RED
+            + BedwarsRevol
+            ._l(sender, "errors.gamenotfound", ImmutableMap.of("game", args.get(0).toString()))));
+        return false;
+      }
+    }
+
+    game.stop();
+
+    sender.sendMessage(
+        ChatWriterNew.pluginMessage(ChatColor.GREEN + BedwarsRevol._l(sender, "success.stopped")));
     return true;
   }
 

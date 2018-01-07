@@ -284,6 +284,12 @@ public class GameContext {
     return this.region.getTopMiddle();
   }
 
+  public void restart() {
+    this.stop();
+    this.state = new GameStateWaiting(this);
+    this.updateSigns();
+  }
+
   public void stop() {
     this.stopRunningTasks();
 //    this.clearProtections();

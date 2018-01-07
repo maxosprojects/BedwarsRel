@@ -6,6 +6,7 @@ import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.UtilsNew;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
@@ -13,6 +14,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Created by {maxos} 2017
@@ -92,11 +94,22 @@ public abstract class PlayerState {
 //      player.sendTitle(title, "", 0, 40, 10);
 //    }
     this.setGameMode();
-    Player player = this.playerCtx.getPlayer();
-    Location location = this.playerCtx.getGameContext().getTopMiddle();
-    this.playerCtx.setTeleportingIfWorldChange(location);
-    player.teleport(location);
-    this.playerCtx.setTeleporting(false);
+    final Player player = this.playerCtx.getPlayer();
+
+    player.getWorld().spawnParticle(Particle.SMOKE_LARGE,
+        player.getLocation().clone().add(0, 1, 0), 20, 0, 0, 0, 0.1);
+
+    final Location location = this.playerCtx.getGameContext().getTopMiddle();
+    this.playerCtx.getGameContext().addRunningTask(
+        new BukkitRunnable() {
+          @Override
+          public void run() {
+            playerCtx.setTeleportingIfWorldChange(location);
+            player.teleport(location);
+            playerCtx.setTeleporting(false);
+          }
+        }.runTaskLater(BedwarsRevol.getInstance(), 20)
+    );
   }
 
   protected String takeResources(PlayerContext playerCtx) {
