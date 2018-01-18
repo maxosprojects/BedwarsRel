@@ -3,7 +3,9 @@ package io.github.bedwarsrevolution.listeners;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.TeamNew;
 import io.github.bedwarsrevolution.game.statemachine.game.GameContext;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Arrow;
@@ -29,9 +31,11 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerListenerNew extends BaseListenerNew {
 
@@ -455,6 +459,17 @@ public class PlayerListenerNew extends BaseListenerNew {
 //    }
 //  }
 
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onJoin(PlayerJoinEvent event) {
+    final Player player = event.getPlayer();
+    new BukkitRunnable() {
+      @Override
+      public void run() {
+        World spawn = Bukkit.getWorld("Spawn");
+        player.teleport(spawn.getSpawnLocation());
+      }
+    }.runTaskLater(BedwarsRevol.getInstance(), 1);
+  }
 
   /*
    * LOBBY

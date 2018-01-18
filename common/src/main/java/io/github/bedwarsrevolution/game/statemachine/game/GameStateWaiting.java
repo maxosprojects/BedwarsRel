@@ -195,7 +195,8 @@ public class GameStateWaiting extends GameState {
 
   @Override
   public void onEventPlayerQuit(PlayerQuitEvent event) {
-
+    PlayerContext playerCtx = this.ctx.getPlayerContext(event.getPlayer());
+    this.playerLeaves(playerCtx, false);
   }
 
   @Override

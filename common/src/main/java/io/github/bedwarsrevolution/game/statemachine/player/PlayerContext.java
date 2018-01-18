@@ -86,6 +86,7 @@ public class PlayerContext {
   }
 
   public void clear(boolean deep) {
+    this.player.closeInventory();
     PlayerInventory inv = this.player.getInventory();
     inv.setArmorContents(new ItemStack[4]);
     inv.setContents(new ItemStack[]{});
