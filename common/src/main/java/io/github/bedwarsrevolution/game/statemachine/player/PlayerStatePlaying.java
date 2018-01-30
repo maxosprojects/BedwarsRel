@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import io.github.bedwarsrevolution.BedwarsRevol;
 import io.github.bedwarsrevolution.game.DamageHolder;
-import io.github.bedwarsrevolution.listeners.InvisibilityPotionListenerNew;
 import io.github.bedwarsrevolution.shop.Shop;
 import io.github.bedwarsrevolution.utils.ChatWriterNew;
 import io.github.bedwarsrevolution.utils.NmsUtils;
@@ -21,7 +20,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.Player;
@@ -335,7 +333,7 @@ public class PlayerStatePlaying extends PlayerState {
           }
         }.runTaskLater(BedwarsRevol.getInstance(), 1L);
       } else if (damagerType == EntityType.ENDER_DRAGON) {
-        Set<Player> friendlies = NmsUtils.getCustomEnderDragonFrendlies(
+        Set<Player> friendlies = NmsUtils.getCustomEnderDragonFriendlies(
             (EnderDragon) eventByEntity.getDamager());
         if (friendlies != null && friendlies.contains(this.playerCtx.getPlayer())) {
           event.setCancelled(true);

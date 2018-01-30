@@ -92,7 +92,7 @@ public class NmsUtils {
   }
 
   @SuppressWarnings(value = "unchecked")
-  public static Set<Player> getCustomEnderDragonFrendlies(EnderDragon dragon) {
+  public static Set<Player> getCustomEnderDragonFriendlies(EnderDragon dragon) {
     try {
       if (methodCustomDragonGetFriendlies == null) {
         Class<?> enderDragonClass = BedwarsRevol.getInstance()
