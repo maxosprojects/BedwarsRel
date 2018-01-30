@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import net.minecraft.server.v1_12_R1.EntityHuman;
 import net.minecraft.server.v1_12_R1.EntityIronGolem;
 import net.minecraft.server.v1_12_R1.EntityPlayer;
+import net.minecraft.server.v1_12_R1.MobEffect;
 import net.minecraft.server.v1_12_R1.PathfinderGoalLookAtPlayer;
 import net.minecraft.server.v1_12_R1.PathfinderGoalMeleeAttack;
 import net.minecraft.server.v1_12_R1.PathfinderGoalMoveTowardsTarget;
@@ -24,12 +25,10 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
  * Created by {maxos} 2017
  */
 public class CustomIronGolem extends EntityIronGolem {
-  private final Set<Player> friendlyPlayers;
 
   @SuppressWarnings("unchecked")
   public CustomIronGolem(World world, final Set<Player> friendlyPlayers) {
     super(world);
-    this.friendlyPlayers = friendlyPlayers;
 
     Set goalB = (Set) NmsUtils.getPrivateField("b", PathfinderGoalSelector.class, this.goalSelector);
     goalB.clear();
@@ -46,14 +45,23 @@ public class CustomIronGolem extends EntityIronGolem {
     this.goalSelector.a(4, new PathfinderGoalRandomLookaround(this));
     this.targetSelector.a(1, new PathfinderGoalNearestAttackableTarget(this, EntityPlayer.class, 10, false, true, new Predicate() {
       public boolean apply(@Nullable Object object) {
-        return this.isNotFriendly((EntityPlayer) object);
+        EntityPlayer player = (EntityPlayer) object;
+        return player != null && !this.isFriendly(player) && !this.isInvisible(player);
       }
       @Override
       public boolean test(@Nullable Object input) {
         return this.apply(input);
       }
-      private boolean isNotFriendly(@Nullable EntityPlayer player) {
-        return player != null && !friendlyPlayers.contains(player.getBukkitEntity());
+      private boolean isFriendly(EntityPlayer player) {
+        return friendlyPlayers.contains(player.getBukkitEntity());
+      }
+      private boolean isInvisible(EntityPlayer player) {
+        for (MobEffect effect : player.getEffects()) {
+          if ("effect.invisibility".equals(effect.f())) {
+            return true;
+          }
+        }
+        return false;
       }
     }));
   }
